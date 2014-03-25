@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D919A35F18E0B09800B140BF /* AGSClusterLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = D919A35E18E0B09800B140BF /* AGSClusterLayer.m */; };
+		D919A36218E0B14700B140BF /* AGSClusterGrid.m in Sources */ = {isa = PBXBuildFile; fileRef = D919A36118E0B14700B140BF /* AGSClusterGrid.m */; };
+		D919A36518E203DD00B140BF /* AGSCluster.m in Sources */ = {isa = PBXBuildFile; fileRef = D919A36418E203DD00B140BF /* AGSCluster.m */; };
 		D9A8B11916BB27B9001653EE /* libc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D9A8B11816BB27B9001653EE /* libc++.dylib */; };
 		D9A8B11B16BB27BF001653EE /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9A8B11A16BB27BF001653EE /* OpenGLES.framework */; };
 		D9F3D1AE1668271A00FB6A8D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9F3D1AD1668271A00FB6A8D /* UIKit.framework */; };
@@ -14,13 +17,13 @@
 		D9F3D1B21668271A00FB6A8D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9F3D1B11668271A00FB6A8D /* CoreGraphics.framework */; };
 		D9F3D1B81668271A00FB6A8D /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = D9F3D1B61668271A00FB6A8D /* InfoPlist.strings */; };
 		D9F3D1BA1668271A00FB6A8D /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = D9F3D1B91668271A00FB6A8D /* main.m */; };
-		D9F3D1BE1668271A00FB6A8D /* AGSBlankSampleAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D9F3D1BD1668271A00FB6A8D /* AGSBlankSampleAppDelegate.m */; };
+		D9F3D1BE1668271A00FB6A8D /* AGSSampleAppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = D9F3D1BD1668271A00FB6A8D /* AGSSampleAppDelegate.m */; };
 		D9F3D1C01668271A00FB6A8D /* Default.png in Resources */ = {isa = PBXBuildFile; fileRef = D9F3D1BF1668271A00FB6A8D /* Default.png */; };
 		D9F3D1C21668271A00FB6A8D /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D9F3D1C11668271A00FB6A8D /* Default@2x.png */; };
 		D9F3D1C41668271A00FB6A8D /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D9F3D1C31668271A00FB6A8D /* Default-568h@2x.png */; };
 		D9F3D1C71668271A00FB6A8D /* MainStoryboard_iPhone.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D9F3D1C51668271A00FB6A8D /* MainStoryboard_iPhone.storyboard */; };
 		D9F3D1CA1668271A00FB6A8D /* MainStoryboard_iPad.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D9F3D1C81668271A00FB6A8D /* MainStoryboard_iPad.storyboard */; };
-		D9F3D1CD1668271A00FB6A8D /* AGSBlankSampleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D9F3D1CC1668271A00FB6A8D /* AGSBlankSampleViewController.m */; };
+		D9F3D1CD1668271A00FB6A8D /* AGSSampleViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = D9F3D1CC1668271A00FB6A8D /* AGSSampleViewController.m */; };
 		D9F3D1DB166828A600FB6A8D /* CoreLocation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9F3D1D3166828A600FB6A8D /* CoreLocation.framework */; };
 		D9F3D1DC166828A600FB6A8D /* CoreText.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9F3D1D4166828A600FB6A8D /* CoreText.framework */; };
 		D9F3D1DE166828A600FB6A8D /* libz.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D9F3D1D6166828A600FB6A8D /* libz.dylib */; };
@@ -32,25 +35,31 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D919A35D18E0B09800B140BF /* AGSClusterLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AGSClusterLayer.h; sourceTree = "<group>"; };
+		D919A35E18E0B09800B140BF /* AGSClusterLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AGSClusterLayer.m; sourceTree = "<group>"; };
+		D919A36018E0B14700B140BF /* AGSClusterGrid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AGSClusterGrid.h; sourceTree = "<group>"; };
+		D919A36118E0B14700B140BF /* AGSClusterGrid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AGSClusterGrid.m; sourceTree = "<group>"; };
+		D919A36318E203DD00B140BF /* AGSCluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AGSCluster.h; sourceTree = "<group>"; };
+		D919A36418E203DD00B140BF /* AGSCluster.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AGSCluster.m; sourceTree = "<group>"; };
 		D9A8B11816BB27B9001653EE /* libc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libc++.dylib"; path = "usr/lib/libc++.dylib"; sourceTree = SDKROOT; };
 		D9A8B11A16BB27BF001653EE /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
-		D9F3D1A91668271A00FB6A8D /* AGSBlankSample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AGSBlankSample.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D9F3D1A91668271A00FB6A8D /* AGSClusterLayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AGSClusterLayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D9F3D1AD1668271A00FB6A8D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		D9F3D1AF1668271A00FB6A8D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		D9F3D1B11668271A00FB6A8D /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
-		D9F3D1B51668271A00FB6A8D /* AGSBlankSample-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "AGSBlankSample-Info.plist"; sourceTree = "<group>"; };
+		D9F3D1B51668271A00FB6A8D /* AGSSample-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "AGSSample-Info.plist"; sourceTree = "<group>"; };
 		D9F3D1B71668271A00FB6A8D /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		D9F3D1B91668271A00FB6A8D /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		D9F3D1BB1668271A00FB6A8D /* AGSBlankSample-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AGSBlankSample-Prefix.pch"; sourceTree = "<group>"; };
-		D9F3D1BC1668271A00FB6A8D /* AGSBlankSampleAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AGSBlankSampleAppDelegate.h; sourceTree = "<group>"; };
-		D9F3D1BD1668271A00FB6A8D /* AGSBlankSampleAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AGSBlankSampleAppDelegate.m; sourceTree = "<group>"; };
+		D9F3D1BB1668271A00FB6A8D /* AGSSample-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "AGSSample-Prefix.pch"; sourceTree = "<group>"; };
+		D9F3D1BC1668271A00FB6A8D /* AGSSampleAppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AGSSampleAppDelegate.h; sourceTree = "<group>"; };
+		D9F3D1BD1668271A00FB6A8D /* AGSSampleAppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AGSSampleAppDelegate.m; sourceTree = "<group>"; };
 		D9F3D1BF1668271A00FB6A8D /* Default.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = Default.png; sourceTree = "<group>"; };
 		D9F3D1C11668271A00FB6A8D /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default@2x.png"; sourceTree = "<group>"; };
 		D9F3D1C31668271A00FB6A8D /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		D9F3D1C61668271A00FB6A8D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPhone.storyboard; sourceTree = "<group>"; };
 		D9F3D1C91668271A00FB6A8D /* en */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = en; path = en.lproj/MainStoryboard_iPad.storyboard; sourceTree = "<group>"; };
-		D9F3D1CB1668271A00FB6A8D /* AGSBlankSampleViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AGSBlankSampleViewController.h; sourceTree = "<group>"; };
-		D9F3D1CC1668271A00FB6A8D /* AGSBlankSampleViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AGSBlankSampleViewController.m; sourceTree = "<group>"; };
+		D9F3D1CB1668271A00FB6A8D /* AGSSampleViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AGSSampleViewController.h; sourceTree = "<group>"; };
+		D9F3D1CC1668271A00FB6A8D /* AGSSampleViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AGSSampleViewController.m; sourceTree = "<group>"; };
 		D9F3D1D3166828A600FB6A8D /* CoreLocation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreLocation.framework; path = System/Library/Frameworks/CoreLocation.framework; sourceTree = SDKROOT; };
 		D9F3D1D4166828A600FB6A8D /* CoreText.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreText.framework; path = System/Library/Frameworks/CoreText.framework; sourceTree = SDKROOT; };
 		D9F3D1D6166828A600FB6A8D /* libz.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.dylib; path = usr/lib/libz.dylib; sourceTree = SDKROOT; };
@@ -84,10 +93,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D919A35C18E0B06300B140BF /* AGSClusterLayer */ = {
+			isa = PBXGroup;
+			children = (
+				D919A35D18E0B09800B140BF /* AGSClusterLayer.h */,
+				D919A35E18E0B09800B140BF /* AGSClusterLayer.m */,
+				D919A36018E0B14700B140BF /* AGSClusterGrid.h */,
+				D919A36118E0B14700B140BF /* AGSClusterGrid.m */,
+				D919A36318E203DD00B140BF /* AGSCluster.h */,
+				D919A36418E203DD00B140BF /* AGSCluster.m */,
+			);
+			path = AGSClusterLayer;
+			sourceTree = "<group>";
+		};
 		D9F3D19E1668271900FB6A8D = {
 			isa = PBXGroup;
 			children = (
-				D9F3D1B31668271A00FB6A8D /* AGSBlankSample */,
+				D9F3D1B31668271A00FB6A8D /* Source */,
 				D9F3D1AC1668271A00FB6A8D /* Frameworks */,
 				D9F3D1AA1668271A00FB6A8D /* Products */,
 			);
@@ -96,7 +118,7 @@
 		D9F3D1AA1668271A00FB6A8D /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				D9F3D1A91668271A00FB6A8D /* AGSBlankSample.app */,
+				D9F3D1A91668271A00FB6A8D /* AGSClusterLayer.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -120,28 +142,29 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		D9F3D1B31668271A00FB6A8D /* AGSBlankSample */ = {
+		D9F3D1B31668271A00FB6A8D /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				D9F3D1BC1668271A00FB6A8D /* AGSBlankSampleAppDelegate.h */,
-				D9F3D1BD1668271A00FB6A8D /* AGSBlankSampleAppDelegate.m */,
+				D919A35C18E0B06300B140BF /* AGSClusterLayer */,
+				D9F3D1BC1668271A00FB6A8D /* AGSSampleAppDelegate.h */,
+				D9F3D1BD1668271A00FB6A8D /* AGSSampleAppDelegate.m */,
 				D9F3D1C51668271A00FB6A8D /* MainStoryboard_iPhone.storyboard */,
 				D9F3D1C81668271A00FB6A8D /* MainStoryboard_iPad.storyboard */,
-				D9F3D1CB1668271A00FB6A8D /* AGSBlankSampleViewController.h */,
-				D9F3D1CC1668271A00FB6A8D /* AGSBlankSampleViewController.m */,
+				D9F3D1CB1668271A00FB6A8D /* AGSSampleViewController.h */,
+				D9F3D1CC1668271A00FB6A8D /* AGSSampleViewController.m */,
 				D9F3D1B41668271A00FB6A8D /* Supporting Files */,
 			);
-			path = AGSBlankSample;
+			path = Source;
 			sourceTree = SOURCE_ROOT;
 		};
 		D9F3D1B41668271A00FB6A8D /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
 				D9F3D1E31668293000FB6A8D /* ArcGIS.bundle */,
-				D9F3D1B51668271A00FB6A8D /* AGSBlankSample-Info.plist */,
+				D9F3D1B51668271A00FB6A8D /* AGSSample-Info.plist */,
 				D9F3D1B61668271A00FB6A8D /* InfoPlist.strings */,
 				D9F3D1B91668271A00FB6A8D /* main.m */,
-				D9F3D1BB1668271A00FB6A8D /* AGSBlankSample-Prefix.pch */,
+				D9F3D1BB1668271A00FB6A8D /* AGSSample-Prefix.pch */,
 				D9F3D1BF1668271A00FB6A8D /* Default.png */,
 				D9F3D1C11668271A00FB6A8D /* Default@2x.png */,
 				D9F3D1C31668271A00FB6A8D /* Default-568h@2x.png */,
@@ -152,9 +175,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		D9F3D1A81668271A00FB6A8D /* AGSBlankSample */ = {
+		D9F3D1A81668271A00FB6A8D /* AGSSample */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D9F3D1D01668271A00FB6A8D /* Build configuration list for PBXNativeTarget "AGSBlankSample" */;
+			buildConfigurationList = D9F3D1D01668271A00FB6A8D /* Build configuration list for PBXNativeTarget "AGSSample" */;
 			buildPhases = (
 				D9F3D1A51668271A00FB6A8D /* Sources */,
 				D9F3D1A61668271A00FB6A8D /* Frameworks */,
@@ -164,9 +187,9 @@
 			);
 			dependencies = (
 			);
-			name = AGSBlankSample;
+			name = AGSSample;
 			productName = Basemaps;
-			productReference = D9F3D1A91668271A00FB6A8D /* AGSBlankSample.app */;
+			productReference = D9F3D1A91668271A00FB6A8D /* AGSClusterLayer.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -179,7 +202,7 @@
 				LastUpgradeCheck = 0450;
 				ORGANIZATIONNAME = ESRI;
 			};
-			buildConfigurationList = D9F3D1A31668271900FB6A8D /* Build configuration list for PBXProject "AGSBlankSample" */;
+			buildConfigurationList = D9F3D1A31668271900FB6A8D /* Build configuration list for PBXProject "AGSCluseterLayer" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -191,7 +214,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D9F3D1A81668271A00FB6A8D /* AGSBlankSample */,
+				D9F3D1A81668271A00FB6A8D /* AGSSample */,
 			);
 		};
 /* End PBXProject section */
@@ -218,9 +241,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D919A36518E203DD00B140BF /* AGSCluster.m in Sources */,
+				D919A36218E0B14700B140BF /* AGSClusterGrid.m in Sources */,
 				D9F3D1BA1668271A00FB6A8D /* main.m in Sources */,
-				D9F3D1BE1668271A00FB6A8D /* AGSBlankSampleAppDelegate.m in Sources */,
-				D9F3D1CD1668271A00FB6A8D /* AGSBlankSampleViewController.m in Sources */,
+				D9F3D1BE1668271A00FB6A8D /* AGSSampleAppDelegate.m in Sources */,
+				D919A35F18E0B09800B140BF /* AGSClusterLayer.m in Sources */,
+				D9F3D1CD1668271A00FB6A8D /* AGSSampleViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -311,16 +337,17 @@
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = "$(HOME)/Library/SDKs/ArcGIS/iOS/**";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "AGSBlankSample/AGSBlankSample-Prefix.pch";
-				INFOPLIST_FILE = "AGSBlankSample/AGSBlankSample-Info.plist";
+				GCC_PREFIX_HEADER = "Source/AGSSample-Prefix.pch";
+				INFOPLIST_FILE = "Source/AGSSample-Info.plist";
 				ONLY_ACTIVE_ARCH = NO;
 				OTHER_LDFLAGS = (
-					"-all_load",
 					"-ObjC",
 					"-framework",
 					ArcGIS,
+					"-l",
+					"c++",
 				);
-				PRODUCT_NAME = AGSBlankSample;
+				PRODUCT_NAME = AGSClusterLayer;
 				VALID_ARCHS = armv7;
 				WRAPPER_EXTENSION = app;
 			};
@@ -331,15 +358,16 @@
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = "$(HOME)/Library/SDKs/ArcGIS/iOS/**";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "AGSBlankSample/AGSBlankSample-Prefix.pch";
-				INFOPLIST_FILE = "AGSBlankSample/AGSBlankSample-Info.plist";
+				GCC_PREFIX_HEADER = "Source/AGSSample-Prefix.pch";
+				INFOPLIST_FILE = "Source/AGSSample-Info.plist";
 				OTHER_LDFLAGS = (
-					"-all_load",
 					"-ObjC",
 					"-framework",
 					ArcGIS,
+					"-l",
+					"c++",
 				);
-				PRODUCT_NAME = AGSBlankSample;
+				PRODUCT_NAME = AGSClusterLayer;
 				VALID_ARCHS = armv7;
 				WRAPPER_EXTENSION = app;
 			};
@@ -348,7 +376,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		D9F3D1A31668271900FB6A8D /* Build configuration list for PBXProject "AGSBlankSample" */ = {
+		D9F3D1A31668271900FB6A8D /* Build configuration list for PBXProject "AGSCluseterLayer" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D9F3D1CE1668271A00FB6A8D /* Debug */,
@@ -357,7 +385,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D9F3D1D01668271A00FB6A8D /* Build configuration list for PBXNativeTarget "AGSBlankSample" */ = {
+		D9F3D1D01668271A00FB6A8D /* Build configuration list for PBXNativeTarget "AGSSample" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D9F3D1D11668271A00FB6A8D /* Debug */,

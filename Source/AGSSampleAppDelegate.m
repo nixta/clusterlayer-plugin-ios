@@ -6,9 +6,9 @@
 //  Copyright (c) 2012 ESRI. All rights reserved.
 //
 
-#import "AGSBlankSampleAppDelegate.h"
+#import "AGSSampleAppDelegate.h"
 
-@implementation AGSBlankSampleAppDelegate
+@implementation AGSSampleAppDelegate
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {

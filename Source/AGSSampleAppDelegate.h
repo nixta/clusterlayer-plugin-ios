@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-@interface AGSBlankSampleAppDelegate : UIResponder <UIApplicationDelegate>
+@interface AGSSampleAppDelegate : UIResponder <UIApplicationDelegate>
 
 @property (strong, nonatomic) UIWindow *window;
 

@@ -8,6 +8,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface AGSBlankSampleViewController : UIViewController
+@interface AGSSampleViewController : UIViewController
 
 @end
