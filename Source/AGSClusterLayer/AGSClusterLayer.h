@@ -11,8 +11,5 @@
 
 @interface AGSClusterLayer : AGSGraphicsLayer
 @property (nonatomic, assign) BOOL showClusterCoverages;
-+(AGSClusterLayer *)clusterLayerWithURL:(NSURL *)featureLayerURL;
-+(AGSClusterLayer *)clusterLayerWithURL:(NSURL *)featureLayerURL credential:(AGSCredential *)cred;
--(id)initWithURL:(NSURL *)featureLayerURL;
--(id)initWithURL:(NSURL *)featureLayerURL credential:(AGSCredential *)cred;
++(AGSClusterLayer *)clusterLayerForFeatureLayer:(AGSFeatureLayer *)featureLayer;
 @end

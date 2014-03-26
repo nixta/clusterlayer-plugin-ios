@@ -12,6 +12,7 @@
 		D919A36518E203DD00B140BF /* AGSCluster.m in Sources */ = {isa = PBXBuildFile; fileRef = D919A36418E203DD00B140BF /* AGSCluster.m */; };
 		D9A8B11916BB27B9001653EE /* libc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D9A8B11816BB27B9001653EE /* libc++.dylib */; };
 		D9A8B11B16BB27BF001653EE /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9A8B11A16BB27BF001653EE /* OpenGLES.framework */; };
+		D9E0F74A18E232CC0009C771 /* AGSClusterLayerRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = D9E0F74918E232CC0009C771 /* AGSClusterLayerRenderer.m */; };
 		D9F3D1AE1668271A00FB6A8D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9F3D1AD1668271A00FB6A8D /* UIKit.framework */; };
 		D9F3D1B01668271A00FB6A8D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9F3D1AF1668271A00FB6A8D /* Foundation.framework */; };
 		D9F3D1B21668271A00FB6A8D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9F3D1B11668271A00FB6A8D /* CoreGraphics.framework */; };
@@ -43,6 +44,8 @@
 		D919A36418E203DD00B140BF /* AGSCluster.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AGSCluster.m; sourceTree = "<group>"; };
 		D9A8B11816BB27B9001653EE /* libc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libc++.dylib"; path = "usr/lib/libc++.dylib"; sourceTree = SDKROOT; };
 		D9A8B11A16BB27BF001653EE /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
+		D9E0F74818E232CC0009C771 /* AGSClusterLayerRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AGSClusterLayerRenderer.h; sourceTree = "<group>"; };
+		D9E0F74918E232CC0009C771 /* AGSClusterLayerRenderer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AGSClusterLayerRenderer.m; sourceTree = "<group>"; };
 		D9F3D1A91668271A00FB6A8D /* AGSClusterLayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AGSClusterLayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D9F3D1AD1668271A00FB6A8D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		D9F3D1AF1668271A00FB6A8D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -102,6 +105,8 @@
 				D919A36118E0B14700B140BF /* AGSClusterGrid.m */,
 				D919A36318E203DD00B140BF /* AGSCluster.h */,
 				D919A36418E203DD00B140BF /* AGSCluster.m */,
+				D9E0F74818E232CC0009C771 /* AGSClusterLayerRenderer.h */,
+				D9E0F74918E232CC0009C771 /* AGSClusterLayerRenderer.m */,
 			);
 			path = AGSClusterLayer;
 			sourceTree = "<group>";
@@ -202,7 +207,7 @@
 				LastUpgradeCheck = 0450;
 				ORGANIZATIONNAME = ESRI;
 			};
-			buildConfigurationList = D9F3D1A31668271900FB6A8D /* Build configuration list for PBXProject "AGSCluseterLayer" */;
+			buildConfigurationList = D9F3D1A31668271900FB6A8D /* Build configuration list for PBXProject "ClusterLayerSample" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -246,6 +251,7 @@
 				D9F3D1BA1668271A00FB6A8D /* main.m in Sources */,
 				D9F3D1BE1668271A00FB6A8D /* AGSSampleAppDelegate.m in Sources */,
 				D919A35F18E0B09800B140BF /* AGSClusterLayer.m in Sources */,
+				D9E0F74A18E232CC0009C771 /* AGSClusterLayerRenderer.m in Sources */,
 				D9F3D1CD1668271A00FB6A8D /* AGSSampleViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -376,7 +382,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		D9F3D1A31668271900FB6A8D /* Build configuration list for PBXProject "AGSCluseterLayer" */ = {
+		D9F3D1A31668271900FB6A8D /* Build configuration list for PBXProject "ClusterLayerSample" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D9F3D1CE1668271A00FB6A8D /* Debug */,

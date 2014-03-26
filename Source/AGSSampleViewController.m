@@ -15,7 +15,7 @@
 #define kGreyBasemapRef @"http://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer"
 #define kFeatureLayerURL @"http://services.arcgis.com/OfH668nDRN7tbJh0/arcgis/rest/services/Philadelphia_Healthy_Corner_Stores/FeatureServer/0"
 
-@interface AGSSampleViewController ()
+@interface AGSSampleViewController () <AGSCalloutDelegate>
 @property (weak, nonatomic) IBOutlet AGSMapView *mapView;
 @end
 
@@ -28,7 +28,12 @@
 
     [self.mapView addMapLayer:[AGSTiledMapServiceLayer tiledMapServiceLayerWithURL:[NSURL URLWithString:kGreyBasemap]]];
 
-    AGSClusterLayer *clusterLayer = [AGSClusterLayer clusterLayerWithURL:[NSURL URLWithString:kFeatureLayerURL]];
+    
+    AGSFeatureLayer *featureLayer = [AGSFeatureLayer featureServiceLayerWithURL:[NSURL URLWithString:kFeatureLayerURL] mode:AGSFeatureLayerModeOnDemand];
+    [self.mapView addMapLayer:featureLayer];
+    featureLayer.opacity = 0;
+    
+    AGSClusterLayer *clusterLayer = [AGSClusterLayer clusterLayerForFeatureLayer:featureLayer];
     clusterLayer.showClusterCoverages = YES;
     [self.mapView addMapLayer:clusterLayer];
 
@@ -40,6 +45,12 @@
                                                          ymax:4879706.758889
                                              spatialReference:[AGSSpatialReference webMercatorSpatialReference]]
                         animated:NO];
+//    self.mapView.callout.delegate = self;
+}
+
+-(BOOL)callout:(AGSCallout *)callout willShowForFeature:(id<AGSFeature>)feature layer:(AGSLayer<AGSHitTestable> *)layer mapPoint:(AGSPoint *)mapPoint {
+    NSLog(@"%@", feature);
+    return YES;
 }
 
 - (void)didReceiveMemoryWarning

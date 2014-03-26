@@ -9,25 +9,20 @@
 #import "AGSClusterLayer.h"
 #import "AGSClusterGrid.h"
 #import "AGSCluster.h"
+#import "AGSClusterLayerRenderer.h"
 
-@interface AGSClusterLayer () <AGSQueryTaskDelegate, AGSHitTestable>
+#import <objc/runtime.h>
+
+@interface AGSClusterLayer () <AGSLayerCalloutDelegate>
 @property (nonatomic, strong) AGSClusterGrid *grid;
-@property (nonatomic, strong) AGSQueryTask *queryTask;
+@property (nonatomic, weak) AGSFeatureLayer *featureLayer;
 @property (nonatomic, strong) NSMutableArray *features;
 @property (nonatomic, strong) NSMutableArray *dataOperations;
-#if debug
-@property (nonatomic, strong) AGSGraphicsLayer *extentLayer;
-@property (nonatomic, strong) AGSSimpleFillSymbol *extentSymbol;
-#endif
 @end
 
 @implementation AGSClusterLayer
-+(AGSClusterLayer *)clusterLayerWithURL:(NSURL *)featureLayerURL {
-    return [[AGSClusterLayer alloc] initWithURL:featureLayerURL];
-}
-
-+(AGSClusterLayer *)clusterLayerWithURL:(NSURL *)featureLayerURL credential:(AGSCredential *)cred {
-    return [[AGSClusterLayer alloc] initWithURL:featureLayerURL credential:cred];
++(AGSClusterLayer *)clusterLayerForFeatureLayer:(AGSFeatureLayer *)featureLayer {
+    return [[AGSClusterLayer alloc] initWithFeatureLayer:featureLayer];
 }
 
 -(id)init {
@@ -36,143 +31,123 @@
         self.features = [NSMutableArray array];
         self.dataOperations = [NSMutableArray array];
         self.showClusterCoverages = NO;
+        self.calloutDelegate = self;
     }
     return self;
 }
 
--(void)setQueryTask:(AGSQueryTask *)queryTask {
-    _queryTask = queryTask;
-    _queryTask.delegate = self;
-}
-
--(id)initWithURL:(NSURL *)featureLayerURL {
+-(id)initWithFeatureLayer:(AGSFeatureLayer *)featureLayer {
     self = [self init];
-    self.queryTask = [AGSQueryTask queryTaskWithURL:featureLayerURL];
+    if (self) {
+        self.featureLayer = featureLayer;
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(featureLayerLoaded:)
+                                                     name:AGSLayerDidLoadNotification
+                                                   object:self.featureLayer];
+    }
     return self;
 }
 
--(id)initWithURL:(NSURL *)featureLayerURL credential:(AGSCredential *)cred
-{
-    self = [self init];
-    self.queryTask = [AGSQueryTask queryTaskWithURL:featureLayerURL credential:cred];
-    return self;
+-(BOOL)callout:(AGSCallout *)callout willShowForFeature:(id<AGSFeature>)feature layer:(AGSLayer<AGSHitTestable> *)layer mapPoint:(AGSPoint *)mapPoint {
+    AGSCluster *cluster = nil;
+    BOOL isCoverage = NO;
+    if ([feature.geometry isKindOfClass:[AGSPoint class]]) {
+        cluster = objc_getAssociatedObject(feature, @"__cluster");
+    } else if ([feature.geometry isKindOfClass:[AGSPolygon class]]) {
+        cluster = objc_getAssociatedObject(feature, @"__cluster");
+        isCoverage = YES;
+    }
+    if (cluster) {
+        if (cluster.features.count > 1) {
+            callout.title = [NSString stringWithFormat:@"Cluster%@", isCoverage?@" Polygon":@""];
+            callout.detail = [NSString stringWithFormat:@"Cluster contains %d features", cluster.features.count];
+        } else {
+            callout.title = [NSString stringWithFormat:@"Ordinary feature"];
+            callout.detail = [NSString stringWithFormat:@"Might have a bunch of attributes on it"];
+        }
+        return YES;
+    }
+    return NO;
 }
 
 -(void)setMapView:(AGSMapView *)mapView
 {
     NSLog(@"Map View Set");
     [super setMapView:mapView];
-#if debug
-    self.extentLayer = [AGSGraphicsLayer graphicsLayer];
-    [mapView addMapLayer:self.extentLayer];
-    self.extentSymbol = [AGSSimpleFillSymbol simpleFillSymbolWithColor:[UIColor clearColor]
-                                                          outlineColor:[UIColor colorWithRed:1
-                                                                                       green:0
-                                                                                        blue:0
-                                                                                       alpha:0.7]];
-#endif
 }
 
--(BOOL)allowCallout {
-    return YES;
+-(void)featureLayerLoaded:(NSNotification *)notification {
+    NSLog(@"Stealing renderer...");
+    self.renderer = [[AGSClusterLayerRenderer alloc] initAsSurrogateFor:self.featureLayer.renderer];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(featuresLoaded:)
+                                                 name:AGSFeatureLayerDidLoadFeaturesNotification
+                                               object:self.featureLayer];
 }
 
--(BOOL)allowHitTest {
-    return YES;
+-(void)featuresLoaded:(NSNotification *)notification {
+    NSLog(@"Features Loaded");
+    [self clearClusters];
+    [self recalcClusterGrid];
+    [self renderClusters];
 }
 
 -(void)mapDidUpdate:(AGSMapUpdateType)updateType
 {
     if (updateType == AGSMapUpdateTypeSpatialExtent) {
-#if debug
-        [self.extentLayer removeAllGraphics];
-#endif
-        [self removeAllGraphics];
-        if (self.grid) {
-            [self.grid removeAllFeatures];
-        }
-        NSUInteger hCells = 7;
-        NSUInteger vCells = 12;
-        AGSEnvelope *mapEnv = [self.mapView toMapEnvelope:CGRectMake(0, 0, self.mapView.layer.bounds.size.width/hCells, self.mapView.layer.bounds.size.height/vCells)];
-        NSUInteger cellSize = floor((mapEnv.height + mapEnv.width)/2);
-        
-        self.grid = [[AGSClusterGrid alloc] initWithCellSize:cellSize];
-        
-        NSLog(@"Cell Size: %d", cellSize);
-
         NSLog(@"Map Extent Updated");
-        AGSMutableEnvelope *e = [self.mapView.visibleAreaEnvelope mutableCopy];
-        [e expandByFactor:1.1];
-        [e expandByFactor:0.5 withAnchorPoint:[AGSPoint pointWithX:e.xmin y:e.ymax spatialReference:e.spatialReference]]; // TL
-        [self requestDataForEnvelope:e];
-        [e offsetByX:e.width y:0]; // TR
-        [self requestDataForEnvelope:e];
-        [e offsetByX:0 y:-e.height]; // BR
-        [self requestDataForEnvelope:e];
-        [e offsetByX:-e.width y:0]; // BL
-        [self requestDataForEnvelope:e];
+//        BOOL activeOperations = ![[self.featureLayer performSelector:@selector(queryOperation)] isFinished];
+//        NSLog(@"Map Updated: %@", activeOperations?@"Still Loading":@"Done Loading");
+//        if (!activeOperations) {
+        [self clearClusters];
+        [self recalcClusterGrid];
+        [self renderClusters];
+//        }
     }
     [super mapDidUpdate:updateType];
 }
 
--(void)requestDataForEnvelope:(AGSEnvelope *)e {
-    AGSQuery *q = [AGSQuery query];
-    q.geometry = e;
-    q.where = @"1=1";
-    q.outFields = @[@"*"];
-    q.returnGeometry = YES;
-    [self.dataOperations addObject:[self.queryTask executeWithQuery:q]];
-    NSLog(@"Querying for envelope (%d queries): %@", self.dataOperations.count, e);
-#if debug
-    [self.extentLayer addGraphic:[AGSGraphic graphicWithGeometry:[e copy]
-                                                         symbol:self.extentSymbol
-                                                      attributes:nil]];
-#endif
-}
-
--(void)queryTask:(AGSQueryTask *)queryTask operation:(NSOperation *)op didFailWithError:(NSError *)error {
-    [self.dataOperations removeObject:op];
-    NSLog(@"Query failed (%d remaining): %@", self.dataOperations.count, error);
-    if (self.dataOperations.count == 0) {
-        NSLog(@"%@", self.grid);
+-(void)recalcClusterGrid {
+    NSUInteger hCells = 7;
+    NSUInteger vCells = 12;
+    AGSEnvelope *mapEnv = [self.mapView toMapEnvelope:CGRectMake(0, 0, self.mapView.layer.bounds.size.width/hCells, self.mapView.layer.bounds.size.height/vCells)];
+    NSUInteger cellSize = floor((mapEnv.height + mapEnv.width)/2);
+    self.grid = [[AGSClusterGrid alloc] initWithCellSize:cellSize];
+    for (id<AGSFeature> feature in self.featureLayer.graphics) {
+        [self.grid addFeature:feature];
     }
 }
 
--(void)queryTask:(AGSQueryTask *)queryTask operation:(NSOperation *)op didExecuteWithFeatureSetResult:(AGSFeatureSet *)featureSet {
-    [self.dataOperations removeObject:op];
-    NSLog(@"Query succeeded (%d remaining): %d", self.dataOperations.count, featureSet.features.count);
-    for (id<AGSFeature> f in featureSet.features) {
-        [self.grid addFeature:f];
-    }
-    if (self.dataOperations.count == 0) {
-        [self displayClusters];
-        NSLog(@"%@", self.grid);
+-(void)clearClusters {
+    [self removeAllGraphics];
+    if (self.grid) {
+        [self.grid removeAllFeatures];
     }
 }
 
--(void) displayClusters {
+-(void) renderClusters {
+    NSMutableArray *coverageGraphics = [NSMutableArray array];
+    NSMutableArray *clusterGraphics = [NSMutableArray array];
+    
     for (AGSCluster *cluster in self.grid.clusters) {
-        AGSCompositeSymbol *s = [AGSCompositeSymbol compositeSymbol];
-        AGSSimpleMarkerSymbol *backgroundSymbol = [AGSSimpleMarkerSymbol simpleMarkerSymbolWithColor:[[UIColor purpleColor] colorWithAlphaComponent:0.7]];
-        backgroundSymbol.outline = nil;
-        backgroundSymbol.size = CGSizeMake(20, 20);
-        AGSTextSymbol *countSymbol = [AGSTextSymbol textSymbolWithText:[NSString stringWithFormat:@"%d", cluster.features.count]
-                                                                 color:[UIColor whiteColor]];
-        [s addSymbol:backgroundSymbol];
-        [s addSymbol:countSymbol];
-        AGSGraphic *g = [AGSGraphic graphicWithGeometry:cluster.location
-                                                 symbol:s
-                                             attributes:@{@"count": @(cluster.features.count)}];
         if (self.showClusterCoverages && cluster.features.count > 1) {
-            AGSGeometry *coverageGeom = cluster.coverage;
-            AGSSimpleFillSymbol *coverageSymbol = [AGSSimpleFillSymbol simpleFillSymbolWithColor:[[UIColor orangeColor] colorWithAlphaComponent:0.3]
-                                                                                    outlineColor:[[UIColor orangeColor] colorWithAlphaComponent:0.7]];
-            AGSGraphic *coverageGraphic = [AGSGraphic graphicWithGeometry:coverageGeom
-                                                                   symbol:coverageSymbol
+            AGSGraphic *coverageGraphic = [AGSGraphic graphicWithGeometry:cluster.coverage
+                                                                   symbol:nil
                                                                attributes:nil];
-            [self addGraphic:coverageGraphic];
+            coverageGraphic.symbol = [self.renderer symbolForFeature:coverageGraphic timeExtent:nil];
+            objc_setAssociatedObject(coverageGraphic, @"__cluster", cluster, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            [coverageGraphics addObject:coverageGraphic];
         }
-        [self addGraphic:g];
+
+        AGSGraphic *clusterGraphic = [AGSGraphic graphicWithGeometry:cluster.location
+                                                              symbol:nil
+                                                          attributes:nil];
+        objc_setAssociatedObject(clusterGraphic, @"__cluster", cluster, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        clusterGraphic.symbol = [self.renderer symbolForFeature:clusterGraphic timeExtent:nil];
+        [clusterGraphics addObject:clusterGraphic];
     }
+    
+    [self addGraphics:coverageGraphics];
+    [self addGraphics:clusterGraphics];
 }
 @end
