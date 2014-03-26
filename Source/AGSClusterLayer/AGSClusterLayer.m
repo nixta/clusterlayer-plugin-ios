@@ -120,7 +120,6 @@
     for (id<AGSFeature> feature in self.featureLayer.graphics) {
         [self.grid addFeature:feature];
     }
-    NSLog(@"Clusters built: %@", self.grid);
 }
 
 -(void) renderClusters {

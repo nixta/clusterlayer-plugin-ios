@@ -8,11 +8,8 @@
 
 #import "AGSClusterLayerRenderer.h"
 #import <objc/runtime.h>
-#import "AGSCluster.h"
 
 #define kClusterPayloadKey @"__cluster"
-
-typedef AGSSymbol*(^SymbolGeneratorBlock)(AGSCluster *);
 
 @interface AGSClusterLayerRenderer ()
 @property (nonatomic, weak) AGSRenderer *originalRenderer;
