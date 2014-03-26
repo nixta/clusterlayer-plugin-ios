@@ -1,6 +1,6 @@
 //
 //  AGSCluster.m
-//  AGSCluseterLayer
+//  ClusterLayerSample
 //
 //  Created by Nicholas Furness on 3/25/14.
 //  Copyright (c) 2014 ESRI. All rights reserved.
@@ -48,35 +48,42 @@
         }
         [mp addPoint:(AGSPoint *)f.geometry];
     }
-    switch (mp.numPoints) {
-        case 0:
-        case 1:
-        {
-            self.calculatedCoverage = self.gridCentroid;
-            self.calculatedCentroid = self.gridCentroid;
-            break;
-        }
-        case 2:
-        {
-            AGSPolyline *cl = (AGSPolyline *)[[AGSGeometryEngine defaultGeometryEngine] convexHullForGeometry:mp];
-            AGSPoint *pt1 = [cl pointOnPath:0 atIndex:0];
-            AGSPoint *pt2 = [cl pointOnPath:0 atIndex:1];
-            AGSMutablePolygon *p = [[AGSMutablePolygon alloc] initWithSpatialReference:cl.spatialReference];
-            [p addRingToPolygon];
-            [p addPointToRing:pt1];
-            [p addPointToRing:pt2];
-            [p closePolygon];
-            self.calculatedCoverage = p;
-            self.calculatedCentroid = [AGSPoint pointWithX:(pt1.x+pt2.x)/2
-                                                         y:(pt1.y+pt2.y)/2
-                                          spatialReference:cl.spatialReference];
-            break;
-        }
-        default:
-        {
-            self.calculatedCoverage = (AGSPolygon *)[[AGSGeometryEngine defaultGeometryEngine] convexHullForGeometry:mp];
-            self.calculatedCentroid = [[AGSGeometryEngine defaultGeometryEngine] labelPointForPolygon:(AGSPolygon *)self.calculatedCoverage];
-            break;
+    if (mp) {
+        switch (mp.numPoints) {
+            case 0: {
+                // An empty cluster cell.
+                self.calculatedCoverage = self.gridCentroid;
+                self.calculatedCentroid = self.gridCentroid;
+                break;
+            }
+            case 1: {
+                // A point
+                self.calculatedCoverage = [mp pointAtIndex:0];
+                self.calculatedCentroid = [mp pointAtIndex:0];
+                break;
+            }
+            case 2: {
+                // A line between the only two points in a cluster (we'll close it and make it a Polygon)
+                AGSPolyline *cl = (AGSPolyline *)[[AGSGeometryEngine defaultGeometryEngine] convexHullForGeometry:mp];
+                AGSPoint *pt1 = [cl pointOnPath:0 atIndex:0];
+                AGSPoint *pt2 = [cl pointOnPath:0 atIndex:1];
+                AGSMutablePolygon *p = [[AGSMutablePolygon alloc] initWithSpatialReference:cl.spatialReference];
+                [p addRingToPolygon];
+                [p addPointToRing:pt1];
+                [p addPointToRing:pt2];
+                [p closePolygon];
+                self.calculatedCoverage = p;
+                self.calculatedCentroid = [AGSPoint pointWithX:(pt1.x+pt2.x)/2
+                                                             y:(pt1.y+pt2.y)/2
+                                              spatialReference:cl.spatialReference];
+                break;
+            }
+            default: {
+                // Otherwise, it's a polygon convex hull.
+                self.calculatedCoverage = (AGSPolygon *)[[AGSGeometryEngine defaultGeometryEngine] convexHullForGeometry:mp];
+                self.calculatedCentroid = [[AGSGeometryEngine defaultGeometryEngine] labelPointForPolygon:(AGSPolygon *)self.calculatedCoverage];
+                break;
+            }
         }
     }
 }

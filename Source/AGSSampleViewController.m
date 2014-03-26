@@ -17,6 +17,8 @@
 
 @interface AGSSampleViewController () <AGSCalloutDelegate>
 @property (weak, nonatomic) IBOutlet AGSMapView *mapView;
+@property (nonatomic, strong) AGSClusterLayer *clusterLayer;
+@property (weak, nonatomic) IBOutlet UISwitch *coverageSwitch;
 @end
 
 @implementation AGSSampleViewController
@@ -31,11 +33,11 @@
     
     AGSFeatureLayer *featureLayer = [AGSFeatureLayer featureServiceLayerWithURL:[NSURL URLWithString:kFeatureLayerURL] mode:AGSFeatureLayerModeOnDemand];
     [self.mapView addMapLayer:featureLayer];
-    featureLayer.opacity = 0;
     
-    AGSClusterLayer *clusterLayer = [AGSClusterLayer clusterLayerForFeatureLayer:featureLayer];
-    clusterLayer.showClusterCoverages = YES;
-    [self.mapView addMapLayer:clusterLayer];
+    self.clusterLayer = [AGSClusterLayer clusterLayerForFeatureLayer:featureLayer];
+    featureLayer.opacity = 0;
+    self.clusterLayer.showClusterCoverages = self.coverageSwitch.on;
+    [self.mapView addMapLayer:self.clusterLayer];
 
     [self.mapView addMapLayer:[AGSTiledMapServiceLayer tiledMapServiceLayerWithURL:[NSURL URLWithString:kGreyBasemapRef]]];
     
@@ -45,12 +47,10 @@
                                                          ymax:4879706.758889
                                              spatialReference:[AGSSpatialReference webMercatorSpatialReference]]
                         animated:NO];
-//    self.mapView.callout.delegate = self;
 }
 
--(BOOL)callout:(AGSCallout *)callout willShowForFeature:(id<AGSFeature>)feature layer:(AGSLayer<AGSHitTestable> *)layer mapPoint:(AGSPoint *)mapPoint {
-    NSLog(@"%@", feature);
-    return YES;
+- (IBAction)toggleCoverages:(id)sender {
+    self.clusterLayer.showClusterCoverages = self.coverageSwitch.on;
 }
 
 - (void)didReceiveMemoryWarning

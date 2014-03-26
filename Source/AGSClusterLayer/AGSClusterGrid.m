@@ -1,6 +1,6 @@
 //
 //  AGSClusterDistanceGrid.m
-//  AGSCluseterLayer
+//  ClusterLayerSample
 //
 //  Created by Nicholas Furness on 3/24/14.
 //  Copyright (c) 2014 ESRI. All rights reserved.
@@ -51,7 +51,6 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
         cluster = [AGSCluster clusterForPoint:getGridCellCentroid(cellCoord, self.cellSize)];
         [row setObject:cluster forKey:@(cellCoord.x)];
     }
-//    NSLog(@"Got cluster (%f,%f) for point (%f,%f)", cellCoord.x, cellCoord.y, pt.x, pt.y);
     return cluster;
 }
 
@@ -108,10 +107,15 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
 -(NSString *)description {
     NSUInteger clusterCount = 0;
     NSUInteger featureCount = 0;
+    NSUInteger loneFeatures = 0;
     for (AGSCluster *cluster in self.clusters) {
-        clusterCount += 1;
+        if (cluster.features.count > 1) {
+            clusterCount++;
+        } else {
+            loneFeatures++;
+        }
         featureCount += cluster.features.count;
     }
-    return [NSString stringWithFormat:@"Cluster Layer: %d features in %d clusters", featureCount, clusterCount];
+    return [NSString stringWithFormat:@"Cluster Layer: %d features in %d clusters (with %d unclustered)", featureCount, clusterCount, loneFeatures];
 }
 @end
