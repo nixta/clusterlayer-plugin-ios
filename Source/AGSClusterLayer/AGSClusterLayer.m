@@ -53,6 +53,7 @@
                                              selector:@selector(featuresLoaded:)
                                                  name:AGSFeatureLayerDidLoadFeaturesNotification
                                                object:self.featureLayer];
+    self.featureLayer.opacity = 0;
 }
 
 -(BOOL)callout:(AGSCallout *)callout willShowForFeature:(id<AGSFeature>)feature layer:(AGSLayer<AGSHitTestable> *)layer mapPoint:(AGSPoint *)mapPoint {

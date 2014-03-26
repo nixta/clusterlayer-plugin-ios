@@ -35,7 +35,6 @@
     [self.mapView addMapLayer:featureLayer];
     
     self.clusterLayer = [AGSClusterLayer clusterLayerForFeatureLayer:featureLayer];
-    featureLayer.opacity = 0;
     self.clusterLayer.showClusterCoverages = self.coverageSwitch.on;
     [self.mapView addMapLayer:self.clusterLayer];
 
