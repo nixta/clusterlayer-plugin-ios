@@ -11,5 +11,6 @@
 
 @interface AGSClusterLayer : AGSGraphicsLayer
 @property (nonatomic, assign) BOOL showClusterCoverages;
+@property (nonatomic, assign) NSUInteger minClusterCount;
 +(AGSClusterLayer *)clusterLayerForFeatureLayer:(AGSFeatureLayer *)featureLayer;
 @end

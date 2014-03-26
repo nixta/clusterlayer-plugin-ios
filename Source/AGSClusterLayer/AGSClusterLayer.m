@@ -13,6 +13,8 @@
 
 #define kClusterPayloadKey @"__cluster"
 
+#define kDefaultMinClusterCount 5
+
 #import <objc/runtime.h>
 
 @interface AGSClusterLayer () <AGSLayerCalloutDelegate>
@@ -30,6 +32,7 @@
     if (self) {
         self.showClusterCoverages = NO;
         self.calloutDelegate = self;
+        self.minClusterCount = kDefaultMinClusterCount;
     }
     return self;
 }
@@ -57,22 +60,17 @@
 }
 
 -(BOOL)callout:(AGSCallout *)callout willShowForFeature:(id<AGSFeature>)feature layer:(AGSLayer<AGSHitTestable> *)layer mapPoint:(AGSPoint *)mapPoint {
-    BOOL isCoverage = [feature.geometry isKindOfClass:[AGSPolygon class]];
-
     AGSCluster *cluster = objc_getAssociatedObject(feature, kClusterPayloadKey);
     if (cluster) {
-        if (cluster.features.count > 1) {
-            callout.title = [NSString stringWithFormat:@"Cluster%@", isCoverage?@" Polygon":@""];
-            callout.detail = [NSString stringWithFormat:@"Cluster contains %d features", cluster.features.count];
-            callout.accessoryButtonHidden = YES;
-        } else {
-            callout.title = [NSString stringWithFormat:@"Ordinary feature"];
-            callout.detail = [NSString stringWithFormat:@"Might have a bunch of attributes on it"];
-            callout.accessoryButtonHidden = NO;
-        }
-        return YES;
+        callout.title = @"Cluster";
+        callout.detail = [NSString stringWithFormat:@"Cluster contains %d features", cluster.features.count];
+        callout.accessoryButtonHidden = YES;
+    } else {
+        callout.title = @"Ordinary feature";
+        callout.detail = @"Might have a bunch of attributes on it";
+        callout.accessoryButtonHidden = NO;
     }
-    return NO;
+    return YES;
 }
 
 -(void)featuresLoaded:(NSNotification *)notification {
@@ -126,26 +124,37 @@
 -(void) renderClusters {
     NSMutableArray *coverageGraphics = [NSMutableArray array];
     NSMutableArray *clusterGraphics = [NSMutableArray array];
+    NSMutableArray *featureGraphics = [NSMutableArray array];
     
     for (AGSCluster *cluster in self.grid.clusters) {
-        if (self.showClusterCoverages && cluster.features.count > 1) {
-            AGSGraphic *coverageGraphic = [AGSGraphic graphicWithGeometry:cluster.coverage
-                                                                   symbol:nil
-                                                               attributes:nil];
-            objc_setAssociatedObject(coverageGraphic, kClusterPayloadKey, cluster, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-            coverageGraphic.symbol = [self.renderer symbolForFeature:coverageGraphic timeExtent:nil];
-            [coverageGraphics addObject:coverageGraphic];
+        if (cluster.features.count >= self.minClusterCount) {
+            // Draw as cluster.
+            if (self.showClusterCoverages && cluster.features.count > 1) {
+                AGSGraphic *coverageGraphic = [AGSGraphic graphicWithGeometry:cluster.coverage
+                                                                       symbol:nil
+                                                                   attributes:nil];
+                objc_setAssociatedObject(coverageGraphic, kClusterPayloadKey, cluster, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+                coverageGraphic.symbol = [self.renderer symbolForFeature:coverageGraphic timeExtent:nil];
+                [coverageGraphics addObject:coverageGraphic];
+            }
+            
+            AGSGraphic *clusterGraphic = [AGSGraphic graphicWithGeometry:cluster.location
+                                                                  symbol:nil
+                                                              attributes:nil];
+            objc_setAssociatedObject(clusterGraphic, kClusterPayloadKey, cluster, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+            clusterGraphic.symbol = [self.renderer symbolForFeature:clusterGraphic timeExtent:nil];
+            [clusterGraphics addObject:clusterGraphic];
+        } else {
+            // Draw as feature(s).
+            for (AGSGraphic *feature in cluster.features) {
+                feature.symbol = [self.renderer symbolForFeature:feature timeExtent:nil];
+                [featureGraphics addObject:feature];
+            }
         }
-
-        AGSGraphic *clusterGraphic = [AGSGraphic graphicWithGeometry:cluster.location
-                                                              symbol:nil
-                                                          attributes:nil];
-        objc_setAssociatedObject(clusterGraphic, kClusterPayloadKey, cluster, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-        clusterGraphic.symbol = [self.renderer symbolForFeature:clusterGraphic timeExtent:nil];
-        [clusterGraphics addObject:clusterGraphic];
     }
-    
+
     [self addGraphics:coverageGraphics];
     [self addGraphics:clusterGraphics];
+    [self addGraphics:featureGraphics];
 }
 @end

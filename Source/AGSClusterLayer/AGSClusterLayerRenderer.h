@@ -13,5 +13,7 @@ typedef AGSSymbol*(^SymbolGeneratorBlock)(AGSCluster *);
 
 @interface AGSClusterLayerRenderer : AGSSimpleRenderer
 -(id)initAsSurrogateFor:(AGSRenderer *)originalRenderer;
--(id)initAsSurrogateFor:(AGSRenderer *)originalRenderer clusterSymbolBlock:(SymbolGeneratorBlock)clusterSymbolGenerator coverageSymbolBlock:(SymbolGeneratorBlock)coverageSymbolGenerator;
+-(id)initAsSurrogateFor:(AGSRenderer *)originalRenderer
+     clusterSymbolBlock:(SymbolGeneratorBlock)clusterSymbolGenerator
+    coverageSymbolBlock:(SymbolGeneratorBlock)coverageSymbolGenerator;
 @end

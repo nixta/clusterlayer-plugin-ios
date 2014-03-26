@@ -23,14 +23,24 @@
                  clusterSymbolBlock:^(AGSCluster *cluster) {
                      AGSCompositeSymbol *s = [AGSCompositeSymbol compositeSymbol];
                      
-                     AGSSimpleMarkerSymbol *backgroundSymbol = [AGSSimpleMarkerSymbol simpleMarkerSymbolWithColor:[[UIColor purpleColor] colorWithAlphaComponent:0.7]];
-                     backgroundSymbol.outline = nil;
-                     backgroundSymbol.size = CGSizeMake(20, 20);
+                     NSUInteger innerSize = 30;
+                     NSUInteger borderSize = 4;
+                     AGSSimpleMarkerSymbol *backgroundSymbol1 = [AGSSimpleMarkerSymbol simpleMarkerSymbolWithColor:[[UIColor purpleColor] colorWithAlphaComponent:0.7]];
+                     backgroundSymbol1.outline = nil;
+                     backgroundSymbol1.size = CGSizeMake(innerSize + borderSize, innerSize + borderSize);
+                     AGSSimpleMarkerSymbol *backgroundSymbol2 = [AGSSimpleMarkerSymbol simpleMarkerSymbolWithColor:[[UIColor whiteColor] colorWithAlphaComponent:0.7]];
+                     backgroundSymbol2.outline = nil;
+                     backgroundSymbol2.size = CGSizeMake(innerSize + (borderSize/2), innerSize + (borderSize/2));
+                     AGSSimpleMarkerSymbol *backgroundSymbol3 = [AGSSimpleMarkerSymbol simpleMarkerSymbolWithColor:[[UIColor purpleColor] colorWithAlphaComponent:0.7]];
+                     backgroundSymbol3.outline = nil;
+                     backgroundSymbol3.size = CGSizeMake(innerSize, innerSize);
                      
                      AGSTextSymbol *countSymbol = [AGSTextSymbol textSymbolWithText:[NSString stringWithFormat:@"%d", cluster.features.count]
                                                                               color:[UIColor whiteColor]];
-                     
-                     [s addSymbol:backgroundSymbol];
+                     countSymbol.fontSize = 16;
+                     [s addSymbol:backgroundSymbol1];
+                     [s addSymbol:backgroundSymbol2];
+                     [s addSymbol:backgroundSymbol3];
                      [s addSymbol:countSymbol];
                      
                      return s;
@@ -56,21 +66,16 @@
 
 -(AGSSymbol *)symbolForFeature:(id<AGSFeature>)feature timeExtent:(AGSTimeExtent *)timeExtent {
     AGSCluster *cluster = objc_getAssociatedObject(feature, kClusterPayloadKey);
-
-    if ([feature.geometry isKindOfClass:[AGSPolygon class]]) {
-        // This is a coverage
-        return self.coverageGenBlock(cluster);
-    }
-
     if (cluster) {
-        if (cluster.features.count > 1) {
-            return self.clusterGenBlock(cluster);
-        } else if (cluster.features.count == 1) {
-            // Render a feature
-            return [self.originalRenderer symbolForFeature:feature timeExtent:timeExtent];
+        if ([feature.geometry isKindOfClass:[AGSPolygon class]]) {
+            // This is a coverage
+            return self.coverageGenBlock(cluster);
         }
+
+        return self.clusterGenBlock(cluster);
+    } else {
+        return [self.originalRenderer symbolForFeature:feature timeExtent:timeExtent];        
     }
-    NSLog(@"!!!!!CLUSTER RENDERER FOUND NON-CLUSTER GRAPHIC!!!!!!!!");
     return nil;
 }
 @end
