@@ -108,8 +108,9 @@
 				D9E0F74818E232CC0009C771 /* AGSClusterLayerRenderer.h */,
 				D9E0F74918E232CC0009C771 /* AGSClusterLayerRenderer.m */,
 			);
-			path = AGSClusterLayer;
-			sourceTree = "<group>";
+			name = AGSClusterLayer;
+			path = ../AGSClusterLayer;
+			sourceTree = SOURCE_ROOT;
 		};
 		D9F3D19E1668271900FB6A8D = {
 			isa = PBXGroup;
