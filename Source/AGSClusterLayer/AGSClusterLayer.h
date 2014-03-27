@@ -8,9 +8,15 @@
 
 #import <UIKit/UIKit.h>
 #import <ArcGIS/ArcGIS.h>
+#import "AGSClusterLayerRenderer.h"
 
 @interface AGSClusterLayer : AGSGraphicsLayer
 @property (nonatomic, assign) BOOL showClusterCoverages;
 @property (nonatomic, assign) NSUInteger minClusterCount;
+@property (nonatomic, assign) double minScaleForClustering;
+@property (nonatomic, readonly) BOOL isClustering;
 +(AGSClusterLayer *)clusterLayerForFeatureLayer:(AGSFeatureLayer *)featureLayer;
++(AGSClusterLayer *)clusterLayerForFeatureLayer:(AGSFeatureLayer *)featureLayer
+                        usingClusterSymbolBlock:(AGSClusterSymbolGeneratorBlock)clusterBlock
+                            coverageSymbolBlock:(AGSClusterSymbolGeneratorBlock)coverageBlock;
 @end

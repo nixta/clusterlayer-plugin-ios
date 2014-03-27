@@ -9,30 +9,48 @@
 #import "AGSClusterLayer.h"
 #import "AGSClusterGrid.h"
 #import "AGSCluster.h"
-#import "AGSClusterLayerRenderer.h"
 
 #define kClusterPayloadKey @"__cluster"
+#define kClusterRenderBlockParameterKey @"clusterBlock"
+#define kCoverageRenderBlockParameterKey @"coverageBlock"
 
-#define kDefaultMinClusterCount 5
+#define kDefaultMinClusterCount 2
 
 #import <objc/runtime.h>
 
 @interface AGSClusterLayer () <AGSLayerCalloutDelegate>
 @property (nonatomic, strong) AGSClusterGrid *grid;
 @property (nonatomic, weak) AGSFeatureLayer *featureLayer;
+@property (nonatomic, strong) NSMutableDictionary *lazyLoadParameters;
+@property (nonatomic, assign, readwrite) BOOL isClustering;
 @end
 
 @implementation AGSClusterLayer
+@synthesize isClustering = _isClustering;
+
+#pragma mark - Convenience Constructors
 +(AGSClusterLayer *)clusterLayerForFeatureLayer:(AGSFeatureLayer *)featureLayer {
     return [[AGSClusterLayer alloc] initWithFeatureLayer:featureLayer];
 }
 
++(AGSClusterLayer *)clusterLayerForFeatureLayer:(AGSFeatureLayer *)featureLayer
+                        usingClusterSymbolBlock:(AGSClusterSymbolGeneratorBlock)clusterBlock
+                            coverageSymbolBlock:(AGSClusterSymbolGeneratorBlock)coverageBlock {
+    AGSClusterLayer *newLayer = [AGSClusterLayer clusterLayerForFeatureLayer:featureLayer];
+    if (clusterBlock) [newLayer.lazyLoadParameters setObject:clusterBlock forKey:kClusterRenderBlockParameterKey];
+    if (coverageBlock) [newLayer.lazyLoadParameters setObject:coverageBlock forKey:kCoverageRenderBlockParameterKey];
+    return newLayer;
+}
+
+#pragma mark - Initializers
 -(id)init {
     self = [super init];
     if (self) {
         self.showClusterCoverages = NO;
         self.calloutDelegate = self;
         self.minClusterCount = kDefaultMinClusterCount;
+        self.lazyLoadParameters = [NSMutableDictionary dictionary];
+        self.minScaleForClustering  = 0;
     }
     return self;
 }
@@ -49,9 +67,14 @@
     return self;
 }
 
+#pragma mark - Asynchronous Setup
 -(void)featureLayerLoaded:(NSNotification *)notification {
     NSLog(@"Stealing renderer...");
-    self.renderer = [[AGSClusterLayerRenderer alloc] initAsSurrogateFor:self.featureLayer.renderer];
+    AGSClusterSymbolGeneratorBlock clusterGenBlock = self.lazyLoadParameters[kClusterRenderBlockParameterKey];
+    AGSClusterSymbolGeneratorBlock coverageGenBlock = self.lazyLoadParameters[kCoverageRenderBlockParameterKey];
+    self.renderer = [[AGSClusterLayerRenderer alloc] initAsSurrogateFor:self.featureLayer.renderer
+                                                     clusterSymbolBlock:clusterGenBlock
+                                                    coverageSymbolBlock:coverageGenBlock];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(featuresLoaded:)
                                                  name:AGSFeatureLayerDidLoadFeaturesNotification
@@ -73,6 +96,7 @@
     return YES;
 }
 
+#pragma mark - Display Update Hooks
 -(void)featuresLoaded:(NSNotification *)notification {
     NSLog(@"Features Loaded");
     [self refreshClusters];
@@ -82,16 +106,42 @@
 {
     if (updateType == AGSMapUpdateTypeSpatialExtent) {
         NSLog(@"Map Extent Updated");
+        self.isClustering = self.mapView.mapScale > self.minScaleForClustering;
         [self refreshClusters];
     }
     [super mapDidUpdate:updateType];
 }
 
+-(void)setIsClustering:(BOOL)isClustering {
+    BOOL wasClustering = _isClustering;
+    if (isClustering != wasClustering) {
+        [self willChangeValueForKey:@"isClustering"];
+    }
+    _isClustering = isClustering;
+    if (isClustering != wasClustering) {
+        [self didChangeValueForKey:@"isClustering"];
+    }
+}
+
+-(BOOL)isClustering {
+    return _isClustering;
+}
+
++(BOOL)automaticallyNotifiesObserversForKey:(NSString *)key {
+    if ([key isEqualToString:@"isClustering"]) {
+        return NO;
+    } else {
+        return [super automaticallyNotifiesObserversForKey:key];
+    }
+}
+
+#pragma mark - Display Configuration Properties
 -(void)setShowClusterCoverages:(BOOL)showClusterCoverages {
     _showClusterCoverages = showClusterCoverages;
     [self refresh];
 }
 
+#pragma mark - Layer Refresh
 -(void)refresh {
     [self refreshClusters];
     [super refresh];
@@ -110,6 +160,7 @@
     }
 }
 
+#pragma mark - Cluster Generation and Display
 -(void)rebuildClusterGrid {
     NSUInteger hCells = 7;
     NSUInteger vCells = 7;
@@ -127,9 +178,10 @@
     NSMutableArray *featureGraphics = [NSMutableArray array];
     
     for (AGSCluster *cluster in self.grid.clusters) {
-        if (cluster.features.count >= self.minClusterCount) {
+        if (self.mapView.mapScale > self.minScaleForClustering &&
+            cluster.features.count >= self.minClusterCount) {
             // Draw as cluster.
-            if (self.showClusterCoverages && cluster.features.count > 1) {
+            if (self.showClusterCoverages && cluster.features.count > 2) {
                 AGSGraphic *coverageGraphic = [AGSGraphic graphicWithGeometry:cluster.coverage
                                                                        symbol:nil
                                                                    attributes:nil];

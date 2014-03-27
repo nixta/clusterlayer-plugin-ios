@@ -9,11 +9,11 @@
 #import <ArcGIS/ArcGIS.h>
 #import "AGSCluster.h"
 
-typedef AGSSymbol*(^SymbolGeneratorBlock)(AGSCluster *);
+typedef AGSSymbol*(^AGSClusterSymbolGeneratorBlock)(AGSCluster *);
 
 @interface AGSClusterLayerRenderer : AGSSimpleRenderer
 -(id)initAsSurrogateFor:(AGSRenderer *)originalRenderer;
 -(id)initAsSurrogateFor:(AGSRenderer *)originalRenderer
-     clusterSymbolBlock:(SymbolGeneratorBlock)clusterSymbolGenerator
-    coverageSymbolBlock:(SymbolGeneratorBlock)coverageSymbolGenerator;
+     clusterSymbolBlock:(AGSClusterSymbolGeneratorBlock)clusterSymbolGenerator
+    coverageSymbolBlock:(AGSClusterSymbolGeneratorBlock)coverageSymbolGenerator;
 @end
