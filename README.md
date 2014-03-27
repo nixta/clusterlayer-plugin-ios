@@ -5,7 +5,7 @@ A cluster layer extension to the [ArcGIS Runtime for iOS](https://developers.arc
 
 The gridding code is based heavily on [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster/blob/master/src/DistanceGrid.js)
 
-![App](clusterlayer-ios.png)
+![App](clusterlayer-plugin-ios.png)
 
 ##Usage
 1. Import `AGSClusterLayer.h`
