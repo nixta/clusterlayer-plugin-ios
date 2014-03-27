@@ -181,9 +181,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		D9F3D1A81668271A00FB6A8D /* AGSSample */ = {
+		D9F3D1A81668271A00FB6A8D /* AGSClusterLayerSample */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = D9F3D1D01668271A00FB6A8D /* Build configuration list for PBXNativeTarget "AGSSample" */;
+			buildConfigurationList = D9F3D1D01668271A00FB6A8D /* Build configuration list for PBXNativeTarget "AGSClusterLayerSample" */;
 			buildPhases = (
 				D9F3D1A51668271A00FB6A8D /* Sources */,
 				D9F3D1A61668271A00FB6A8D /* Frameworks */,
@@ -193,7 +193,7 @@
 			);
 			dependencies = (
 			);
-			name = AGSSample;
+			name = AGSClusterLayerSample;
 			productName = Basemaps;
 			productReference = D9F3D1A91668271A00FB6A8D /* AGSClusterLayer.app */;
 			productType = "com.apple.product-type.application";
@@ -220,7 +220,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				D9F3D1A81668271A00FB6A8D /* AGSSample */,
+				D9F3D1A81668271A00FB6A8D /* AGSClusterLayerSample */,
 			);
 		};
 /* End PBXProject section */
@@ -392,7 +392,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		D9F3D1D01668271A00FB6A8D /* Build configuration list for PBXNativeTarget "AGSSample" */ = {
+		D9F3D1D01668271A00FB6A8D /* Build configuration list for PBXNativeTarget "AGSClusterLayerSample" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				D9F3D1D11668271A00FB6A8D /* Debug */,
