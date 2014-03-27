@@ -54,7 +54,7 @@
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
     NSLog(@"%@: %@", keyPath, change);
-    self.clusteringStatusLabel.text = [NSString stringWithFormat:@"%@ (scale %f)", self.clusterLayer.isClustering?@"Clustering":@"Not Clustering", self.mapView.mapScale];
+    self.clusteringStatusLabel.text = [NSString stringWithFormat:@"%@ [1:%f]", self.clusterLayer.isClustering?@"Clustering":@"Not Clustering", self.mapView.mapScale];
 }
 
 - (IBAction)toggleCoverages:(id)sender {
