@@ -112,14 +112,14 @@
     [super mapDidUpdate:updateType];
 }
 
--(void)setWillClusterAtCurrentScale:(BOOL)isClustering {
-    BOOL wasClustering = _willClusterAtCurrentScale;
-    if (isClustering != wasClustering) {
-        [self willChangeValueForKey:@"isClustering"];
+-(void)setWillClusterAtCurrentScale:(BOOL)willClusterAtCurrentScale {
+    BOOL wasClusteringAtPreviousScale = _willClusterAtCurrentScale;
+    if (willClusterAtCurrentScale != wasClusteringAtPreviousScale) {
+        [self willChangeValueForKey:@"willClusterAtCurrentScale"];
     }
-    _willClusterAtCurrentScale = isClustering;
-    if (isClustering != wasClustering) {
-        [self didChangeValueForKey:@"isClustering"];
+    _willClusterAtCurrentScale = willClusterAtCurrentScale;
+    if (willClusterAtCurrentScale != wasClusteringAtPreviousScale) {
+        [self didChangeValueForKey:@"willClusterAtCurrentScale"];
     }
 }
 
@@ -128,7 +128,7 @@
 }
 
 +(BOOL)automaticallyNotifiesObserversForKey:(NSString *)key {
-    if ([key isEqualToString:@"isClustering"]) {
+    if ([key isEqualToString:@"willClusterAtCurrentScale"]) {
         return NO;
     } else {
         return [super automaticallyNotifiesObserversForKey:key];
@@ -166,12 +166,11 @@
     NSUInteger vCells = 7;
     AGSEnvelope *mapEnv = [self.mapView toMapEnvelope:CGRectMake(0, 0, self.mapView.layer.bounds.size.width/hCells, self.mapView.layer.bounds.size.height/vCells)];
     NSUInteger cellSize = floor((mapEnv.height + mapEnv.width)/2);
-    NSLog(@"CellSize: %d", cellSize);
     self.grid = [[AGSClusterGrid alloc] initWithCellSize:cellSize];
     for (id<AGSFeature> feature in self.featureLayer.graphics) {
         [self.grid addFeature:feature];
     }
-    NSLog(@"ADDED ALL FEATURES: There are %d clusters", self.grid.clusters.count);
+    NSLog(@"Rebuilt %d features into %d clusters with cell size %d", self.featureLayer.graphicsCount, self.grid.clusters.count, cellSize);
 }
 
 -(void) renderClusters {
