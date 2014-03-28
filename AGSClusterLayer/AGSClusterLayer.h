@@ -10,7 +10,14 @@
 #import <ArcGIS/ArcGIS.h>
 #import "AGSClusterLayerRenderer.h"
 
+extern NSString * const AGSClusterLayerDidCompleteClusteringNotification;
+extern NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Duration;
+extern NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_ClusterCount;
+extern NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_FeatureCount;
+extern NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_ClusteringCellsize;
+
 @interface AGSClusterLayer : AGSGraphicsLayer
+
 @property (nonatomic, assign) BOOL showClusterCoverages;
 @property (nonatomic, assign) NSUInteger minClusterCount;
 @property (nonatomic, assign) double minScaleForClustering;
