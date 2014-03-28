@@ -9,7 +9,7 @@
 #import "AGSClusterLayerRenderer.h"
 #import <objc/runtime.h>
 
-#define kClusterPayloadKey @"__cluster"
+#import "Common.h"
 
 @interface AGSClusterLayerRenderer ()
 @property (nonatomic, weak) AGSRenderer *originalRenderer;
@@ -83,15 +83,16 @@
 
 -(AGSSymbol *)symbolForFeature:(id<AGSFeature>)feature timeExtent:(AGSTimeExtent *)timeExtent {
     if ([feature isKindOfClass:[AGSCluster class]]) {
-        if ([feature.geometry isKindOfClass:[AGSPolygon class]]) {
-            // This is a coverage
-            return self.coverageGenBlock(feature);
-        }
-
-        return self.clusterGenBlock(feature);
-    } else {
-        return [self.originalRenderer symbolForFeature:feature timeExtent:timeExtent];
+        return self.clusterGenBlock((AGSCluster *)feature);
     }
-    return nil;
+    
+    AGSCluster *cluster = objc_getAssociatedObject(feature, kClusterPayloadKey);
+    if (cluster != nil &&
+        [feature.geometry isKindOfClass:[AGSPolygon class]]) {
+        // This is a coverage
+        return self.coverageGenBlock((AGSCluster *)feature);
+    }
+        
+    return [self.originalRenderer symbolForFeature:feature timeExtent:timeExtent];
 }
 @end

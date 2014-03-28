@@ -10,7 +10,8 @@
 #import "AGSClusterGrid.h"
 #import "AGSCluster.h"
 
-#define kClusterPayloadKey @"__cluster"
+#include "Common.h"
+
 #define kClusterRenderBlockParameterKey @"clusterBlock"
 #define kCoverageRenderBlockParameterKey @"coverageBlock"
 

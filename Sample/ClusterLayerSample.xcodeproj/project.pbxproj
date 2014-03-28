@@ -12,6 +12,8 @@
 		D919A36518E203DD00B140BF /* AGSCluster.m in Sources */ = {isa = PBXBuildFile; fileRef = D919A36418E203DD00B140BF /* AGSCluster.m */; };
 		D9A8B11916BB27B9001653EE /* libc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D9A8B11816BB27B9001653EE /* libc++.dylib */; };
 		D9A8B11B16BB27BF001653EE /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9A8B11A16BB27BF001653EE /* OpenGLES.framework */; };
+		D9D1C8BE18E62D6400CD3CEF /* AGSGraphic+AGSClustering.m in Sources */ = {isa = PBXBuildFile; fileRef = D9D1C8BD18E62D6400CD3CEF /* AGSGraphic+AGSClustering.m */; };
+		D9D1C8C218E62DF000CD3CEF /* NSArray+Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = D9D1C8C118E62DF000CD3CEF /* NSArray+Utils.m */; };
 		D9E0F74A18E232CC0009C771 /* AGSClusterLayerRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = D9E0F74918E232CC0009C771 /* AGSClusterLayerRenderer.m */; };
 		D9F3D1AE1668271A00FB6A8D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9F3D1AD1668271A00FB6A8D /* UIKit.framework */; };
 		D9F3D1B01668271A00FB6A8D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9F3D1AF1668271A00FB6A8D /* Foundation.framework */; };
@@ -45,6 +47,11 @@
 		D9A8B11816BB27B9001653EE /* libc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libc++.dylib"; path = "usr/lib/libc++.dylib"; sourceTree = SDKROOT; };
 		D9A8B11A16BB27BF001653EE /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		D9D1C8BB18E5942F00CD3CEF /* AGSCluster_int.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AGSCluster_int.h; sourceTree = SOURCE_ROOT; };
+		D9D1C8BC18E62D6400CD3CEF /* AGSGraphic+AGSClustering.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AGSGraphic+AGSClustering.h"; sourceTree = "<group>"; };
+		D9D1C8BD18E62D6400CD3CEF /* AGSGraphic+AGSClustering.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AGSGraphic+AGSClustering.m"; sourceTree = "<group>"; };
+		D9D1C8C018E62DF000CD3CEF /* NSArray+Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+Utils.h"; sourceTree = "<group>"; };
+		D9D1C8C118E62DF000CD3CEF /* NSArray+Utils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+Utils.m"; sourceTree = "<group>"; };
+		D9D1C8C318E6338300CD3CEF /* Common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Common.h; sourceTree = SOURCE_ROOT; };
 		D9E0F74818E232CC0009C771 /* AGSClusterLayerRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AGSClusterLayerRenderer.h; sourceTree = "<group>"; };
 		D9E0F74918E232CC0009C771 /* AGSClusterLayerRenderer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AGSClusterLayerRenderer.m; sourceTree = "<group>"; };
 		D9F3D1A91668271A00FB6A8D /* AGSClusterLayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AGSClusterLayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -109,10 +116,23 @@
 				D919A36118E0B14700B140BF /* AGSClusterGrid.m */,
 				D9E0F74818E232CC0009C771 /* AGSClusterLayerRenderer.h */,
 				D9E0F74918E232CC0009C771 /* AGSClusterLayerRenderer.m */,
+				D9D1C8BF18E62D6900CD3CEF /* Categories */,
+				D9D1C8C318E6338300CD3CEF /* Common.h */,
 			);
 			name = AGSClusterLayer;
 			path = ../AGSClusterLayer;
 			sourceTree = SOURCE_ROOT;
+		};
+		D9D1C8BF18E62D6900CD3CEF /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				D9D1C8BC18E62D6400CD3CEF /* AGSGraphic+AGSClustering.h */,
+				D9D1C8BD18E62D6400CD3CEF /* AGSGraphic+AGSClustering.m */,
+				D9D1C8C018E62DF000CD3CEF /* NSArray+Utils.h */,
+				D9D1C8C118E62DF000CD3CEF /* NSArray+Utils.m */,
+			);
+			name = Categories;
+			sourceTree = "<group>";
 		};
 		D9F3D19E1668271900FB6A8D = {
 			isa = PBXGroup;
@@ -249,10 +269,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D9D1C8C218E62DF000CD3CEF /* NSArray+Utils.m in Sources */,
 				D919A36518E203DD00B140BF /* AGSCluster.m in Sources */,
 				D919A36218E0B14700B140BF /* AGSClusterGrid.m in Sources */,
 				D9F3D1BA1668271A00FB6A8D /* main.m in Sources */,
 				D9F3D1BE1668271A00FB6A8D /* AGSSampleAppDelegate.m in Sources */,
+				D9D1C8BE18E62D6400CD3CEF /* AGSGraphic+AGSClustering.m in Sources */,
 				D919A35F18E0B09800B140BF /* AGSClusterLayer.m in Sources */,
 				D9E0F74A18E232CC0009C771 /* AGSClusterLayerRenderer.m in Sources */,
 				D9F3D1CD1668271A00FB6A8D /* AGSSampleViewController.m in Sources */,
