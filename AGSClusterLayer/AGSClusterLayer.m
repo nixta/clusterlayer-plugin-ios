@@ -135,10 +135,23 @@
     }
 }
 
-#pragma mark - Display Configuration Properties
+#pragma mark - Properties
 -(void)setShowClusterCoverages:(BOOL)showClusterCoverages {
     _showClusterCoverages = showClusterCoverages;
     [self refresh];
+}
+
+-(AGSEnvelope *)clustersEnvelope {
+    AGSMutableEnvelope *envelope = nil;
+    for (AGSCluster *cluster in self.grid.clusters) {
+        AGSGeometry *coverage = cluster.coverage;
+        if (!envelope) {
+            envelope = [coverage.envelope mutableCopy];
+        } else {
+            [envelope unionWithEnvelope:coverage.envelope];
+        }
+    }
+    return envelope;
 }
 
 #pragma mark - Layer Refresh
