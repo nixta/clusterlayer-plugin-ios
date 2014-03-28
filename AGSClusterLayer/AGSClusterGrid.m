@@ -13,6 +13,8 @@
 
 #define kClusterKey @"_agsclusterkey"
 
+#define kAddFeaturesArrayKey @"__tempArrayKey"
+
 @interface AGSClusterGrid()
 @property (nonatomic, assign, readwrite) NSUInteger cellSize;
 @property (nonatomic, strong) NSMutableDictionary* grid;
@@ -60,6 +62,26 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
 -(void)addFeature:(id<AGSFeature>)feature {
     AGSCluster *cluster = [self getClusterForFeature:feature];
     [cluster addFeature:feature];
+}
+
+-(void)addFeatures:(NSArray *)features {
+    NSMutableSet *clustersForFeatures = [NSMutableSet set];
+    for (id<AGSFeature> feature in features) {
+        AGSCluster *cluster = [self getClusterForFeature:feature];
+        NSMutableArray *featuresToAddToCluster = objc_getAssociatedObject(cluster, kAddFeaturesArrayKey);
+        if (!featuresToAddToCluster) {
+            featuresToAddToCluster = [NSMutableArray array];
+            objc_setAssociatedObject(cluster, kAddFeaturesArrayKey, featuresToAddToCluster, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        }
+        [featuresToAddToCluster addObject:feature];
+        [clustersForFeatures addObject:cluster];
+    }
+    
+    for (AGSCluster *cluster in clustersForFeatures) {
+        NSArray *featuresToAdd = objc_getAssociatedObject(cluster, kAddFeaturesArrayKey);
+        [cluster addFeatures:featuresToAdd];
+        objc_setAssociatedObject(cluster, kAddFeaturesArrayKey, nil, OBJC_ASSOCIATION_ASSIGN);
+    }
 }
 
 -(void)updateFeature:(id<AGSFeature>)feature {

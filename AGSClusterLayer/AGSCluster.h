@@ -17,6 +17,7 @@
 +(AGSCluster *)clusterForPoint:(AGSPoint *)point;
 
 -(void)addFeature:(id<AGSFeature>)feature;
+-(void)addFeatures:(NSArray *)features;
 -(BOOL)removeFeature:(id<AGSFeature>)feature;
 -(void)clearFeatures;
 @end

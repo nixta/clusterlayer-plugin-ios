@@ -42,9 +42,15 @@
     [self recalculateCentroid];
 }
 
+-(void)addFeatures:(NSArray *)features {
+    [self._rawFeatures addObjectsFromArray:features];
+    [self recalculateCentroid];
+}
+
 -(BOOL)removeFeature:(id<AGSFeature>)feature {
     if ([self._rawFeatures containsObject:feature]) {
         [self._rawFeatures removeObject:feature];
+        [self recalculateCentroid];
         return YES;
     }
     return NO;
@@ -52,6 +58,7 @@
 
 -(void)clearFeatures {
     [self._rawFeatures removeAllObjects];
+    [self recalculateCentroid];
 }
 
 #pragma mark - Centroid logic

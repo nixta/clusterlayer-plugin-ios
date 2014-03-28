@@ -191,12 +191,15 @@ NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Cluste
     AGSEnvelope *mapEnv = [self.mapView toMapEnvelope:CGRectMake(0, 0, self.mapView.layer.bounds.size.width/hCells, self.mapView.layer.bounds.size.height/vCells)];
     NSUInteger cellSize = floor((mapEnv.height + mapEnv.width)/2);
     self.grid = [[AGSClusterGrid alloc] initWithCellSize:cellSize];
+    
     NSDate *startTime = [NSDate date];
-    for (id<AGSFeature> feature in self.featureLayer.graphics) {
-        [self.grid addFeature:feature];
-    }
+
+    [self.grid addFeatures:self.featureLayer.graphics];
+    
     NSTimeInterval clusteringDuration = -[startTime timeIntervalSinceNow];
+    
     NSLog(@"Rebuilt %d features into %d clusters with cell size %d in %.5fs", self.featureLayer.graphicsCount, self.grid.clusters.count, cellSize, clusteringDuration);
+    
     [[NSNotificationCenter defaultCenter] postNotificationName:AGSClusterLayerDidCompleteClusteringNotification
                                                         object:self
                                                       userInfo:@{
