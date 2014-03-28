@@ -14,7 +14,7 @@
 @property (nonatomic, assign) BOOL showClusterCoverages;
 @property (nonatomic, assign) NSUInteger minClusterCount;
 @property (nonatomic, assign) double minScaleForClustering;
-@property (nonatomic, readonly) BOOL isClustering;
+@property (nonatomic, readonly) BOOL willClusterAtCurrentScale;
 +(AGSClusterLayer *)clusterLayerForFeatureLayer:(AGSFeatureLayer *)featureLayer;
 +(AGSClusterLayer *)clusterLayerForFeatureLayer:(AGSFeatureLayer *)featureLayer
                         usingClusterSymbolBlock:(AGSClusterSymbolGeneratorBlock)clusterBlock

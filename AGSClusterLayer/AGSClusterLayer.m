@@ -22,11 +22,11 @@
 @property (nonatomic, strong) AGSClusterGrid *grid;
 @property (nonatomic, weak) AGSFeatureLayer *featureLayer;
 @property (nonatomic, strong) NSMutableDictionary *lazyLoadParameters;
-@property (nonatomic, assign, readwrite) BOOL isClustering;
+@property (nonatomic, assign, readwrite) BOOL willClusterAtCurrentScale;
 @end
 
 @implementation AGSClusterLayer
-@synthesize isClustering = _isClustering;
+@synthesize willClusterAtCurrentScale = _willClusterAtCurrentScale;
 
 #pragma mark - Convenience Constructors
 +(AGSClusterLayer *)clusterLayerForFeatureLayer:(AGSFeatureLayer *)featureLayer {
@@ -106,25 +106,25 @@
 {
     if (updateType == AGSMapUpdateTypeSpatialExtent) {
         NSLog(@"Map Extent Updated");
-        self.isClustering = self.mapView.mapScale > self.minScaleForClustering;
+        self.willClusterAtCurrentScale = self.mapView.mapScale > self.minScaleForClustering;
         [self refreshClusters];
     }
     [super mapDidUpdate:updateType];
 }
 
--(void)setIsClustering:(BOOL)isClustering {
-    BOOL wasClustering = _isClustering;
+-(void)setWillClusterAtCurrentScale:(BOOL)isClustering {
+    BOOL wasClustering = _willClusterAtCurrentScale;
     if (isClustering != wasClustering) {
         [self willChangeValueForKey:@"isClustering"];
     }
-    _isClustering = isClustering;
+    _willClusterAtCurrentScale = isClustering;
     if (isClustering != wasClustering) {
         [self didChangeValueForKey:@"isClustering"];
     }
 }
 
--(BOOL)isClustering {
-    return _isClustering;
+-(BOOL)willClusterAtCurrentScale {
+    return _willClusterAtCurrentScale;
 }
 
 +(BOOL)automaticallyNotifiesObserversForKey:(NSString *)key {
@@ -166,10 +166,12 @@
     NSUInteger vCells = 7;
     AGSEnvelope *mapEnv = [self.mapView toMapEnvelope:CGRectMake(0, 0, self.mapView.layer.bounds.size.width/hCells, self.mapView.layer.bounds.size.height/vCells)];
     NSUInteger cellSize = floor((mapEnv.height + mapEnv.width)/2);
+    NSLog(@"CellSize: %d", cellSize);
     self.grid = [[AGSClusterGrid alloc] initWithCellSize:cellSize];
     for (id<AGSFeature> feature in self.featureLayer.graphics) {
         [self.grid addFeature:feature];
     }
+    NSLog(@"ADDED ALL FEATURES: There are %d clusters", self.grid.clusters.count);
 }
 
 -(void) renderClusters {

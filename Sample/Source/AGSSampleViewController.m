@@ -15,7 +15,7 @@
 #define kGreyBasemapRef @"http://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer"
 #define kFeatureLayerURL @"http://services.arcgis.com/OfH668nDRN7tbJh0/arcgis/rest/services/Philadelphia_Healthy_Corner_Stores/FeatureServer/0"
 
-@interface AGSSampleViewController () <AGSCalloutDelegate>
+@interface AGSSampleViewController () <AGSMapViewLayerDelegate>
 @property (weak, nonatomic) IBOutlet AGSMapView *mapView;
 @property (nonatomic, strong) AGSClusterLayer *clusterLayer;
 @property (weak, nonatomic) IBOutlet UISwitch *coverageSwitch;
@@ -50,10 +50,15 @@
                                                          ymax:4879706.758889
                                              spatialReference:[AGSSpatialReference webMercatorSpatialReference]]
                         animated:NO];
+    self.mapView.layerDelegate = self;
+}
+
+-(void)mapViewDidLoad:(AGSMapView *)mapView {
+    NSLog(@"%@", self.mapView.visibleAreaEnvelope);
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    self.clusteringStatusLabel.text = [NSString stringWithFormat:@"%@ (1:%.2f)", self.clusterLayer.isClustering?@"Clustering":@"Not Clustering", self.mapView.mapScale];
+    self.clusteringStatusLabel.text = [NSString stringWithFormat:@"%@ (1:%.2f)", self.clusterLayer.willClusterAtCurrentScale?@"Clustering":@"Not Clustering", self.mapView.mapScale];
 }
 
 - (IBAction)toggleCoverages:(id)sender {

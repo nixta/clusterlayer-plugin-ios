@@ -7,6 +7,7 @@
 //
 
 #import "AGSCluster.h"
+#import "AGSCluster_int.h"
 
 @interface AGSCluster ()
 @property (nonatomic, strong) AGSPoint *gridCentroid;
@@ -15,7 +16,11 @@
 @property (nonatomic, strong) NSMutableArray *_rawFeatures;
 @end
 
-@implementation AGSCluster
+@implementation AGSCluster {
+    CGPoint _cellCoordinate;
+}
+
+#pragma mark - Constructors and Initializers
 +(AGSCluster *)clusterForPoint:(AGSPoint *)point {
     return [[AGSCluster alloc] initWithPoint:point];
 }
@@ -31,15 +36,25 @@
     return self;
 }
 
--(NSArray *)features {
-    return [NSArray arrayWithArray:self._rawFeatures];
-}
-
+#pragma mark - Add and remove features
 -(void)addFeature:(id<AGSFeature>)feature {
     [self._rawFeatures addObject:feature];
     [self recalculateCentroid];
 }
 
+-(BOOL)removeFeature:(id<AGSFeature>)feature {
+    if ([self._rawFeatures containsObject:feature]) {
+        [self._rawFeatures removeObject:feature];
+        return YES;
+    }
+    return NO;
+}
+
+-(void)clearFeatures {
+    [self._rawFeatures removeAllObjects];
+}
+
+#pragma mark - Centroid logic
 -(void) recalculateCentroid {
     AGSMutableMultipoint *mp = nil;
     for (id<AGSFeature> f in self.features) {
@@ -88,6 +103,11 @@
     }
 }
 
+#pragma mark - Properties
+-(NSArray *)features {
+    return [NSArray arrayWithArray:self._rawFeatures];
+}
+
 -(AGSPoint *)location {
     return self.calculatedCentroid;
 }
@@ -96,15 +116,11 @@
     return self.calculatedCoverage;
 }
 
--(BOOL)removeFeature:(id<AGSFeature>)feature {
-    if ([self._rawFeatures containsObject:feature]) {
-        [self._rawFeatures removeObject:feature];
-        return YES;
-    }
-    return NO;
+-(CGPoint)cellCoordinate {
+    return _cellCoordinate;
 }
 
--(void)clearFeatures {
-    [self._rawFeatures removeAllObjects];
+-(void)setCellCoordinate:(CGPoint)cellCoordinate {
+    _cellCoordinate = cellCoordinate;
 }
 @end

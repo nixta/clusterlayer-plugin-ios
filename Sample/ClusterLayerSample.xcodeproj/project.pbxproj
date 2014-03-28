@@ -44,6 +44,7 @@
 		D919A36418E203DD00B140BF /* AGSCluster.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AGSCluster.m; sourceTree = "<group>"; };
 		D9A8B11816BB27B9001653EE /* libc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libc++.dylib"; path = "usr/lib/libc++.dylib"; sourceTree = SDKROOT; };
 		D9A8B11A16BB27BF001653EE /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
+		D9D1C8BB18E5942F00CD3CEF /* AGSCluster_int.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AGSCluster_int.h; sourceTree = SOURCE_ROOT; };
 		D9E0F74818E232CC0009C771 /* AGSClusterLayerRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AGSClusterLayerRenderer.h; sourceTree = "<group>"; };
 		D9E0F74918E232CC0009C771 /* AGSClusterLayerRenderer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AGSClusterLayerRenderer.m; sourceTree = "<group>"; };
 		D9F3D1A91668271A00FB6A8D /* AGSClusterLayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AGSClusterLayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -103,6 +104,7 @@
 				D919A35E18E0B09800B140BF /* AGSClusterLayer.m */,
 				D919A36318E203DD00B140BF /* AGSCluster.h */,
 				D919A36418E203DD00B140BF /* AGSCluster.m */,
+				D9D1C8BB18E5942F00CD3CEF /* AGSCluster_int.h */,
 				D919A36018E0B14700B140BF /* AGSClusterGrid.h */,
 				D919A36118E0B14700B140BF /* AGSClusterGrid.m */,
 				D9E0F74818E232CC0009C771 /* AGSClusterLayerRenderer.h */,

@@ -8,6 +8,7 @@
 
 #import "AGSClusterGrid.h"
 #import "AGSCluster.h"
+#import "AGSCluster_int.h"
 #import <objc/runtime.h>
 
 #define kClusterKey @"_agsclusterkey"
@@ -39,6 +40,7 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
 
 -(AGSCluster *)getClusterForFeature:(id<AGSFeature>)feature {
     AGSPoint *pt = (AGSPoint *)feature.geometry;
+    NSAssert(pt != nil, @"Feature Geometry is NIL!");
     CGPoint cellCoord = getGridCoordForMapPoint(pt, self.cellSize);
     
     NSMutableDictionary *row = self.grid[@(cellCoord.y)];
@@ -49,6 +51,7 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
     AGSCluster *cluster = row[@(cellCoord.x)];
     if (!cluster) {
         cluster = [AGSCluster clusterForPoint:getGridCellCentroid(cellCoord, self.cellSize)];
+        cluster.cellCoordinate = cellCoord;
         [row setObject:cluster forKey:@(cellCoord.x)];
     }
     return cluster;
@@ -66,7 +69,16 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
 
 -(BOOL)removeFeature:(id<AGSFeature>)feature {
     AGSCluster *cluster = [self getClusterForFeature:feature];
-    return [cluster removeFeature:feature];
+    @try {
+        return [cluster removeFeature:feature];
+    }
+    @finally {
+        if (cluster.features.count == 0) {
+            CGPoint cellCoord = cluster.cellCoordinate;
+            NSMutableDictionary *row = self.grid[@(cellCoord.y)];
+            [row removeObjectForKey:@(cellCoord.x)];
+        }
+    }
 }
 
 -(void)removeAllFeatures {
