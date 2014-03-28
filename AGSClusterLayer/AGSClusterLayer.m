@@ -228,12 +228,8 @@ NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Cluste
                 [coverageGraphics addObject:coverageGraphic];
             }
             
-            AGSGraphic *clusterGraphic = [AGSGraphic graphicWithGeometry:cluster.location
-                                                                  symbol:nil
-                                                              attributes:nil];
-            objc_setAssociatedObject(clusterGraphic, kClusterPayloadKey, cluster, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-            clusterGraphic.symbol = [self.renderer symbolForFeature:clusterGraphic timeExtent:nil];
-            [clusterGraphics addObject:clusterGraphic];
+            cluster.symbol = [self.renderer symbolForFeature:cluster timeExtent:nil];
+            [clusterGraphics addObject:cluster];
         } else {
             // Draw as feature(s).
             for (AGSGraphic *feature in cluster.features) {

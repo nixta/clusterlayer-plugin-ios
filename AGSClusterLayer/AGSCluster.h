@@ -9,10 +9,14 @@
 #import <Foundation/Foundation.h>
 #import <ArcGIS/ArcGIS.h>
 
-@interface AGSCluster : NSObject
-@property (nonatomic, readonly) AGSPoint *location;
+@interface AGSGraphic (AGSClustering)
+@property (nonatomic, readonly) BOOL isCluster;
+@end
+
+@interface AGSCluster : AGSGraphic <AGSFeature>
 @property (nonatomic, readonly) AGSGeometry *coverage;
 @property (nonatomic, readonly) NSArray *features;
+@property (nonatomic, readonly) NSArray *clusters;
 
 +(AGSCluster *)clusterForPoint:(AGSPoint *)point;
 

@@ -11,8 +11,6 @@
 #import "AGSCluster_int.h"
 #import <objc/runtime.h>
 
-#define kClusterKey @"_agsclusterkey"
-
 #define kAddFeaturesArrayKey @"__tempArrayKey"
 
 @interface AGSClusterGrid()

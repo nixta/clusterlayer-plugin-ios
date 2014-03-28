@@ -82,14 +82,13 @@
 }
 
 -(AGSSymbol *)symbolForFeature:(id<AGSFeature>)feature timeExtent:(AGSTimeExtent *)timeExtent {
-    AGSCluster *cluster = objc_getAssociatedObject(feature, kClusterPayloadKey);
-    if (cluster) {
+    if ([feature isKindOfClass:[AGSCluster class]]) {
         if ([feature.geometry isKindOfClass:[AGSPolygon class]]) {
             // This is a coverage
-            return self.coverageGenBlock(cluster);
+            return self.coverageGenBlock(feature);
         }
 
-        return self.clusterGenBlock(cluster);
+        return self.clusterGenBlock(feature);
     } else {
         return [self.originalRenderer symbolForFeature:feature timeExtent:timeExtent];
     }

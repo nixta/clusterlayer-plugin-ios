@@ -8,12 +8,33 @@
 
 #import "AGSCluster.h"
 #import "AGSCluster_int.h"
+#import <objc/runtime.h>
+
+#define kClusterFeaturesKey @"_agsClusterFeaturesKey"
+
+@interface AGSGraphic (AGSClustering_int)
+-(void)setFeatures:(NSArray *)features;
+@end
+
+@implementation AGSGraphic (AGSClustering_int)
+-(BOOL)isCluster {
+    return objc_getAssociatedObject(self, kClusterFeaturesKey) != nil;
+}
+
+-(void)setFeatures:(NSArray *)features {
+    objc_setAssociatedObject(self, kClusterFeaturesKey, features, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+@end
+
+
+
+
 
 @interface AGSCluster ()
 @property (nonatomic, strong) AGSPoint *gridCentroid;
 @property (nonatomic, strong) AGSPoint *calculatedCentroid;
 @property (nonatomic, strong) AGSGeometry *calculatedCoverage;
-@property (nonatomic, strong) NSMutableArray *_rawFeatures;
+@property (nonatomic, strong) NSMutableArray *_clustersAndFeatures;
 @end
 
 @implementation AGSCluster {
@@ -31,25 +52,25 @@
         self.gridCentroid = point;
         self.calculatedCentroid = point;
         self.calculatedCoverage = point;
-        self._rawFeatures = [NSMutableArray array];
+        self._clustersAndFeatures = [NSMutableArray array];
     }
     return self;
 }
 
 #pragma mark - Add and remove features
 -(void)addFeature:(id<AGSFeature>)feature {
-    [self._rawFeatures addObject:feature];
+    [self._clustersAndFeatures addObject:feature];
     [self recalculateCentroid];
 }
 
 -(void)addFeatures:(NSArray *)features {
-    [self._rawFeatures addObjectsFromArray:features];
+    [self._clustersAndFeatures addObjectsFromArray:features];
     [self recalculateCentroid];
 }
 
 -(BOOL)removeFeature:(id<AGSFeature>)feature {
-    if ([self._rawFeatures containsObject:feature]) {
-        [self._rawFeatures removeObject:feature];
+    if ([self._clustersAndFeatures containsObject:feature]) {
+        [self._clustersAndFeatures removeObject:feature];
         [self recalculateCentroid];
         return YES;
     }
@@ -57,7 +78,7 @@
 }
 
 -(void)clearFeatures {
-    [self._rawFeatures removeAllObjects];
+    [self._clustersAndFeatures removeAllObjects];
     [self recalculateCentroid];
 }
 
@@ -75,13 +96,13 @@
             case 0: {
                 // An empty cluster cell.
                 self.calculatedCoverage = self.gridCentroid;
-                self.calculatedCentroid = self.gridCentroid;
+                self.geometry = self.gridCentroid;
                 break;
             }
             case 1: {
                 // A point
                 self.calculatedCoverage = [mp pointAtIndex:0];
-                self.calculatedCentroid = [mp pointAtIndex:0];
+                self.geometry = [mp pointAtIndex:0];
                 break;
             }
             case 2: {
@@ -95,7 +116,7 @@
                 [p addPointToRing:pt2];
                 [p closePolygon];
                 self.calculatedCoverage = p;
-                self.calculatedCentroid = [AGSPoint pointWithX:(pt1.x+pt2.x)/2
+                self.geometry = [AGSPoint pointWithX:(pt1.x+pt2.x)/2
                                                              y:(pt1.y+pt2.y)/2
                                               spatialReference:cl.spatialReference];
                 break;
@@ -103,7 +124,7 @@
             default: {
                 // Otherwise, it's a polygon convex hull.
                 self.calculatedCoverage = (AGSPolygon *)[[AGSGeometryEngine defaultGeometryEngine] convexHullForGeometry:mp];
-                self.calculatedCentroid = [[AGSGeometryEngine defaultGeometryEngine] labelPointForPolygon:(AGSPolygon *)self.calculatedCoverage];
+                self.geometry = [[AGSGeometryEngine defaultGeometryEngine] labelPointForPolygon:(AGSPolygon *)self.calculatedCoverage];
                 break;
             }
         }
@@ -112,11 +133,7 @@
 
 #pragma mark - Properties
 -(NSArray *)features {
-    return [NSArray arrayWithArray:self._rawFeatures];
-}
-
--(AGSPoint *)location {
-    return self.calculatedCentroid;
+    return [NSArray arrayWithArray:self._clustersAndFeatures];
 }
 
 -(AGSGeometry *)coverage {
