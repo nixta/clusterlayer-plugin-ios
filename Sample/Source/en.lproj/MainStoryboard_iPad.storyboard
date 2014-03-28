@@ -30,9 +30,16 @@
                                         </connections>
                                     </switch>
                                     <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="X7M-zW-5tL">
-                                        <rect key="frame" x="77" y="9" width="672" height="21"/>
+                                        <rect key="frame" x="77" y="4" width="672" height="21"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Feedback" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="nx1-fc-F0w" userLabel="Feedback Label">
+                                        <rect key="frame" x="689" y="21" width="60" height="16"/>
+                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                                        <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                 </subviews>
@@ -42,6 +49,7 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="calibratedWhite"/>
                     </view>
                     <connections>
+                        <outlet property="clusteringFeedbackLabel" destination="nx1-fc-F0w" id="lEj-BF-LE9"/>
                         <outlet property="clusteringStatusLabel" destination="X7M-zW-5tL" id="ug4-EH-Qz7"/>
                         <outlet property="coverageSwitch" destination="0a5-v2-L7w" id="FaC-FB-6Tc"/>
                         <outlet property="mapView" destination="nmt-Jy-qhe" id="43k-To-u06"/>

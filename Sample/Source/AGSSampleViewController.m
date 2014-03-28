@@ -13,16 +13,20 @@
 
 #define kGreyBasemap @"http://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer"
 #define kGreyBasemapRef @"http://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer"
-#define kFeatureLayerURL @"http://services.arcgis.com/OfH668nDRN7tbJh0/arcgis/rest/services/Philadelphia_Healthy_Corner_Stores/FeatureServer/0"
+//#define kFeatureLayerURL @"http://services.arcgis.com/OfH668nDRN7tbJh0/arcgis/rest/services/Philadelphia_Healthy_Corner_Stores/FeatureServer/0"
+#define kFeatureLayerURL @"http://services.arcgis.com/rOo16HdIMeOBI4Mb/arcgis/rest/services/stops/FeatureServer/0"
 
 @interface AGSSampleViewController () <AGSMapViewLayerDelegate>
 @property (weak, nonatomic) IBOutlet AGSMapView *mapView;
 @property (nonatomic, strong) AGSClusterLayer *clusterLayer;
 @property (weak, nonatomic) IBOutlet UISwitch *coverageSwitch;
 @property (weak, nonatomic) IBOutlet UILabel *clusteringStatusLabel;
+@property (weak, nonatomic) IBOutlet UILabel *clusteringFeedbackLabel;
 @end
 
-@implementation AGSSampleViewController
+@implementation AGSSampleViewController {
+    BOOL _initialZoomDone;
+}
 
 - (void)viewDidLoad
 {
@@ -38,19 +42,26 @@
     [self.mapView addMapLayer:self.clusterLayer];
     self.clusterLayer.showClusterCoverages = self.coverageSwitch.on;
     self.clusterLayer.minScaleForClustering = 50000;
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didClusterFeatures:) name:AGSClusterLayerDidCompleteClusteringNotification object:self.clusterLayer];
     
     [self.clusterLayer addObserver:self forKeyPath:@"willClusterAtCurrentScale" options:NSKeyValueObservingOptionNew context:nil];
     [self.mapView addObserver:self forKeyPath:@"mapScale" options:NSKeyValueObservingOptionNew context:nil];
 
     [self.mapView addMapLayer:[AGSTiledMapServiceLayer tiledMapServiceLayerWithURL:[NSURL URLWithString:kGreyBasemapRef]]];
     
-    [self.mapView zoomToEnvelope:[AGSEnvelope envelopeWithXmin:-8374937.880610
-                                                         ymin:4844715.815690
-                                                         xmax:-8355224.673174
-                                                         ymax:4879706.758889
-                                             spatialReference:[AGSSpatialReference webMercatorSpatialReference]]
-                        animated:NO];
     self.mapView.layerDelegate = self;
+}
+
+-(void)didClusterFeatures:(NSNotification *)notification {
+    NSUInteger count = [notification.userInfo[AGSClusterLayerDidCompleteClusteringNotificationUserInfo_ClusterCount] unsignedIntegerValue];
+    if (count > 0) {
+        if (!_initialZoomDone) {
+            [self.mapView zoomToEnvelope:self.clusterLayer.clustersEnvelope animated:YES];
+            _initialZoomDone = YES;
+        }
+        double duration = [notification.userInfo[AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Duration] doubleValue];
+        self.clusteringFeedbackLabel.text = [NSString stringWithFormat:@"%f", duration];
+    }
 }
 
 -(void)mapViewDidLoad:(AGSMapView *)mapView {
