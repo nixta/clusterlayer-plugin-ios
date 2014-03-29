@@ -15,7 +15,9 @@
 @interface AGSClusterGrid : NSObject
 @property (nonatomic, strong, readonly) NSArray *clusters;
 @property (nonatomic, readonly, assign) NSUInteger cellSize;
+
 -(id)initWithCellSize:(NSUInteger)cellSize;
+
 -(void)addFeature:(id<AGSFeature>)feature;
 -(void)addFeatures:(NSArray *)features;
 -(void)updateFeature:(id<AGSFeature>)feature;
