@@ -133,7 +133,6 @@ NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Cluste
 
 #pragma mark - Asynchronous Setup
 -(void)featureLayerLoaded:(NSNotification *)notification {
-    NSLog(@"Stealing renderer...");
     AGSClusterSymbolGeneratorBlock clusterGenBlock = self.lazyLoadParameters[kClusterRenderBlockParameterKey];
     AGSClusterSymbolGeneratorBlock coverageGenBlock = self.lazyLoadParameters[kCoverageRenderBlockParameterKey];
     self.lazyLoadParameters = nil;
@@ -160,14 +159,11 @@ NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Cluste
     for (NSNumber *zoomLevel in self.sortedGridKeys) {
         NSMutableDictionary *d = self.grids[zoomLevel];
         double scale = [d[kLODLevelScale] doubleValue];
-        double resolution = [d[kLODLevelResolution] doubleValue];
         NSUInteger cellSize = floor(cellSizeInMapUnits * scale);
         d[kLODLevelCellSize] = @(cellSize);
         d[kLODLevelGrid] = [[AGSClusterGrid alloc] initWithCellSize:cellSize];
-        NSLog(@"Zoom Level %2d has cell size %7d [%.4f, %.4f]", [zoomLevel unsignedIntegerValue], cellSize, scale, resolution);
         self.maxZoomLevel = zoomLevel;
     }
-    NSLog(@"Max Zoom Level %@", self.maxZoomLevel);
 }
 
 -(NSUInteger)getZoomForScale:(double)scale {
@@ -175,15 +171,12 @@ NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Cluste
     for (NSNumber *zoomLevel in [self.sortedGridKeys reverseObjectEnumerator]) {
         NSDictionary *d = self.grids[zoomLevel];
         double scaleForZoom = [d[kLODLevelScale] doubleValue];
-        NSLog(@"Finding Zoom Level for scale %.4f: %@ [%4f]", scale, zoomLevel, scaleForZoom);
         if (scale <= scaleForZoom) {
             // This is our ZoomLevel
-            NSLog(@"ZOOM LEVEL %@", zoomLevel);
             return [zoomLevel unsignedIntegerValue];
         }
         lastZoomLevel = zoomLevel;
     }
-    NSLog(@"ZOOM LEVEL %@ (fall-through)", lastZoomLevel);
     return [lastZoomLevel unsignedIntegerValue];
 }
 

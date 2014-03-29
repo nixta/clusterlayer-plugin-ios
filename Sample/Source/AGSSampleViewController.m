@@ -12,12 +12,10 @@
 #import "AGSClusterLayer.h"
 
 #define kBasemap @"http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer"
-#define kGreyBasemap @"http://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer"
-#define kGreyBasemapRef @"http://services.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer"
 //#define kFeatureLayerURL @"http://services.arcgis.com/OfH668nDRN7tbJh0/arcgis/rest/services/Philadelphia_Healthy_Corner_Stores/FeatureServer/0"
 #define kFeatureLayerURL @"http://services.arcgis.com/rOo16HdIMeOBI4Mb/arcgis/rest/services/stops/FeatureServer/0"
 
-@interface AGSSampleViewController () <AGSMapViewLayerDelegate>
+@interface AGSSampleViewController ()
 @property (weak, nonatomic) IBOutlet AGSMapView *mapView;
 @property (nonatomic, strong) AGSClusterLayer *clusterLayer;
 @property (weak, nonatomic) IBOutlet UISwitch *coverageSwitch;
@@ -47,10 +45,6 @@
     
     [self.clusterLayer addObserver:self forKeyPath:@"willClusterAtCurrentScale" options:NSKeyValueObservingOptionNew context:nil];
     [self.mapView addObserver:self forKeyPath:@"mapScale" options:NSKeyValueObservingOptionNew context:nil];
-
-//    [self.mapView addMapLayer:[AGSTiledMapServiceLayer tiledMapServiceLayerWithURL:[NSURL URLWithString:kGreyBasemapRef]]];
-    
-    self.mapView.layerDelegate = self;
 }
 
 -(void)didClusterFeatures:(NSNotification *)notification {
@@ -63,10 +57,6 @@
         double duration = [notification.userInfo[AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Duration] doubleValue];
         self.clusteringFeedbackLabel.text = [NSString stringWithFormat:@"%f", duration];
     }
-}
-
--(void)mapViewDidLoad:(AGSMapView *)mapView {
-    NSLog(@"%@", self.mapView.visibleAreaEnvelope);
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
