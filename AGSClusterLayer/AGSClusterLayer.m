@@ -29,18 +29,25 @@
 #define kClusterNotificationUserInfoKey_FeatureCount @"clusterCount"
 #define kClusterNotificationUserInfoKey_CellSize @"clusterCount"
 
+#define kKVOMapLoaded @"loaded"
+
 NSString * const AGSClusterLayerDidCompleteClusteringNotification = @"AGSClusterLayerClusteringCompleteNotification";
 NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Duration = kClusterNotificationUserInfoKey_Duration;
 NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_ClusterCount = kClusterNotificationUserInfoKey_ClusterCount;
 NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_FeatureCount = kClusterNotificationUserInfoKey_FeatureCount;
 NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_ClusteringCellsize = kClusterNotificationUserInfoKey_CellSize;
 
+NSString * NSStringFromBool(BOOL boolValue) {
+    return boolValue?@"YES":@"NO";
+}
+
 #pragma mark - Internal properties
 @interface AGSClusterLayer () <AGSLayerCalloutDelegate>
 
-@property (nonatomic, strong) AGSClusterGrid *grid;
 @property (nonatomic, strong) NSMutableDictionary *grids;
 @property (nonatomic, strong) NSArray *sortedGridKeys;
+@property (nonatomic, strong) AGSClusterGrid *gridForCurrentScale;
+@property (nonatomic, readonly) AGSClusterGrid *maxZoomLevelGrid;
 
 @property (nonatomic, strong) NSArray *lodData;
 
@@ -49,6 +56,8 @@ NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Cluste
 @property (nonatomic, assign, readwrite) BOOL willClusterAtCurrentScale;
 
 @property (nonatomic, assign) BOOL mapViewLoaded;
+@property (nonatomic, assign) BOOL dataLoaded;
+@property (nonatomic, assign) BOOL initialized;
 
 @property (nonatomic, strong) NSNumber *maxZoomLevel;
 @end
@@ -77,6 +86,9 @@ NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Cluste
     self = [super init];
     if (self) {
         self.mapViewLoaded = NO;
+        self.dataLoaded = NO;
+        self.initialized = NO;
+        
         self.showClusterCoverages = NO;
         self.calloutDelegate = self;
         self.minClusterCount = kDefaultMinClusterCount;
@@ -87,36 +99,6 @@ NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Cluste
         [self parseLodData];
     }
     return self;
-}
-
--(void)setMapView:(AGSMapView *)mapView {
-    self.mapViewLoaded = self.mapView.loaded;
-    [super setMapView:mapView];
-}
-
--(void)setMapViewLoaded:(BOOL)mapViewLoaded {
-    _mapViewLoaded = mapViewLoaded;
-    if (_mapViewLoaded) {
-        [self.mapView removeObserver:self forKeyPath:@"loaded"];
-    } else {
-        [self.mapView addObserver:self forKeyPath:@"loaded" options:NSKeyValueObservingOptionNew context:nil];
-    }
-}
-
--(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
-    if (object == self.mapView && [keyPath isEqualToString:@"loaded"]) {
-        self.mapViewLoaded = self.mapView.loaded;
-    }
-}
-
--(void)parseLodData {
-    for (NSDictionary *lodInfo in self.lodData) {
-        [self.grids setObject:[NSMutableDictionary dictionaryWithDictionary:lodInfo]
-                       forKey:lodInfo[kLODLevelZoomLevel]];
-    }
-    self.sortedGridKeys = [self.grids.allKeys sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
-        return [((NSNumber *)obj1) compare:obj2];
-    }];
 }
 
 -(id)initWithFeatureLayer:(AGSFeatureLayer *)featureLayer {
@@ -150,22 +132,72 @@ NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Cluste
     [self calculateLods];
 }
 
--(void)calculateLods {
-    CGFloat cellSizeInInches = 0.25;
-    AGSUnits mapUnits = self.mapViewLoaded?AGSUnitsFromSpatialReference(self.mapView.spatialReference):AGSUnitsMeters;
-    AGSUnits screenUnits = AGSUnitsInches;
-    double cellSizeInMapUnits = AGSUnitsToUnits(cellSizeInInches, screenUnits, mapUnits);
+#pragma mark - Update Hooks
+-(void)featuresLoaded:(NSNotification *)notification {
+    NSLog(@"Features Loaded");
+    self.dataLoaded = YES;
+    [self rebuildClusterGrid];
+    [self refresh];
+}
 
-    for (NSNumber *zoomLevel in self.sortedGridKeys) {
-        NSMutableDictionary *d = self.grids[zoomLevel];
-        double scale = [d[kLODLevelScale] doubleValue];
-        NSUInteger cellSize = floor(cellSizeInMapUnits * scale);
-        d[kLODLevelCellSize] = @(cellSize);
-        d[kLODLevelGrid] = [[AGSClusterGrid alloc] initWithCellSize:cellSize];
-        self.maxZoomLevel = zoomLevel;
+-(void)mapDidUpdate:(AGSMapUpdateType)updateType
+{
+    if (updateType == AGSMapUpdateTypeSpatialExtent) {
+        NSLog(@"Map Extent Updated: %@", NSStringFromBool(self.mapView.loaded));
+        self.mapViewLoaded = self.mapView.loaded;
+        if (self.initialized) {
+            self.willClusterAtCurrentScale = self.mapView.mapScale > self.minScaleForClustering;
+            self.gridForCurrentScale = [self __gridForCurrentScale];
+        }
+        //        [self refreshClusters];
+    }
+    [super mapDidUpdate:updateType];
+}
+
+#pragma mark - Map/Data Load tracking
+-(void)setDataLoaded:(BOOL)dataLoaded {
+    _dataLoaded = dataLoaded;
+    [self initializeIfPossible];
+}
+
+-(void)setMapViewLoaded:(BOOL)mapViewLoaded {
+    _mapViewLoaded = mapViewLoaded;
+    [self initializeIfPossible];
+
+//    if (!_mapViewLoaded) {
+//        if (self.mapView) {
+//            NSLog(@"KVO Add to %@", self.mapView);
+//            [self.mapView addObserver:self forKeyPath:kKVOMapLoaded options:NSKeyValueObservingOptionNew context:nil];
+//        }
+//    } else {
+//        NSLog(@"KVO Remove from %@", self.mapView);
+//        [self.mapView removeObserver:self forKeyPath:kKVOMapLoaded];
+//    }
+}
+
+-(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
+    if (object == self.mapView && [keyPath isEqualToString:@"loaded"]) {
+        self.mapViewLoaded = self.mapView.loaded;
     }
 }
 
+-(void)initializeIfPossible {
+    if (!self.initialized) {
+        if (self.mapViewLoaded && self.dataLoaded) {
+            self.initialized = YES;
+        }
+    }
+}
+
+#pragma mark - Current Grid
+-(void)setGridForCurrentScale:(AGSClusterGrid *)gridForCurrentScale {
+    if (_gridForCurrentScale != gridForCurrentScale) {
+        _gridForCurrentScale = gridForCurrentScale;
+        [self refresh];
+    }
+}
+
+#pragma mark - Helpers
 -(NSUInteger)getZoomForScale:(double)scale {
     NSNumber *lastZoomLevel = nil;
     for (NSNumber *zoomLevel in [self.sortedGridKeys reverseObjectEnumerator]) {
@@ -184,34 +216,42 @@ NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Cluste
     return [self.grids[@([self getZoomForScale:scale])][kLODLevelCellSize] unsignedIntegerValue];
 }
 
--(BOOL)callout:(AGSCallout *)callout willShowForFeature:(id<AGSFeature>)feature layer:(AGSLayer<AGSHitTestable> *)layer mapPoint:(AGSPoint *)mapPoint {
-    AGSCluster *cluster = objc_getAssociatedObject(feature, kClusterPayloadKey);
-    if (cluster) {
-        callout.title = @"Cluster";
-        callout.detail = [NSString stringWithFormat:@"Cluster contains %d features", cluster.features.count];
-        callout.accessoryButtonHidden = YES;
-    } else {
-        callout.title = @"Ordinary feature";
-        callout.detail = @"Might have a bunch of attributes on it";
-        callout.accessoryButtonHidden = NO;
-    }
-    return YES;
+#pragma mark - Property Overrides
+-(void)setMapView:(AGSMapView *)mapView {
+    [super setMapView:mapView];
+    self.mapViewLoaded = self.mapView.loaded;
 }
 
-#pragma mark - Display Update Hooks
--(void)featuresLoaded:(NSNotification *)notification {
-    NSLog(@"Features Loaded");
+#pragma mark - Properties
+-(void)setShowClusterCoverages:(BOOL)showClusterCoverages {
+    _showClusterCoverages = showClusterCoverages;
     [self refresh];
 }
 
--(void)mapDidUpdate:(AGSMapUpdateType)updateType
-{
-    if (updateType == AGSMapUpdateTypeSpatialExtent) {
-        NSLog(@"Map Extent Updated");
-        self.willClusterAtCurrentScale = self.mapView.mapScale > self.minScaleForClustering;
-        [self refreshClusters];
+-(AGSEnvelope *)clustersEnvelope {
+    return [self clustersEnvelopeForZoomLevel:[self getZoomForScale:self.mapView.mapScale]];
+}
+
+-(AGSEnvelope *)clustersEnvelopeForZoomLevel:(NSUInteger)zoomLevel {
+    AGSMutableEnvelope *envelope = nil;
+    AGSClusterGrid *gridToZoomTo = self.grids[@(zoomLevel)][kLODLevelGrid];
+    for (AGSCluster *cluster in gridToZoomTo.clusters) {
+        AGSGeometry *coverage = cluster.coverageGraphic.geometry;
+        if (!envelope) {
+            envelope = [coverage.envelope mutableCopy];
+        } else {
+            [envelope unionWithEnvelope:coverage.envelope];
+        }
     }
-    [super mapDidUpdate:updateType];
+    return envelope;
+}
+
+-(AGSClusterGrid *)__gridForCurrentScale {
+    return self.grids[@([self getZoomForScale:self.mapView.mapScale])][kLODLevelGrid];
+}
+
+-(AGSClusterGrid *)maxZoomLevelGrid {
+    return self.grids[self.maxZoomLevel][kLODLevelGrid];
 }
 
 -(void)setWillClusterAtCurrentScale:(BOOL)willClusterAtCurrentScale {
@@ -237,65 +277,48 @@ NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Cluste
     }
 }
 
-#pragma mark - Properties
--(void)setShowClusterCoverages:(BOOL)showClusterCoverages {
-    _showClusterCoverages = showClusterCoverages;
-    [self refresh];
-}
-
--(AGSEnvelope *)clustersEnvelope {
-    AGSMutableEnvelope *envelope = nil;
-    for (AGSCluster *cluster in self.grid.clusters) {
-        AGSGeometry *coverage = cluster.coverage;
-        if (!envelope) {
-            envelope = [coverage.envelope mutableCopy];
-        } else {
-            [envelope unionWithEnvelope:coverage.envelope];
-        }
-    }
-    return envelope;
-}
-
 #pragma mark - Layer Refresh
 -(void)refresh {
+    [self initializeIfPossible];
+    if (!self.initialized) return;
+    
     [self refreshClusters];
+    
     [super refresh];
 }
 
 -(void)refreshClusters {
-    [self clearClusters];
-    [self rebuildClusterGrid];
+//    [self clearClusters];
+//    [self rebuildClusterGrid];
+    [self removeAllGraphics];
     [self renderClusters];
 }
 
 -(void)clearClusters {
     [self removeAllGraphics];
-    if (self.grid) {
-        [self.grid removeAllFeatures];
-    }
+    [self.maxZoomLevelGrid removeAllItems];
 }
 
 #pragma mark - Cluster Generation and Display
 -(void)rebuildClusterGrid {
-    NSUInteger zoomLevel = [self getZoomForScale:self.mapView.mapScale];
-    self.grid = self.grids[@(zoomLevel)][kLODLevelGrid];
+    AGSClusterGrid *grid = self.maxZoomLevelGrid;
     
     NSDate *startTime = [NSDate date];
 
-    [self.grid removeAllFeatures];
-    [self.grid addFeatures:self.featureLayer.graphics];
+    [grid removeAllItems];
+    [grid replaceItems:self.featureLayer.graphics];
     
     NSTimeInterval clusteringDuration = -[startTime timeIntervalSinceNow];
     
-    NSLog(@"Rebuilt %d features into %d clusters with cell size %d in %.4fs", self.featureLayer.graphicsCount, self.grid.clusters.count, self.grid.cellSize, clusteringDuration);
+    NSLog(@"Rebuilt %d features into %d clusters with cell size %d in %.4fs", self.featureLayer.graphicsCount, grid.clusters.count, grid.cellSize, clusteringDuration);
     
     [[NSNotificationCenter defaultCenter] postNotificationName:AGSClusterLayerDidCompleteClusteringNotification
                                                         object:self
                                                       userInfo:@{
                                                                  kClusterNotificationUserInfoKey_Duration: @(clusteringDuration),
-                                                                 kClusterNotificationUserInfoKey_ClusterCount: @(self.grid.clusters.count),
+                                                                 kClusterNotificationUserInfoKey_ClusterCount: @(grid.clusters.count),
                                                                  kClusterNotificationUserInfoKey_FeatureCount: @(self.featureLayer.graphicsCount),
-                                                                 kClusterNotificationUserInfoKey_CellSize: @(self.grid.cellSize)
+                                                                 kClusterNotificationUserInfoKey_CellSize: @(grid.cellSize)
                                                                  }];
 }
 
@@ -304,14 +327,12 @@ NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Cluste
     NSMutableArray *clusterGraphics = [NSMutableArray array];
     NSMutableArray *featureGraphics = [NSMutableArray array];
     
-    for (AGSCluster *cluster in self.grid.clusters) {
+    for (AGSCluster *cluster in self.gridForCurrentScale.clusters) {
         if (self.mapView.mapScale > self.minScaleForClustering &&
-            cluster.features.count >= self.minClusterCount) {
+            cluster.items.count >= self.minClusterCount) {
             // Draw as cluster.
-            if (self.showClusterCoverages && cluster.features.count > 2) {
-                AGSGraphic *coverageGraphic = [AGSGraphic graphicWithGeometry:cluster.coverage
-                                                                       symbol:nil
-                                                                   attributes:nil];
+            if (self.showClusterCoverages && cluster.items.count > 2) {
+                AGSGraphic *coverageGraphic = cluster.coverageGraphic;
                 objc_setAssociatedObject(coverageGraphic, kClusterPayloadKey, cluster, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
                 coverageGraphic.symbol = [self.renderer symbolForFeature:coverageGraphic timeExtent:nil];
                 [coverageGraphics addObject:coverageGraphic];
@@ -331,6 +352,57 @@ NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Cluste
     [self addGraphics:coverageGraphics];
     [self addGraphics:clusterGraphics];
     [self addGraphics:featureGraphics];
+}
+
+#pragma mark - UI/Callouts
+-(BOOL)callout:(AGSCallout *)callout willShowForFeature:(id<AGSFeature>)feature layer:(AGSLayer<AGSHitTestable> *)layer mapPoint:(AGSPoint *)mapPoint {
+    AGSCluster *cluster = objc_getAssociatedObject(feature, kClusterPayloadKey);
+    if (cluster) {
+        callout.title = @"Cluster";
+        callout.detail = [NSString stringWithFormat:@"Cluster contains %d features", cluster.features.count];
+        callout.accessoryButtonHidden = YES;
+    } else {
+        callout.title = @"Ordinary feature";
+        callout.detail = @"Might have a bunch of attributes on it";
+        callout.accessoryButtonHidden = NO;
+    }
+    return YES;
+}
+
+#pragma mark - Build All Grids
+-(void)calculateLods {
+    CGFloat cellSizeInInches = 0.25;
+    AGSUnits mapUnits = self.mapViewLoaded?AGSUnitsFromSpatialReference(self.mapView.spatialReference):AGSUnitsMeters;
+    AGSUnits screenUnits = AGSUnitsInches;
+    double cellSizeInMapUnits = AGSUnitsToUnits(cellSizeInInches, screenUnits, mapUnits);
+    
+    AGSClusterGrid *prevClusterGrid = nil;
+    for (NSNumber *zoomLevel in self.sortedGridKeys) {
+        NSMutableDictionary *d = self.grids[zoomLevel];
+        double scale = [d[kLODLevelScale] doubleValue];
+        NSUInteger cellSize = floor(cellSizeInMapUnits * scale);
+        d[kLODLevelCellSize] = @(cellSize);
+        
+        AGSClusterGrid *gridForZoomLevel = [[AGSClusterGrid alloc] initWithCellSize:cellSize];
+        gridForZoomLevel.zoomLevel = zoomLevel;
+        prevClusterGrid.gridForNextZoomLevel = gridForZoomLevel;
+        gridForZoomLevel.gridForPrevZoomLevel = prevClusterGrid;
+        d[kLODLevelGrid] = gridForZoomLevel;
+        prevClusterGrid = gridForZoomLevel;
+        
+        self.maxZoomLevel = zoomLevel;
+    }
+}
+
+#pragma mark - Demo LODs
+-(void)parseLodData {
+    for (NSDictionary *lodInfo in self.lodData) {
+        [self.grids setObject:[NSMutableDictionary dictionaryWithDictionary:lodInfo]
+                       forKey:lodInfo[kLODLevelZoomLevel]];
+    }
+    self.sortedGridKeys = [self.grids.allKeys sortedArrayUsingComparator:^NSComparisonResult(id obj1, id obj2) {
+        return [((NSNumber *)obj1) compare:obj2];
+    }];
 }
 
 -(NSArray *)defaultLodData {

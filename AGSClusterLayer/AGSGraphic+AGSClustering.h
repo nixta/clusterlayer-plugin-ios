@@ -8,6 +8,7 @@
 
 #import <ArcGIS/ArcGIS.h>
 
-@interface AGSGraphic (AGSClustering_int)
-//-(void)setFeatures:(NSArray *)features;
+@interface AGSGraphic (AGSClustering)
+@property (nonatomic, readonly) BOOL isCluster;
+@property (nonatomic, readonly) BOOL isClusterCoverage;
 @end

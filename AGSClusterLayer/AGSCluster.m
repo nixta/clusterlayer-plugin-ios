@@ -12,15 +12,25 @@
 
 #import <objc/runtime.h>
 
-@interface AGSCluster ()
-@property (nonatomic, strong) AGSPoint *gridCentroid;
-@property (nonatomic, strong) AGSGeometry *calculatedCoverage;
-@property (nonatomic, strong) NSMutableArray *_clustersAndFeatures;
+#pragma mark - Cluster Coverage
+@interface AGSClusterCoverage : AGSGraphic
 @end
 
-@implementation AGSCluster {
-    CGPoint _cellCoordinate;
+@implementation AGSClusterCoverage
+-(BOOL)isClusterCoverage {
+    return YES;
 }
+@end
+
+@interface AGSCluster ()
+@property (nonatomic, strong) AGSPoint *gridCentroid;
+@property (nonatomic, strong) AGSGraphic *calculatedCoverageGraphic;
+@property (nonatomic, strong) NSMutableArray *_clustersAndFeatures;
+@property (nonatomic, assign) CGPoint cellCoordinate;
+@property (nonatomic, assign, readwrite) NSUInteger displayCount;
+@end
+
+@implementation AGSCluster
 
 #pragma mark - Constructors and Initializers
 +(AGSCluster *)clusterForPoint:(AGSPoint *)point {
@@ -31,33 +41,33 @@
     self = [self init];
     if (self) {
         self.gridCentroid = point;
-        self.calculatedCoverage = point;
+        self.calculatedCoverageGraphic = [AGSGraphic graphicWithGeometry:point symbol:nil attributes:nil];
         self._clustersAndFeatures = [NSMutableArray array];
     }
     return self;
 }
 
 #pragma mark - Add and remove features
--(void)addFeature:(id<AGSFeature>)feature {
-    [self._clustersAndFeatures addObject:feature];
+-(void)addItem:(AGSGraphic *)item {
+    [self._clustersAndFeatures addObject:item];
     [self recalculateCentroidAndCoverage];
 }
 
--(void)addFeatures:(NSArray *)features {
-    [self._clustersAndFeatures addObjectsFromArray:features];
+-(void)addItems:(NSArray *)items {
+    [self._clustersAndFeatures addObjectsFromArray:items];
     [self recalculateCentroidAndCoverage];
 }
 
--(BOOL)removeFeature:(id<AGSFeature>)feature {
-    if ([self._clustersAndFeatures containsObject:feature]) {
-        [self._clustersAndFeatures removeObject:feature];
+-(BOOL)removeItem:(AGSGraphic *)item {
+    if ([self._clustersAndFeatures containsObject:item]) {
+        [self._clustersAndFeatures removeObject:item];
         [self recalculateCentroidAndCoverage];
         return YES;
     }
     return NO;
 }
 
--(void)clearFeatures {
+-(void)clearItems {
     [self._clustersAndFeatures removeAllObjects];
     [self recalculateCentroidAndCoverage];
 }
@@ -65,6 +75,14 @@
 #pragma mark - Centroid logic
 -(void) recalculateCentroidAndCoverage {
     if (self._clustersAndFeatures.count > 0) {
+        for (AGSCluster *cluster in self.items) {
+            if ([cluster isKindOfClass:[AGSCluster class]]) {
+                self.displayCount += cluster.displayCount;
+            } else {
+                self.displayCount++;
+            }
+        }
+        
         // Get an array of geometries from all the clusters and features
         NSArray *allGeomsForCoverage = [self._clustersAndFeatures map:^id(id obj) {
             if ([obj isKindOfClass:[AGSCluster class]]) {
@@ -80,27 +98,22 @@
         
         // Determine the centroid
         if ([coverage isKindOfClass:[AGSPolygon class]]) {
-            self.calculatedCoverage = coverage;
-            self.geometry = [[AGSGeometryEngine defaultGeometryEngine] labelPointForPolygon:(AGSPolygon *)self.calculatedCoverage];
+            self.calculatedCoverageGraphic.geometry = coverage;
+            self.geometry = [[AGSGeometryEngine defaultGeometryEngine] labelPointForPolygon:(AGSPolygon *)self.calculatedCoverageGraphic.geometry];
         } else if ([coverage isKindOfClass:[AGSPolyline class]]) {
             AGSPolyline *cl = (AGSPolyline *)coverage;
+            self.calculatedCoverageGraphic.geometry = coverage;
             AGSPoint *pt1 = [cl pointOnPath:0 atIndex:0];
             AGSPoint *pt2 = [cl pointOnPath:0 atIndex:1];
-            AGSMutablePolygon *p = [[AGSMutablePolygon alloc] initWithSpatialReference:cl.spatialReference];
-            [p addRingToPolygon];
-            [p addPointToRing:pt1];
-            [p addPointToRing:pt2];
-            [p closePolygon];
-            self.calculatedCoverage = p;
             self.geometry = [AGSPoint pointWithX:(pt1.x+pt2.x)/2
                                                y:(pt1.y+pt2.y)/2
                                 spatialReference:cl.spatialReference];
         } else if ([coverage isKindOfClass:[AGSPoint class]]) {
-            self.calculatedCoverage = coverage;
+            self.calculatedCoverageGraphic.geometry = coverage;
             self.geometry = coverage;
         }
     } else {
-        self.calculatedCoverage = self.gridCentroid;
+        self.calculatedCoverageGraphic.geometry = self.gridCentroid;
         self.geometry = self.gridCentroid;
     }
 }
@@ -118,15 +131,23 @@
     }]];
 }
 
+-(NSArray *)items {
+    return [NSArray arrayWithArray:self._clustersAndFeatures];
+}
+
+-(NSArray *)deepFeatures {
+    NSMutableArray *clusterFeatures = [self.features mutableCopy];
+    for (AGSCluster *childCluster in self.clusters) {
+        [clusterFeatures addObjectsFromArray:[childCluster deepFeatures]];
+    }
+    return clusterFeatures;
+}
+
+-(AGSGraphic *)coverageGraphic {
+    return [[AGSClusterCoverage alloc] initWithGeometry:self.coverage symbol:nil attributes:nil];
+}
+
 -(AGSGeometry *)coverage {
-    return self.calculatedCoverage;
-}
-
--(CGPoint)cellCoordinate {
-    return _cellCoordinate;
-}
-
--(void)setCellCoordinate:(CGPoint)cellCoordinate {
-    _cellCoordinate = cellCoordinate;
+    return self.calculatedCoverageGraphic.geometry;
 }
 @end

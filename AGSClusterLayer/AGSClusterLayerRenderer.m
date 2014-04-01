@@ -44,6 +44,7 @@
     if (self) {
         self.clusterGenBlock = ^(AGSCluster *cluster) {
             AGSCompositeSymbol *s = [AGSCompositeSymbol compositeSymbol];
+//            NSArray *clusterItems = cluster.items;
             
             NSUInteger innerSize = 24;
             NSUInteger borderSize = 6;
@@ -51,7 +52,7 @@
             UIColor *smallClusterColor = [UIColor colorWithRed:0.000 green:0.491 blue:0.000 alpha:1.000];
             UIColor *mediumClusterColor = [UIColor colorWithRed:0.838 green:0.500 blue:0.000 alpha:1.000];
             UIColor *largeClusterColor = [UIColor colorWithRed:0.615 green:0.178 blue:0.550 alpha:1.000];
-            UIColor *c = cluster.features.count < 10?smallClusterColor:(cluster.features.count < 100?mediumClusterColor:largeClusterColor);
+            UIColor *c = cluster.displayCount < 10?smallClusterColor:(cluster.displayCount < 100?mediumClusterColor:largeClusterColor);
             AGSSimpleMarkerSymbol *backgroundSymbol1 = [AGSSimpleMarkerSymbol simpleMarkerSymbolWithColor:[c colorWithAlphaComponent:0.7]];
             backgroundSymbol1.outline = nil;
             backgroundSymbol1.size = CGSizeMake(innerSize + borderSize, innerSize + borderSize);
@@ -62,8 +63,8 @@
             backgroundSymbol3.outline = nil;
             backgroundSymbol3.size = CGSizeMake(innerSize, innerSize);
             
-            if (cluster.features.count > 99) fontSize = fontSize * 0.8;
-            AGSTextSymbol *countSymbol = [AGSTextSymbol textSymbolWithText:[NSString stringWithFormat:@"%d", cluster.features.count]
+            if (cluster.displayCount > 99) fontSize = fontSize * 0.8;
+            AGSTextSymbol *countSymbol = [AGSTextSymbol textSymbolWithText:[NSString stringWithFormat:@"%d", cluster.displayCount]
                                                                      color:[UIColor whiteColor]];
             countSymbol.fontSize = fontSize;
             [s addSymbol:backgroundSymbol1];

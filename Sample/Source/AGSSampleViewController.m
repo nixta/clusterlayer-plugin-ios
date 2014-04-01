@@ -51,7 +51,7 @@
     NSUInteger count = [notification.userInfo[AGSClusterLayerDidCompleteClusteringNotificationUserInfo_ClusterCount] unsignedIntegerValue];
     if (count > 0) {
         if (!_initialZoomDone) {
-            [self.mapView zoomToEnvelope:self.clusterLayer.clustersEnvelope animated:YES];
+            [self.mapView zoomToEnvelope:[self.clusterLayer clustersEnvelopeForZoomLevel:7] animated:YES];
             _initialZoomDone = YES;
         }
         double duration = [notification.userInfo[AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Duration] doubleValue];

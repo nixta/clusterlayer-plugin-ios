@@ -8,11 +8,14 @@
 
 #import "AGSGraphic+AGSClustering.h"
 #import <objc/runtime.h>
+#import "AGSCluster.h"
 
-#define kClusterFeaturesKey @"_agsClusterFeaturesKey"
+@implementation AGSGraphic (AGSClustering)
+-(BOOL)isCluster {
+    return [self isKindOfClass:[AGSCluster class]];
+}
 
-@implementation AGSGraphic (AGSClustering_int)
-//-(void)setFeatures:(NSArray *)features {
-//    objc_setAssociatedObject(self, kClusterFeaturesKey, features, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-//}
+-(BOOL)isClusterCoverage {
+    return NO;
+}
 @end

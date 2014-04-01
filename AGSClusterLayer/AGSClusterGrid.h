@@ -16,11 +16,15 @@
 @property (nonatomic, strong, readonly) NSArray *clusters;
 @property (nonatomic, readonly, assign) NSUInteger cellSize;
 
+@property (nonatomic, strong) NSNumber *zoomLevel;
+@property (nonatomic, strong) AGSClusterGrid *gridForNextZoomLevel;
+@property (nonatomic, strong) AGSClusterGrid *gridForPrevZoomLevel;
+
 -(id)initWithCellSize:(NSUInteger)cellSize;
 
--(void)addFeature:(id<AGSFeature>)feature;
--(void)addFeatures:(NSArray *)features;
--(void)updateFeature:(id<AGSFeature>)feature;
--(BOOL)removeFeature:(id<AGSFeature>)feature;
--(void)removeAllFeatures;
+//-(void)addItem:(AGSGraphic *)item;
+-(void)addItems:(NSArray *)items;
+//-(BOOL)removeItem:(AGSGraphic *)item;
+-(void)removeAllItems;
+-(void)replaceItems:(NSArray *)items;
 @end

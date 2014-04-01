@@ -13,11 +13,9 @@
 
 #define kAddFeaturesArrayKey @"__tempArrayKey"
 
-@interface AGSClusterGrid()
-@property (nonatomic, assign, readwrite) NSUInteger cellSize;
-@property (nonatomic, strong) NSMutableDictionary* grid;
-@end
+typedef AGSGraphic AGSClusterItem;
 
+#pragma mark - Helper Methods
 CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
     return CGPointMake(floor(pt.x/cellSize), floor(pt.y/cellSize));
 }
@@ -28,113 +26,199 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
                spatialReference:[AGSSpatialReference webMercatorSpatialReference]];
 }
 
+
+#pragma mark - Internal Helper Classes
+@interface AGSClusterGridRow : NSObject
+@property (nonatomic, strong) NSMutableDictionary *rowClusters;
+@property (nonatomic, weak) AGSClusterGrid *grid;
+-(AGSCluster *)clusterForGridCoord:(CGPoint)gridCoord;
+@end
+
+@implementation AGSClusterGridRow
+-(id)initForClusterGrid:(AGSClusterGrid *)parentGrid {
+    self = [super init];
+    if (self) {
+        self.rowClusters = [NSMutableDictionary dictionary];
+        self.grid = parentGrid;
+    }
+    return self;
+}
+
+-(AGSCluster *)clusterForGridCoord:(CGPoint)gridCoord {
+    AGSCluster *result = self.rowClusters[@(gridCoord.x)];
+    if (!result) {
+        // Create a new cluster if necessary
+        result = [AGSCluster clusterForPoint:getGridCellCentroid(gridCoord, self.grid.cellSize)];
+        result.cellCoordinate = gridCoord;
+        [self.rowClusters setObject:result forKey:@(gridCoord.x)];
+    }
+    return result;
+}
+@end
+
+
+#pragma mark - Cluster Grid
+@interface AGSClusterGrid()
+@property (nonatomic, assign, readwrite) NSUInteger cellSize;
+@property (nonatomic, strong) NSMutableDictionary* grid;
+@property (nonatomic, strong, readwrite) NSMutableSet *items;
+//-(void)rebuildClusters;
+@end
+
 @implementation AGSClusterGrid
 -(id)initWithCellSize:(NSUInteger)cellSize {
     self = [self init];
     if (self) {
         self.cellSize = cellSize;
         self.grid = [NSMutableDictionary dictionary];
+        self.items = [NSMutableSet set];
     }
     return self;
 }
 
--(AGSCluster *)getClusterForFeature:(id<AGSFeature>)feature {
-    AGSPoint *pt = (AGSPoint *)feature.geometry;
-    NSAssert(pt != nil, @"Feature Geometry is NIL!");
-    CGPoint cellCoord = getGridCoordForMapPoint(pt, self.cellSize);
-    
-    NSMutableDictionary *row = self.grid[@(cellCoord.y)];
-    if (!row) {
-        row = [NSMutableDictionary dictionary];
-        [self.grid setObject:row forKey:@(cellCoord.y)];
-    }
-    AGSCluster *cluster = row[@(cellCoord.x)];
-    if (!cluster) {
-        cluster = [AGSCluster clusterForPoint:getGridCellCentroid(cellCoord, self.cellSize)];
-        cluster.cellCoordinate = cellCoord;
-        [row setObject:cluster forKey:@(cellCoord.x)];
-    }
-    return cluster;
-}
+//-(void)addItem:(AGSClusterItem *)item {
+//    // Get the cluster we need to add the graphic to
+//    AGSCluster *cluster = [self getClusterForItem:item];
+//    // Add the graphic (it could be a cluster or a feature)
+//    [cluster addFeature:item];
+//
+//    [[self gridForPrevZoomLevel] addItem:cluster];
+//}
 
--(void)addFeature:(id<AGSFeature>)feature {
-    AGSCluster *cluster = [self getClusterForFeature:feature];
-    [cluster addFeature:feature];
-}
-
--(void)addFeatures:(NSArray *)features {
-    NSMutableSet *clustersForFeatures = [NSMutableSet set];
-    for (id<AGSFeature> feature in features) {
-        AGSCluster *cluster = [self getClusterForFeature:feature];
-        NSMutableArray *featuresToAddToCluster = objc_getAssociatedObject(cluster, kAddFeaturesArrayKey);
-        if (!featuresToAddToCluster) {
-            featuresToAddToCluster = [NSMutableArray array];
-            objc_setAssociatedObject(cluster, kAddFeaturesArrayKey, featuresToAddToCluster, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+-(void)replaceItems:(NSArray *)items {
+    for (id<AGSFeature>f in items) {
+        if (![f isKindOfClass:[AGSCluster class]]) {
+            NSLog(@"Feature %d", f.featureId);
         }
-        [featuresToAddToCluster addObject:feature];
-        [clustersForFeatures addObject:cluster];
+    }
+    [self removeAllItems];
+    self.items = [NSMutableSet setWithArray:items];
+    [self clusterItems];
+    [self.gridForPrevZoomLevel replaceItems:self.clusters];
+}
+
+-(void)addItems:(NSArray *)items {
+    [self.items addObjectsFromArray:items];
+    [self clusterItems];
+    [self.gridForPrevZoomLevel replaceItems:self.clusters];
+}
+
+-(void)clusterItems {
+    NSSet *items = self.items;
+    NSLog(@"Adding %d features/clusters to zoom level %@", items.count, self.zoomLevel);
+
+    // Add each item to the clusters (creating new ones if necessary).
+    NSMutableSet *clustersForItems = [NSMutableSet set];
+    for (AGSClusterItem *item in items) {
+        // Find out what cluster this item should belong to.
+        AGSCluster *cluster = [self getClusterForItem:item];
+        
+        // And track this item in an array associated with this cluster.
+        NSMutableArray *itemsToAddToCluster = objc_getAssociatedObject(cluster, kAddFeaturesArrayKey);
+        if (!itemsToAddToCluster) {
+            itemsToAddToCluster = [NSMutableArray array];
+            objc_setAssociatedObject(cluster, kAddFeaturesArrayKey, itemsToAddToCluster, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+        }
+        [itemsToAddToCluster addObject:item];
+        
+        // Also track the clusters we've touched with these items.
+        [clustersForItems addObject:cluster];
     }
     
-    for (AGSCluster *cluster in clustersForFeatures) {
-        NSArray *featuresToAdd = objc_getAssociatedObject(cluster, kAddFeaturesArrayKey);
-        [cluster addFeatures:featuresToAdd];
+    // Now go over the clusters we've touched
+    // And bulk add items to each individual cluster.
+    for (AGSCluster *cluster in clustersForItems) {
+        NSArray *itemsToAdd = objc_getAssociatedObject(cluster, kAddFeaturesArrayKey);
+        [cluster addItems:itemsToAdd];
+        // Remove the temporary reference to the array that tracked the items to add to this cluster
         objc_setAssociatedObject(cluster, kAddFeaturesArrayKey, nil, OBJC_ASSOCIATION_ASSIGN);
     }
 }
 
--(void)updateFeature:(id<AGSFeature>)feature {
-    [self removeFeature:feature];
-    [self addFeature:feature];
-}
+//-(void)rebuildClusters {
+//    // Rebuild our clusters based off the next zoom level's clusters.
+//    if (self.gridForNextZoomLevel) {
+//        [self removeAllItems];
+//        [self addItems:self.gridForNextZoomLevel.clusters];
+//    }
+//}
 
--(BOOL)removeFeature:(id<AGSFeature>)feature {
-    AGSCluster *cluster = [self getClusterForFeature:feature];
-    @try {
-        return [cluster removeFeature:feature];
-    }
-    @finally {
-        if (cluster.features.count == 0) {
-            CGPoint cellCoord = cluster.cellCoordinate;
-            NSMutableDictionary *row = self.grid[@(cellCoord.y)];
-            [row removeObjectForKey:@(cellCoord.x)];
-        }
-    }
-}
+//-(BOOL)removeItem:(AGSClusterItem *)item {
+//    [self.gridForPrevZoomLevel removeItem:item];
+//    
+//    AGSCluster *cluster = [self getClusterForItem:item];
+//    BOOL result = [cluster removeFeature:item];
+//    if (cluster.features.count == 0) {
+//        CGPoint cellCoord = cluster.cellCoordinate;
+//        NSMutableDictionary *row = self.grid[@(cellCoord.y)];
+//        [row removeObjectForKey:@(cellCoord.x)];
+//    }
+//    return result;
+//}
 
--(void)removeAllFeatures {
-    for (NSMutableDictionary *row in self.grid.allValues) {
-        for (AGSCluster *cluster in row.allValues) {
-            [cluster clearFeatures];
+-(void)removeAllItems {
+    for (AGSClusterGridRow *row in self.grid.allValues) {
+        for (AGSCluster *cluster in row.rowClusters.allValues) {
+            [cluster clearItems];
         }
-        [row removeAllObjects];
+        [row.rowClusters removeAllObjects];
     }
     [self.grid removeAllObjects];
+//    NSLog(@"Removed items for zoom level %@", self.zoomLevel);
+}
+
+-(AGSCluster *)getClusterForItem:(AGSGraphic *)graphic {
+    AGSPoint *pt = (AGSPoint *)graphic.geometry;
+    NSAssert(pt != nil, @"Graphic Geometry is NIL!");
+    
+    // What cell (cluster) should this graphic go into?
+    CGPoint gridCoord = getGridCoordForMapPoint(pt, self.cellSize);
+    
+    // Return the cluster
+    return [self clusterForGridCoord:gridCoord];
+}
+
+-(AGSCluster *)clusterForGridCoord:(CGPoint)gridCoord {
+    // Find the cells along that row.
+    AGSClusterGridRow *row = [self rowForGridCoord:gridCoord];
+    
+    // Find the cluster within that row
+    return [row clusterForGridCoord:gridCoord];
+}
+
+-(AGSClusterGridRow *)rowForGridCoord:(CGPoint)gridCoord {
+    AGSClusterGridRow *row = self.grid[@(gridCoord.y)];
+    if (!row) {
+        row = [[AGSClusterGridRow alloc] initForClusterGrid:self];
+        [self.grid setObject:row forKey:@(gridCoord.y)];
+    }
+    return row;
 }
 
 -(NSArray *)clusters {
     NSMutableArray *clusters = [NSMutableArray array];
-    for (NSDictionary *row in self.grid.allValues) {
-        for (AGSCluster *cluster in row.allValues) {
+    for (AGSClusterGridRow *row in self.grid.allValues) {
+        for (AGSCluster *cluster in row.rowClusters.allValues) {
             [clusters addObject:cluster];
         }
     }
     return [NSArray arrayWithArray:clusters];
 }
 
--(id<AGSFeature>)getFeatureNear:(AGSPoint *)mapPoint {
-    double closestDistance = (double)self.cellSize;
-    id closestFeature = nil;
-    for (AGSCluster *cluster in self.clusters) {
-        for (id<AGSFeature> feature in cluster.features) {
-            double distance = [[AGSGeometryEngine defaultGeometryEngine] distanceFromGeometry:feature.geometry toGeometry:mapPoint];
-            if (distance < closestDistance) {
-                closestFeature = feature;
-                closestDistance = distance;
-            }
-        }
-    }
-    return closestFeature;
-}
+//-(AGSGraphic *)getItemNear:(AGSPoint *)mapPoint {
+//    double closestDistance = (double)self.cellSize;
+//    id closestItem = nil;
+//    for (AGSCluster *cluster in self.clusters) {
+//        for (AGSGraphic *item in cluster.features) {
+//            double distance = [[AGSGeometryEngine defaultGeometryEngine] distanceFromGeometry:item.geometry toGeometry:mapPoint];
+//            if (distance < closestDistance) {
+//                closestItem = item;
+//                closestDistance = distance;
+//            }
+//        }
+//    }
+//    return closestItem;
+//}
 
 -(NSString *)description {
     NSUInteger clusterCount = 0;

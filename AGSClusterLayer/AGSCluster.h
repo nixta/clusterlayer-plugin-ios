@@ -9,19 +9,19 @@
 #import <Foundation/Foundation.h>
 #import <ArcGIS/ArcGIS.h>
 
-@interface AGSGraphic (AGSClustering)
-@property (nonatomic, readonly) BOOL isCluster;
-@end
+@interface AGSCluster : AGSGraphic// <AGSFeature>
 
-@interface AGSCluster : AGSGraphic <AGSFeature>
-@property (nonatomic, readonly) AGSGeometry *coverage;
+@property (nonatomic, readonly) AGSGraphic *coverageGraphic;
+@property (nonatomic, readonly) NSArray *items;
 @property (nonatomic, readonly) NSArray *features;
 @property (nonatomic, readonly) NSArray *clusters;
+@property (nonatomic, readonly) NSUInteger displayCount;
 
 +(AGSCluster *)clusterForPoint:(AGSPoint *)point;
 
--(void)addFeature:(id<AGSFeature>)feature;
--(void)addFeatures:(NSArray *)features;
--(BOOL)removeFeature:(id<AGSFeature>)feature;
--(void)clearFeatures;
+-(void)addItem:(AGSGraphic *)item;
+-(void)addItems:(NSArray *)items;
+-(BOOL)removeItem:(AGSGraphic *)item;
+-(void)clearItems;
+
 @end

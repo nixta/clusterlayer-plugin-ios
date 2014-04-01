@@ -25,6 +25,8 @@ extern NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo
 
 @property (nonatomic, readonly) AGSEnvelope *clustersEnvelope;
 
+-(AGSEnvelope *)clustersEnvelopeForZoomLevel:(NSUInteger)zoomLevel;
+
 +(AGSClusterLayer *)clusterLayerForFeatureLayer:(AGSFeatureLayer *)featureLayer;
 +(AGSClusterLayer *)clusterLayerForFeatureLayer:(AGSFeatureLayer *)featureLayer
                         usingClusterSymbolBlock:(AGSClusterSymbolGeneratorBlock)clusterBlock
