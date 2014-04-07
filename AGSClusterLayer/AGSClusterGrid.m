@@ -26,20 +26,29 @@ CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
     static NSString *oidFieldName = @"FID";
 
     NSUInteger result = self.featureId;
-    if (result == 0 && self.layer == nil) {
-        // No featureId (we're doubtless not on a featureLayer). Try to recover
-        @try {
+    if (result == 0) {
+        if (self.layer == nil ||
+            ![self.layer respondsToSelector:@selector(objectIdField)]) {
+            // No featureId (we're doubtless not on a featureLayer). Try to recover
+            @try {
+                NSNumber *oid = [self attributeForKey:oidFieldName];
+                if (oid) {
+                    result = oid.unsignedIntegerValue;
+                }
+            }
+            @catch (NSException *exception) {
+                NSLog(@"Could not read FeatureID: %@", exception);
+            }
+        } else {
+            // No id, but we can get a OID field
+            oidFieldName = [((id)self.layer) objectIdField];
             NSNumber *oid = [self attributeForKey:oidFieldName];
             if (oid) {
-                result = [oid unsignedIntegerValue];
+                result = oid.unsignedIntegerValue;
+            } else {
+                NSLog(@"Cannot find feature OID!");
             }
         }
-        @catch (NSException *exception) {
-            NSLog(@"Could not read FeatureID: %@", exception);
-        }
-    } else {
-        // keep track of the objectId field for this graphic.
-        oidFieldName = ((AGSFeatureLayer*)self.layer).objectIdField;
     }
 
     if (result == 0) {
@@ -72,8 +81,8 @@ CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
 }
 
 -(void)addItems:(NSArray *)items {
-    NSUInteger addFeatureCount = 0;
-    NSUInteger addClusterCount = 0;
+//    NSUInteger addFeatureCount = 0;
+//    NSUInteger addClusterCount = 0;
     for (AGSClusterItem *item in items) {
         id key = item.clusterItemKey;
 //        if ([key isEqualToString:@"f0"]) {
@@ -89,10 +98,10 @@ CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
 //            }
 //        }
         self.items[key] = item;
-        addClusterCount++;
+//        addClusterCount++;
     }
-    if (addFeatureCount > 0) NSLog(@"Added %d features at zoom level %@!", addFeatureCount, self.zoomLevel);
-    if (addClusterCount > 0) NSLog(@"Added %d clusters at zoom level %@!", addClusterCount, self.zoomLevel);
+//    if (addFeatureCount > 0) NSLog(@"Added %d features at zoom level %@!", addFeatureCount, self.zoomLevel);
+//    if (addClusterCount > 0) NSLog(@"Added %d clusters at zoom level %@!", addClusterCount, self.zoomLevel);
 
     [self clusterItems];
     [self.gridForPrevZoomLevel addItems:self.clusters];
@@ -105,6 +114,8 @@ CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
 }
 
 -(void)clusterItems {
+//    NSDate *startTime = [NSDate date];
+
     NSMutableDictionary *items = self.items;
 //    NSLog(@"Adding %d features/clusters to zoom level %@", items.count, self.zoomLevel);
 
@@ -134,6 +145,10 @@ CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
         // Remove the temporary reference to the array that tracked the items to add to this cluster
         objc_setAssociatedObject(cluster, kAddFeaturesArrayKey, nil, OBJC_ASSOCIATION_ASSIGN);
     }
+    
+//    NSTimeInterval clusteringDuration = -[startTime timeIntervalSinceNow];
+    
+//    NSLog(@"Grid %2d Rebuilt %4d items into %4d clusters with cell size %7d in %.4fs", self.zoomLevel.unsignedIntegerValue, self.items.count, self.clusters.count, self.cellSize, clusteringDuration);
 }
 
 -(AGSCluster *)clusterForItem:(AGSClusterItem *)item {

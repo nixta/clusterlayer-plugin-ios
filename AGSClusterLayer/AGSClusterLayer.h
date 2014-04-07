@@ -16,6 +16,11 @@ extern NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo
 extern NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_FeatureCount;
 extern NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_ClusteringCellsize;
 
+extern NSString * const AGSClusterLayerLoadFeaturesProgressNotification;
+extern NSString * const AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_PercentComplete;
+extern NSString * const AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_TotalRecordsToLoad;
+extern NSString * const AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_RecordsLoaded;
+
 @interface AGSClusterLayer : AGSGraphicsLayer
 
 @property (nonatomic, assign) BOOL showClusterCoverages;

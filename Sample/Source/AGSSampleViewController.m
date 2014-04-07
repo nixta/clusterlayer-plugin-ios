@@ -45,6 +45,10 @@
                                              selector:@selector(didClusterFeatures:)
                                                  name:AGSClusterLayerDidCompleteClusteringNotification
                                                object:self.clusterLayer];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(dataLoadProgress:)
+                                                 name:AGSClusterLayerLoadFeaturesProgressNotification
+                                               object:self.clusterLayer];
     
     [self.clusterLayer addObserver:self forKeyPath:@"willClusterAtCurrentScale" options:NSKeyValueObservingOptionNew context:nil];
     [self.mapView addObserver:self forKeyPath:@"mapScale" options:NSKeyValueObservingOptionNew context:nil];
@@ -67,6 +71,11 @@
 //        double duration = [notification.userInfo[AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Duration] doubleValue];
 //        self.clusteringFeedbackLabel.text = [NSString stringWithFormat:@"%f", duration];
 //    }
+}
+
+-(void)dataLoadProgress:(NSNotification *)notification {
+    double percentComplete = [notification.userInfo[AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_PercentComplete] doubleValue];
+    NSLog(@"Loading data: %.2f%% complete", percentComplete);
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
