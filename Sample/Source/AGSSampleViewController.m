@@ -41,22 +41,32 @@
     [self.mapView addMapLayer:self.clusterLayer];
     self.clusterLayer.showClusterCoverages = self.coverageSwitch.on;
     self.clusterLayer.minScaleForClustering = 50000;
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(didClusterFeatures:) name:AGSClusterLayerDidCompleteClusteringNotification object:self.clusterLayer];
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(didClusterFeatures:)
+                                                 name:AGSClusterLayerDidCompleteClusteringNotification
+                                               object:self.clusterLayer];
     
     [self.clusterLayer addObserver:self forKeyPath:@"willClusterAtCurrentScale" options:NSKeyValueObservingOptionNew context:nil];
     [self.mapView addObserver:self forKeyPath:@"mapScale" options:NSKeyValueObservingOptionNew context:nil];
+    
+    AGSEnvelope *initialEnv = [AGSEnvelope envelopeWithXmin:-13743980.503617
+                                                       ymin:5553033.545344
+                                                       xmax:-13567177.320049
+                                                       ymax:5845311.308181
+                                           spatialReference:[AGSSpatialReference webMercatorSpatialReference]];
+    [self.mapView zoomToEnvelope:initialEnv animated:NO];
 }
 
 -(void)didClusterFeatures:(NSNotification *)notification {
-    NSUInteger count = [notification.userInfo[AGSClusterLayerDidCompleteClusteringNotificationUserInfo_ClusterCount] unsignedIntegerValue];
-    if (count > 0) {
-        if (!_initialZoomDone) {
-            [self.mapView zoomToEnvelope:[self.clusterLayer clustersEnvelopeForZoomLevel:7] animated:YES];
-            _initialZoomDone = YES;
-        }
-        double duration = [notification.userInfo[AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Duration] doubleValue];
-        self.clusteringFeedbackLabel.text = [NSString stringWithFormat:@"%f", duration];
-    }
+//    NSUInteger count = [notification.userInfo[AGSClusterLayerDidCompleteClusteringNotificationUserInfo_ClusterCount] unsignedIntegerValue];
+//    if (count > 0) {
+//        if (!_initialZoomDone) {
+//            [self.mapView zoomToEnvelope:[self.clusterLayer clustersEnvelopeForZoomLevel:7] animated:YES];
+//            _initialZoomDone = YES;
+//        }
+//        double duration = [notification.userInfo[AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Duration] doubleValue];
+//        self.clusteringFeedbackLabel.text = [NSString stringWithFormat:@"%f", duration];
+//    }
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {

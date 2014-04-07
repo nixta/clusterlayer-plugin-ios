@@ -23,8 +23,6 @@ extern NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo
 @property (nonatomic, assign) double minScaleForClustering;
 @property (nonatomic, readonly) BOOL willClusterAtCurrentScale;
 
-@property (nonatomic, readonly) AGSEnvelope *clustersEnvelope;
-
 -(AGSEnvelope *)clustersEnvelopeForZoomLevel:(NSUInteger)zoomLevel;
 
 +(AGSClusterLayer *)clusterLayerForFeatureLayer:(AGSFeatureLayer *)featureLayer;

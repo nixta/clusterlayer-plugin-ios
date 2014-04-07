@@ -9,13 +9,14 @@
 #import <Foundation/Foundation.h>
 #import <ArcGIS/ArcGIS.h>
 
-@interface AGSCluster : AGSGraphic// <AGSFeature>
+@interface AGSCluster : AGSGraphic
 
 @property (nonatomic, readonly) AGSGraphic *coverageGraphic;
 @property (nonatomic, readonly) NSArray *items;
 @property (nonatomic, readonly) NSArray *features;
 @property (nonatomic, readonly) NSArray *clusters;
 @property (nonatomic, readonly) NSUInteger displayCount;
+@property (nonatomic, readonly) id clusterItemKey;
 
 +(AGSCluster *)clusterForPoint:(AGSPoint *)point;
 
@@ -24,4 +25,5 @@
 -(BOOL)removeItem:(AGSGraphic *)item;
 -(void)clearItems;
 
+-(NSUInteger)calculatedFeatureCount;
 @end

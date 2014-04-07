@@ -11,4 +11,9 @@
 
 #define kClusterPayloadKey @"__cluster"
 
+typedef AGSGraphic AGSClusterItem;
+
+@interface AGSGraphic (AGSClusterItem)
+-(id)clusterItemKey;
+@end
 #endif

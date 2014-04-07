@@ -42,7 +42,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
 }
 
 #pragma mark - Internal properties
-@interface AGSClusterLayer () <AGSLayerCalloutDelegate>
+@interface AGSClusterLayer () <AGSLayerCalloutDelegate, AGSFeatureLayerQueryDelegate>
 
 @property (nonatomic, strong) NSMutableDictionary *grids;
 @property (nonatomic, strong) NSArray *sortedGridKeys;
@@ -60,6 +60,11 @@ NSString * NSStringFromBool(BOOL boolValue) {
 @property (nonatomic, assign) BOOL initialized;
 
 @property (nonatomic, strong) NSNumber *maxZoomLevel;
+
+@property (nonatomic, strong) AGSGDBSyncTask *syncTask;
+@property (nonatomic, assign) NSUInteger maxRecordCount;
+@property (nonatomic, strong) NSMutableSet *openQueries;
+@property (nonatomic, strong) NSMutableDictionary *allFeatures;
 @end
 
 
@@ -96,6 +101,8 @@ NSString * NSStringFromBool(BOOL boolValue) {
         self.minScaleForClustering  = 0;
         self.grids = [NSMutableDictionary dictionary];
         self.lodData = [self defaultLodData];
+        self.openQueries = [NSMutableSet set];
+        self.allFeatures = [NSMutableDictionary dictionary];
         [self parseLodData];
     }
     return self;
@@ -123,27 +130,90 @@ NSString * NSStringFromBool(BOOL boolValue) {
                                                      clusterSymbolBlock:clusterGenBlock
                                                     coverageSymbolBlock:coverageGenBlock];
     
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(featuresLoaded:)
-                                                 name:AGSFeatureLayerDidLoadFeaturesNotification
-                                               object:self.featureLayer];
+//    [[NSNotificationCenter defaultCenter] addObserver:self
+//                                             selector:@selector(featuresLoaded:)
+//                                                 name:AGSFeatureLayerDidLoadFeaturesNotification
+//                                               object:self.featureLayer];
     self.featureLayer.opacity = 0;
+    
+    
+    self.syncTask = [[AGSGDBSyncTask alloc] initWithURL:self.featureLayer.URL credential:self.featureLayer.credential];
+    __weak AGSGDBSyncTask *weakTask = self.syncTask;
+    __weak typeof(self) weakSelf = self;
+    [self.syncTask setLoadCompletion:^(NSError *error) {
+        if (error) {
+            NSLog(@"Uh oh, could not load FS definition: %@", error);
+        } else {
+            weakSelf.maxRecordCount = weakTask.featureServiceInfo.maxRecordCount;
+            weakSelf.featureLayer.queryDelegate = weakSelf;
+            AGSQuery *q = [AGSQuery query];
+            q.where = @"1=1";
+            [weakSelf.featureLayer queryIds:q];
+        }
+    }];
     
     [self calculateLods];
 }
 
-#pragma mark - Update Hooks
--(void)featuresLoaded:(NSNotification *)notification {
-    NSLog(@"Features Loaded");
-    self.dataLoaded = YES;
-    [self rebuildClusterGrid];
-    [self refresh];
+-(void)featureLayer:(AGSFeatureLayer *)featureLayer operation:(NSOperation *)op didQueryObjectIdsWithResults:(NSArray *)objectIds {
+    NSUInteger count = 0;
+    NSUInteger pageCount = 0;
+    NSMutableArray *pagesToLoad = [NSMutableArray array];
+    NSMutableArray *currentArray = nil;
+    for (NSNumber *oid in objectIds) {
+        if (count % self.maxRecordCount == 0) {
+            currentArray = [NSMutableArray array];
+            [pagesToLoad addObject:currentArray];
+            pageCount++;
+            NSLog(@"Created page %d of IDs", pageCount);
+        }
+        [currentArray addObject:oid];
+        count++;
+    }
+
+    for (NSArray *featureIds in pagesToLoad) {
+        AGSQuery *q = [AGSQuery query];
+        q.objectIds = featureIds;
+        q.returnGeometry = YES;
+        [self.openQueries addObject:[self.featureLayer queryFeatures:q]];
+        NSLog(@"Made another query");
+    }
 }
 
+-(void)featureLayer:(AGSFeatureLayer *)featureLayer operation:(NSOperation *)op didFailQueryObjectIdsWithError:(NSError *)error {
+    NSLog(@"Could not load all features");
+}
+
+-(void)featureLayer:(AGSFeatureLayer *)featureLayer operation:(NSOperation *)op didQueryFeaturesWithFeatureSet:(AGSFeatureSet *)featureSet {
+    for (AGSGraphic *feature in featureSet.features) {
+        self.allFeatures[[feature attributeForKey:featureLayer.objectIdField]] = feature;
+    }
+    [self.openQueries removeObject:op];
+    NSLog(@"%d feature queries remaining", self.openQueries.count);
+    if (self.openQueries.count == 0) {
+        NSLog(@"Done loading features! %d", self.allFeatures.count);
+        self.dataLoaded = YES;
+        [self rebuildClusterGrid];
+        [self refresh];
+    }
+}
+
+-(void)featureLayer:(AGSFeatureLayer *)featureLayer operation:(NSOperation *)op didFailQueryFeaturesWithError:(NSError *)error {
+    
+}
+
+#pragma mark - Update Hooks
+//-(void)featuresLoaded:(NSNotification *)notification {
+//    NSLog(@"Features Loaded");
+//    self.dataLoaded = YES;
+//    [self rebuildClusterGrid];
+//    [self refresh];
+//}
+//
 -(void)mapDidUpdate:(AGSMapUpdateType)updateType
 {
     if (updateType == AGSMapUpdateTypeSpatialExtent) {
-        NSLog(@"Map Extent Updated: %@", NSStringFromBool(self.mapView.loaded));
+//        NSLog(@"Map Extent Updated: %@", NSStringFromBool(self.mapView.loaded));
         self.mapViewLoaded = self.mapView.loaded;
         if (self.initialized) {
             self.willClusterAtCurrentScale = self.mapView.mapScale > self.minScaleForClustering;
@@ -228,10 +298,6 @@ NSString * NSStringFromBool(BOOL boolValue) {
     [self refresh];
 }
 
--(AGSEnvelope *)clustersEnvelope {
-    return [self clustersEnvelopeForZoomLevel:[self getZoomForScale:self.mapView.mapScale]];
-}
-
 -(AGSEnvelope *)clustersEnvelopeForZoomLevel:(NSUInteger)zoomLevel {
     AGSMutableEnvelope *envelope = nil;
     AGSClusterGrid *gridToZoomTo = self.grids[@(zoomLevel)][kLODLevelGrid];
@@ -301,16 +367,15 @@ NSString * NSStringFromBool(BOOL boolValue) {
 
 #pragma mark - Cluster Generation and Display
 -(void)rebuildClusterGrid {
-    AGSClusterGrid *grid = self.maxZoomLevelGrid;
-    
     NSDate *startTime = [NSDate date];
 
-    [grid removeAllItems];
-    [grid replaceItems:self.featureLayer.graphics];
+    AGSClusterGrid *grid = self.maxZoomLevelGrid;
+//    [grid removeAllItems];
+    [grid addKeyedItems:self.allFeatures];
     
     NSTimeInterval clusteringDuration = -[startTime timeIntervalSinceNow];
     
-    NSLog(@"Rebuilt %d features into %d clusters with cell size %d in %.4fs", self.featureLayer.graphicsCount, grid.clusters.count, grid.cellSize, clusteringDuration);
+    NSLog(@"Rebuilt %d features into %d clusters with cell size %d in %.4fs", self.allFeatures.count, grid.clusters.count, grid.cellSize, clusteringDuration);
     
     [[NSNotificationCenter defaultCenter] postNotificationName:AGSClusterLayerDidCompleteClusteringNotification
                                                         object:self
@@ -327,9 +392,12 @@ NSString * NSStringFromBool(BOOL boolValue) {
     NSMutableArray *clusterGraphics = [NSMutableArray array];
     NSMutableArray *featureGraphics = [NSMutableArray array];
     
+    NSLog(@"Rendering %d items at zoom level %@", self.gridForCurrentScale.clusters.count, self.gridForCurrentScale.zoomLevel);
+    
     for (AGSCluster *cluster in self.gridForCurrentScale.clusters) {
+//        NSLog(@"Cluster: %@", cluster);
         if (self.mapView.mapScale > self.minScaleForClustering &&
-            cluster.items.count >= self.minClusterCount) {
+            cluster.displayCount >= self.minClusterCount) {
             // Draw as cluster.
             if (self.showClusterCoverages && cluster.items.count > 2) {
                 AGSGraphic *coverageGraphic = cluster.coverageGraphic;
@@ -356,11 +424,14 @@ NSString * NSStringFromBool(BOOL boolValue) {
 
 #pragma mark - UI/Callouts
 -(BOOL)callout:(AGSCallout *)callout willShowForFeature:(id<AGSFeature>)feature layer:(AGSLayer<AGSHitTestable> *)layer mapPoint:(AGSPoint *)mapPoint {
-    AGSCluster *cluster = objc_getAssociatedObject(feature, kClusterPayloadKey);
-    if (cluster) {
-        callout.title = @"Cluster";
-        callout.detail = [NSString stringWithFormat:@"Cluster contains %d features", cluster.features.count];
-        callout.accessoryButtonHidden = YES;
+    if ([feature isMemberOfClass:[AGSCluster class]]) {
+        AGSCluster *cluster = (AGSCluster*)feature;
+        NSLog(@"%@ :: %d", cluster, [cluster calculatedFeatureCount]);
+        if (cluster) {
+            callout.title = @"Cluster";
+            callout.detail = [NSString stringWithFormat:@"Cluster contains %d features", cluster.features.count];
+            callout.accessoryButtonHidden = YES;
+        }
     } else {
         callout.title = @"Ordinary feature";
         callout.detail = @"Might have a bunch of attributes on it";
@@ -383,7 +454,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
         NSUInteger cellSize = floor(cellSizeInMapUnits * scale);
         d[kLODLevelCellSize] = @(cellSize);
         
-        AGSClusterGrid *gridForZoomLevel = [[AGSClusterGrid alloc] initWithCellSize:cellSize];
+        AGSClusterGrid *gridForZoomLevel = [[AGSClusterGrid alloc] initWithCellSize:cellSize forClusterLayer:self];
         gridForZoomLevel.zoomLevel = zoomLevel;
         prevClusterGrid.gridForNextZoomLevel = gridForZoomLevel;
         gridForZoomLevel.gridForPrevZoomLevel = prevClusterGrid;

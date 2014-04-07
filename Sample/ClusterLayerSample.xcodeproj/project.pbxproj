@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D906E0A818F316940015EAF2 /* AGSClusterGridRow.m in Sources */ = {isa = PBXBuildFile; fileRef = D906E0A718F316940015EAF2 /* AGSClusterGridRow.m */; };
 		D919A35F18E0B09800B140BF /* AGSClusterLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = D919A35E18E0B09800B140BF /* AGSClusterLayer.m */; };
 		D919A36218E0B14700B140BF /* AGSClusterGrid.m in Sources */ = {isa = PBXBuildFile; fileRef = D919A36118E0B14700B140BF /* AGSClusterGrid.m */; };
 		D919A36518E203DD00B140BF /* AGSCluster.m in Sources */ = {isa = PBXBuildFile; fileRef = D919A36418E203DD00B140BF /* AGSCluster.m */; };
@@ -38,6 +39,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D906E0A618F316940015EAF2 /* AGSClusterGridRow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AGSClusterGridRow.h; sourceTree = "<group>"; };
+		D906E0A718F316940015EAF2 /* AGSClusterGridRow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AGSClusterGridRow.m; sourceTree = "<group>"; };
 		D919A35D18E0B09800B140BF /* AGSClusterLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AGSClusterLayer.h; sourceTree = "<group>"; };
 		D919A35E18E0B09800B140BF /* AGSClusterLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AGSClusterLayer.m; sourceTree = "<group>"; };
 		D919A36018E0B14700B140BF /* AGSClusterGrid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AGSClusterGrid.h; sourceTree = "<group>"; };
@@ -109,14 +112,16 @@
 			children = (
 				D919A35D18E0B09800B140BF /* AGSClusterLayer.h */,
 				D919A35E18E0B09800B140BF /* AGSClusterLayer.m */,
-				D919A36318E203DD00B140BF /* AGSCluster.h */,
-				D919A36418E203DD00B140BF /* AGSCluster.m */,
-				D9D1C8BB18E5942F00CD3CEF /* AGSCluster_int.h */,
-				D919A36018E0B14700B140BF /* AGSClusterGrid.h */,
-				D919A36118E0B14700B140BF /* AGSClusterGrid.m */,
 				D9E0F74818E232CC0009C771 /* AGSClusterLayerRenderer.h */,
 				D9E0F74918E232CC0009C771 /* AGSClusterLayerRenderer.m */,
+				D919A36318E203DD00B140BF /* AGSCluster.h */,
+				D919A36418E203DD00B140BF /* AGSCluster.m */,
+				D919A36018E0B14700B140BF /* AGSClusterGrid.h */,
+				D919A36118E0B14700B140BF /* AGSClusterGrid.m */,
+				D906E0A618F316940015EAF2 /* AGSClusterGridRow.h */,
+				D906E0A718F316940015EAF2 /* AGSClusterGridRow.m */,
 				D9D1C8C318E6338300CD3CEF /* Common.h */,
+				D9D1C8BB18E5942F00CD3CEF /* AGSCluster_int.h */,
 				D9D1C8BF18E62D6900CD3CEF /* Categories */,
 			);
 			name = AGSClusterLayer;
@@ -270,6 +275,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D9D1C8C218E62DF000CD3CEF /* NSArray+Utils.m in Sources */,
+				D906E0A818F316940015EAF2 /* AGSClusterGridRow.m in Sources */,
 				D919A36518E203DD00B140BF /* AGSCluster.m in Sources */,
 				D919A36218E0B14700B140BF /* AGSClusterGrid.m in Sources */,
 				D9F3D1BA1668271A00FB6A8D /* main.m in Sources */,
