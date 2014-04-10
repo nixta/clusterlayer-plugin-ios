@@ -79,7 +79,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
 @property (nonatomic, strong) NSMutableSet *openQueries;
 @property (nonatomic, assign) NSUInteger featuresToLoad;
 @property (nonatomic, assign) NSUInteger featuresToLoadTotal;
-@property (nonatomic, strong) NSMutableDictionary *allFeatures;
+@property (nonatomic, strong) NSMutableArray *allFeatures;
 
 @property (nonatomic, strong) NSMutableArray *clusteringGrids;
 @property (nonatomic, strong) NSDate *clusteringStartTime;
@@ -125,7 +125,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
         self.openQueries = [NSMutableSet set];
         self.featuresToLoad = 0;
         self.featuresToLoadTotal = 0;
-        self.allFeatures = [NSMutableDictionary dictionary];
+        self.allFeatures = [NSMutableArray array];
         [self parseLodData];
     }
     return self;
@@ -245,7 +245,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             NSLog(@"Done loading %d features.", self.allFeatures.count);
             self.dataLoaded = YES;
-            [self rebuildClusterGrid:self.allFeatures];
+            [self rebuildClusterGrid];
             dispatch_async(dispatch_get_main_queue(), ^{
                 [self refresh];
             });
@@ -253,24 +253,25 @@ NSString * NSStringFromBool(BOOL boolValue) {
     }
 }
 
--(NSMutableDictionary *)addOrUpdateFeatures:(NSArray *)features {
-    NSMutableDictionary *addedFeatures = [NSMutableDictionary dictionary];
-    for (AGSGraphic *feature in features) {
-        id key = feature.clusterItemKey;
-        if (!self.allFeatures[key]) {
-            addedFeatures[key] = feature;
-        }
-        self.allFeatures[feature.clusterItemKey] = feature;
-    }
-    return addedFeatures;
+-(void)addOrUpdateFeatures:(NSArray *)features {
+//    NSMutableDictionary *addedFeatures = [NSMutableDictionary dictionary];
+//    for (AGSGraphic *feature in features) {
+//        id key = feature.clusterItemKey;
+//        if (!self.allFeatures[key]) {
+//            addedFeatures[key] = feature;
+//        }
+//        self.allFeatures[feature.clusterItemKey] = feature;
+//    }
+    [self.allFeatures addObjectsFromArray:features];
+//    return addedFeatures;
 }
 
 #pragma mark - Update Hooks
 -(void)featuresLoaded:(NSNotification *)notification {
-    NSDictionary *newFeatures = [self addOrUpdateFeatures:self.featureLayer.graphics];
-    NSLog(@"Features Loaded: %d", newFeatures.count);
+    [self addOrUpdateFeatures:self.featureLayer.graphics];
+//    NSLog(@"Features Loaded: %d", newFeatures.count);
     self.dataLoaded = YES;
-    [self rebuildClusterGrid:newFeatures];
+    [self rebuildClusterGrid];
     [self refresh];
 }
 
@@ -420,14 +421,14 @@ NSString * NSStringFromBool(BOOL boolValue) {
 }
 
 #pragma mark - Cluster Generation and Display
--(void)rebuildClusterGrid:(NSDictionary *)featuresToAdd {
+-(void)rebuildClusterGrid {
     self.clusteringStartTime = [NSDate date];
     self.clusteringGrids = [NSMutableArray arrayWithArray:[self.grids.allValues map:^id(id obj) {
         return obj[kLODLevelGrid];
     }]];
     
     AGSClusterGrid *grid = self.maxZoomLevelGrid;
-    [grid addKeyedItems:featuresToAdd];
+    [grid addItems:self.allFeatures];
     
 //    NSTimeInterval clusteringDuration = -[startTime timeIntervalSinceNow];
     

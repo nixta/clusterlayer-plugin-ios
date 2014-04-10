@@ -74,7 +74,7 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
 @interface AGSClusterGrid()
 @property (nonatomic, assign, readwrite) NSUInteger cellSize;
 @property (nonatomic, strong) NSMutableDictionary* _int_rows;
-@property (nonatomic, strong, readwrite) NSMutableDictionary *items;
+@property (nonatomic, strong, readwrite) NSMutableArray *items;
 @property (nonatomic, weak) AGSClusterLayer *owningClusterLayer;
 @end
 
@@ -84,26 +84,26 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
     if (self) {
         self.cellSize = cellSize;
         self._int_rows = [NSMutableDictionary dictionary];
-        self.items = [NSMutableDictionary dictionary];
+        self.items = [NSMutableArray array];
         self.owningClusterLayer = clusterLayer;
     }
     return self;
 }
 
 -(void)addItems:(NSArray *)items {
-    for (AGSClusterItem *item in items) {
-        id key = item.clusterItemKey;
-        self.items[key] = item;
-    }
+//    for (AGSClusterItem *item in items) {
+//        id key = item.clusterItemKey;
+//        self.items[key] = item;
+//    }
+    [self.items addObjectsFromArray:items];
 
     [self clusterItems];
     [self.gridForPrevZoomLevel addItems:self.clusters];
 }
 
--(void)addKeyedItems:(NSDictionary *)items {
-    [self.items addEntriesFromDictionary:items];
-    [self addItems:@[]];
-}
+//-(void)addKeyedItems:(NSDictionary *)items {
+//    [self addItems:items.allValues];
+//}
 
 -(void)removeAllItems {
     for (AGSClusterGridRow *row in self.rows) {
@@ -119,12 +119,12 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
     [[NSNotificationCenter defaultCenter] postNotificationName:AGSClusterGridClusteringNotification object:self];
     NSDate *startTime = [NSDate date];
 
-    NSMutableDictionary *items = self.items;
+    NSArray *items = self.items;
 //    NSLog(@"Adding %d features/clusters to zoom level %@", items.count, self.zoomLevel);
 
     // Add each item to the clusters (creating new ones if necessary).
     NSMutableSet *clustersForItems = [NSMutableSet set];
-    for (AGSClusterItem *item in items.allValues) {
+    for (AGSClusterItem *item in items) {
         // Find out what cluster this item should belong to.
         AGSCluster *cluster = [self clusterForItem:item];
         

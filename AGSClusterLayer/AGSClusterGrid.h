@@ -28,6 +28,7 @@ extern NSString * const AGSClusterGridClusteredNotification;
 
 -(AGSPoint *)cellCentroid:(CGPoint)cellCoord;
 
--(void)addKeyedItems:(NSDictionary *)items;
+-(void)addItems:(NSArray *)items;
+//-(void)addKeyedItems:(NSDictionary *)items;
 -(void)removeAllItems;
 @end
