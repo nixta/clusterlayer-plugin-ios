@@ -12,7 +12,7 @@
 
 @implementation AGSGraphic (AGSClustering)
 -(BOOL)isCluster {
-    return [self isKindOfClass:[AGSCluster class]];
+    return NO;
 }
 
 -(BOOL)isClusterCoverage {

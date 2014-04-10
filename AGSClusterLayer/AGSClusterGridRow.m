@@ -11,15 +11,14 @@
 #import "AGSCluster_int.h"
 #import "AGSClusterGrid.h"
 
-AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
-    return [AGSPoint pointWithX:(cellCoord.x * cellSize) + (cellSize/2)
-                              y:cellCoord.y * cellSize + (cellSize/2)
-               spatialReference:[AGSSpatialReference webMercatorSpatialReference]];
-}
-
 @implementation AGSClusterGridRow
 +(AGSClusterGridRow *)clusterGridRowForClusterGrid:(AGSClusterGrid *)parentGrid {
     return [[AGSClusterGridRow alloc] initForClusterGrid:parentGrid];
+}
+
++(NSUInteger)createdCellCount {
+    static NSUInteger count = 0;
+    return count++;
 }
 
 -(id)initForClusterGrid:(AGSClusterGrid *)parentGrid {
@@ -31,12 +30,13 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
     return self;
 }
 
--(AGSCluster *)clusterForGridCoord:(CGPoint)gridCoord {
+-(AGSCluster *)clusterForGridCoord:(CGPoint)gridCoord atPoint:(AGSPoint *)point{
     AGSCluster *result = self.rowClusters[@(gridCoord.x)];
     if (!result) {
-        result = [AGSCluster clusterForPoint:getGridCellCentroid(gridCoord, self.grid.cellSize)];
+        result = [AGSCluster clusterForPoint:point];
         result.cellCoordinate = gridCoord;
         [self.rowClusters setObject:result forKey:@(gridCoord.x)];
+        [AGSClusterGridRow createdCellCount];
     }
     return result;
 }

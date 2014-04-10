@@ -55,6 +55,7 @@ CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
         // If we could not recover, let's say so.
         NSLog(@"Feature ID 0!!");
     }
+
     return [NSString stringWithFormat:@"f%d", result];
 }
 @end
@@ -109,12 +110,11 @@ CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
 
 -(void)addKeyedItems:(NSDictionary *)items {
     [self.items addEntriesFromDictionary:items];
-    [self clusterItems];
-    [self.gridForPrevZoomLevel addItems:self.clusters];
+    [self addItems:@[]];
 }
 
 -(void)clusterItems {
-//    NSDate *startTime = [NSDate date];
+    NSDate *startTime = [NSDate date];
 
     NSMutableDictionary *items = self.items;
 //    NSLog(@"Adding %d features/clusters to zoom level %@", items.count, self.zoomLevel);
@@ -146,9 +146,9 @@ CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
         objc_setAssociatedObject(cluster, kAddFeaturesArrayKey, nil, OBJC_ASSOCIATION_ASSIGN);
     }
     
-//    NSTimeInterval clusteringDuration = -[startTime timeIntervalSinceNow];
+    NSTimeInterval clusteringDuration = -[startTime timeIntervalSinceNow];
     
-//    NSLog(@"Grid %2d Rebuilt %4d items into %4d clusters with cell size %7d in %.4fs", self.zoomLevel.unsignedIntegerValue, self.items.count, self.clusters.count, self.cellSize, clusteringDuration);
+    NSLog(@"%2d [%4d items in %4d clusters sized %7d] in %.4fs :: %d", self.zoomLevel.unsignedIntegerValue, self.items.count, self.clusters.count, self.cellSize, clusteringDuration, [AGSClusterGridRow createdCellCount]);
 }
 
 -(AGSCluster *)clusterForItem:(AGSClusterItem *)item {
@@ -159,7 +159,7 @@ CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
     CGPoint gridCoord = getGridCoordForMapPoint(pt, self.cellSize);
     
     // Return the cluster
-    return [self clusterForGridCoord:gridCoord];
+    return [self clusterForGridCoord:gridCoord atPoint:pt];
 }
 
 -(AGSClusterGridRow *)rowForGridCoord:(CGPoint)gridCoord {
@@ -171,10 +171,10 @@ CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
     return row;
 }
 
--(AGSCluster *)clusterForGridCoord:(CGPoint)gridCoord {
+-(AGSCluster *)clusterForGridCoord:(CGPoint)gridCoord atPoint:(AGSPoint *)point {
     // Find the cells along that row.
     AGSClusterGridRow *row = [self rowForGridCoord:gridCoord];
-    return [row clusterForGridCoord:gridCoord];
+    return [row clusterForGridCoord:gridCoord atPoint:point];
 }
 
 -(NSArray *)rows {

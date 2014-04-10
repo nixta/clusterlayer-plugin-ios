@@ -11,19 +11,21 @@
 
 @interface AGSCluster : AGSGraphic
 
-@property (nonatomic, readonly) AGSGraphic *coverageGraphic;
+@property (nonatomic, readonly) id clusterItemKey;
+
 @property (nonatomic, readonly) NSArray *items;
 @property (nonatomic, readonly) NSArray *features;
 @property (nonatomic, readonly) NSArray *clusters;
+
 @property (nonatomic, readonly) NSUInteger displayCount;
-@property (nonatomic, readonly) id clusterItemKey;
+
+@property (nonatomic, readonly) AGSGeometry *coverage;
+@property (nonatomic, readonly) AGSGraphic *coverageGraphic;
 
 +(AGSCluster *)clusterForPoint:(AGSPoint *)point;
 
 -(void)addItem:(AGSGraphic *)item;
 -(void)addItems:(NSArray *)items;
--(BOOL)removeItem:(AGSGraphic *)item;
+-(void)removeItem:(AGSGraphic *)item;
 -(void)clearItems;
-
--(NSUInteger)calculatedFeatureCount;
 @end

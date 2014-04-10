@@ -40,7 +40,7 @@
     self.clusterLayer = [AGSClusterLayer clusterLayerForFeatureLayer:featureLayer];
     [self.mapView addMapLayer:self.clusterLayer];
     self.clusterLayer.showClusterCoverages = self.coverageSwitch.on;
-    self.clusterLayer.minScaleForClustering = 50000;
+    self.clusterLayer.minScaleForClustering = 14000;
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(didClusterFeatures:)
                                                  name:AGSClusterLayerDidCompleteClusteringNotification

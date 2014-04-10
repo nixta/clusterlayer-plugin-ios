@@ -236,10 +236,12 @@ NSString * NSStringFromBool(BOOL boolValue) {
     
     NSLog(@"%d feature queries remaining for %d features", self.openQueries.count, self.featuresToLoad);
     if (self.openQueries.count == 0) {
-        NSLog(@"Done loading features! %d", self.allFeatures.count);
-        self.dataLoaded = YES;
-        [self rebuildClusterGrid:self.allFeatures];
-        [self refresh];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            NSLog(@"Done loading features! %d", self.allFeatures.count);
+            self.dataLoaded = YES;
+            [self rebuildClusterGrid:self.allFeatures];
+            [self refresh];
+        });
     }
 }
 
@@ -471,7 +473,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
 -(BOOL)callout:(AGSCallout *)callout willShowForFeature:(id<AGSFeature>)feature layer:(AGSLayer<AGSHitTestable> *)layer mapPoint:(AGSPoint *)mapPoint {
     if ([feature isMemberOfClass:[AGSCluster class]]) {
         AGSCluster *cluster = (AGSCluster*)feature;
-        NSLog(@"%@ :: %d", cluster, [cluster calculatedFeatureCount]);
+        NSLog(@"%@ :: %d", cluster, cluster.displayCount);
         if (cluster) {
             callout.title = @"Cluster";
             callout.detail = [NSString stringWithFormat:@"Cluster contains %d features", cluster.features.count];

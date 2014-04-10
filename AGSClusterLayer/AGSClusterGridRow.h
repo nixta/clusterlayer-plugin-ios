@@ -7,6 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <ArcGIS/ArcGIS.h>
+
 @class AGSClusterGrid;
 @class AGSCluster;
 
@@ -14,9 +16,10 @@
 @property (nonatomic, strong) NSMutableDictionary *rowClusters;
 @property (nonatomic, weak) AGSClusterGrid *grid;
 @property (nonatomic, readonly) NSArray *clusters;
--(AGSCluster *)clusterForGridCoord:(CGPoint)gridCoord;
+-(AGSCluster *)clusterForGridCoord:(CGPoint)gridCoord atPoint:(AGSPoint *)point;
 -(void)removeAllClusters;
 
 +(AGSClusterGridRow *)clusterGridRowForClusterGrid:(AGSClusterGrid *)parentGrid;
++(NSUInteger)createdCellCount;
 @end
 
