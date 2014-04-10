@@ -10,6 +10,7 @@
 #import "AGSClusterGrid.h"
 #import "AGSCluster.h"
 #import "Common.h"
+#import "NSArray+Utils.h"
 #import <objc/runtime.h>
 
 #pragma mark - Constants and Defines
@@ -25,19 +26,21 @@
 #define kDefaultMinClusterCount 2
 
 #define kClusterNotificationUserInfoKey_Duration @"duration"
-#define kClusterNotificationUserInfoKey_ClusterCount @"clusterCount"
-#define kClusterNotificationUserInfoKey_FeatureCount @"clusterCount"
-#define kClusterNotificationUserInfoKey_CellSize @"clusterCount"
+#define kClusterNotificationUserInfoKey_PercentComplete @"percentComplete"
+#define kClusterNotificationUserInfoKey_FeatureCount @"featureCount"
+#define kClusterNotificationUserInfoKey_TotalZoomLevels @"totalLevels"
+#define kClusterNotificationUserInfoKey_ZoomLevelsClustered @"levelsComplete"
 
 #define kBatchQueryOperationQueryKey @"__batchquery"
 
 #define kKVOMapLoaded @"loaded"
 
-NSString * const AGSClusterLayerDidCompleteClusteringNotification = @"AGSClusterLayerClusteringCompleteNotification";
-NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Duration = kClusterNotificationUserInfoKey_Duration;
-NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_ClusterCount = kClusterNotificationUserInfoKey_ClusterCount;
-NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_FeatureCount = kClusterNotificationUserInfoKey_FeatureCount;
-NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_ClusteringCellsize = kClusterNotificationUserInfoKey_CellSize;
+NSString * const AGSClusterLayerClusteringProgressNotification = @"AGSClusterLayerClusteringCompleteNotification";
+NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_PercentComplete = kClusterNotificationUserInfoKey_PercentComplete;
+NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_TotalZoomLevels = kClusterNotificationUserInfoKey_TotalZoomLevels;
+NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_CompletedZoomLevels = kClusterNotificationUserInfoKey_ZoomLevelsClustered;
+NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_FeatureCount = kClusterNotificationUserInfoKey_FeatureCount;
+NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_Duration = kClusterNotificationUserInfoKey_Duration;
 
 NSString * const AGSClusterLayerLoadFeaturesProgressNotification = @"AGSCLusterLayerLoadProgressNotification";
 NSString * const AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_PercentComplete = @"percentComplete";
@@ -77,6 +80,9 @@ NSString * NSStringFromBool(BOOL boolValue) {
 @property (nonatomic, assign) NSUInteger featuresToLoad;
 @property (nonatomic, assign) NSUInteger featuresToLoadTotal;
 @property (nonatomic, strong) NSMutableDictionary *allFeatures;
+
+@property (nonatomic, strong) NSMutableArray *clusteringGrids;
+@property (nonatomic, strong) NSDate *clusteringStartTime;
 @end
 
 
@@ -188,7 +194,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
             currentArray = [NSMutableArray array];
             [pagesToLoad addObject:currentArray];
             pageCount++;
-            NSLog(@"Created page %d of IDs", pageCount);
+//            NSLog(@"Created page %d of IDs", pageCount);
         }
         [currentArray addObject:oid];
         count++;
@@ -203,7 +209,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
         NSOperation *queryOp = [self.featureLayer queryFeatures:q];
         objc_setAssociatedObject(queryOp, kBatchQueryOperationQueryKey, q, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         [self.openQueries addObject:queryOp];
-        NSLog(@"Made another query");
+//        NSLog(@"Fired off query %d", [pagesToLoad indexOfObject:featureIds]);
     }
 }
 
@@ -234,13 +240,15 @@ NSString * NSStringFromBool(BOOL boolValue) {
                                                                  AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_RecordsLoaded: @(featuresLoaded),
                                                                  AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_PercentComplete: @(percentComplete)}];
     
-    NSLog(@"%d feature queries remaining for %d features", self.openQueries.count, self.featuresToLoad);
+//    NSLog(@"%d feature queries remaining for %d features", self.openQueries.count, self.featuresToLoad);
     if (self.openQueries.count == 0) {
-        dispatch_async(dispatch_get_main_queue(), ^{
-            NSLog(@"Done loading features! %d", self.allFeatures.count);
+        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            NSLog(@"Done loading %d features.", self.allFeatures.count);
             self.dataLoaded = YES;
             [self rebuildClusterGrid:self.allFeatures];
-            [self refresh];
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [self refresh];
+            });
         });
     }
 }
@@ -402,8 +410,6 @@ NSString * NSStringFromBool(BOOL boolValue) {
 }
 
 -(void)refreshClusters {
-//    [self clearClusters];
-//    [self rebuildClusterGrid];
     [self removeAllGraphics];
     [self renderClusters];
 }
@@ -415,23 +421,37 @@ NSString * NSStringFromBool(BOOL boolValue) {
 
 #pragma mark - Cluster Generation and Display
 -(void)rebuildClusterGrid:(NSDictionary *)featuresToAdd {
-    NSDate *startTime = [NSDate date];
-
+    self.clusteringStartTime = [NSDate date];
+    self.clusteringGrids = [NSMutableArray arrayWithArray:[self.grids.allValues map:^id(id obj) {
+        return obj[kLODLevelGrid];
+    }]];
+    
     AGSClusterGrid *grid = self.maxZoomLevelGrid;
     [grid addKeyedItems:featuresToAdd];
     
-    NSTimeInterval clusteringDuration = -[startTime timeIntervalSinceNow];
+//    NSTimeInterval clusteringDuration = -[startTime timeIntervalSinceNow];
     
-    NSLog(@"Rebuilt %d features into %d clusters with cell size %d in %.4fs", self.allFeatures.count, grid.clusters.count, grid.cellSize, clusteringDuration);
+//    NSLog(@"Rebuilt %d features into %d clusters with cell size %d in %.4fs", self.allFeatures.count, grid.clusters.count, grid.cellSize, clusteringDuration);
+}
+
+-(void)gridClustered:(NSNotification *)notification {
+    [self.clusteringGrids removeObject:notification.object];
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:AGSClusterLayerDidCompleteClusteringNotification
-                                                        object:self
-                                                      userInfo:@{
-                                                                 kClusterNotificationUserInfoKey_Duration: @(clusteringDuration),
-                                                                 kClusterNotificationUserInfoKey_ClusterCount: @(grid.clusters.count),
-                                                                 kClusterNotificationUserInfoKey_FeatureCount: @(self.featureLayer.graphicsCount),
-                                                                 kClusterNotificationUserInfoKey_CellSize: @(grid.cellSize)
-                                                                 }];
+    NSUInteger gridsClustered = self.grids.count - self.clusteringGrids.count;
+    NSTimeInterval clusteringDuration = -[self.clusteringStartTime timeIntervalSinceNow];
+    NSLog(@"%f", clusteringDuration);
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+        [[NSNotificationCenter defaultCenter] postNotificationName:AGSClusterLayerClusteringProgressNotification
+                                                            object:self
+                                                          userInfo:@{
+                                                                     kClusterNotificationUserInfoKey_Duration: @(clusteringDuration),
+                                                                     kClusterNotificationUserInfoKey_PercentComplete: @(100*gridsClustered/self.grids.count),
+                                                                     kClusterNotificationUserInfoKey_FeatureCount: @(self.allFeatures.count),
+                                                                     kClusterNotificationUserInfoKey_TotalZoomLevels: @(self.grids.count),
+                                                                     kClusterNotificationUserInfoKey_ZoomLevelsClustered: @(self.grids.count - self.clusteringGrids.count)
+                                                                     }];
+    });
 }
 
 -(void) renderClusters {
@@ -439,7 +459,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
     NSMutableArray *clusterGraphics = [NSMutableArray array];
     NSMutableArray *featureGraphics = [NSMutableArray array];
     
-    NSLog(@"Rendering %d items at zoom level %@", self.gridForCurrentScale.clusters.count, self.gridForCurrentScale.zoomLevel);
+//    NSLog(@"Rendering %d items at zoom level %@", self.gridForCurrentScale.clusters.count, self.gridForCurrentScale.zoomLevel);
     
     for (AGSCluster *cluster in self.gridForCurrentScale.clusters) {
 //        NSLog(@"Cluster: %@", cluster);
@@ -503,11 +523,18 @@ NSString * NSStringFromBool(BOOL boolValue) {
         
         AGSClusterGrid *gridForZoomLevel = [[AGSClusterGrid alloc] initWithCellSize:cellSize forClusterLayer:self];
         gridForZoomLevel.zoomLevel = zoomLevel;
+        
         prevClusterGrid.gridForNextZoomLevel = gridForZoomLevel;
         gridForZoomLevel.gridForPrevZoomLevel = prevClusterGrid;
-        d[kLODLevelGrid] = gridForZoomLevel;
-        prevClusterGrid = gridForZoomLevel;
         
+        d[kLODLevelGrid] = gridForZoomLevel;
+        
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(gridClustered:)
+                                                     name:AGSClusterGridClusteredNotification
+                                                   object:gridForZoomLevel];
+        
+        prevClusterGrid = gridForZoomLevel;
         self.maxZoomLevel = zoomLevel;
     }
 }

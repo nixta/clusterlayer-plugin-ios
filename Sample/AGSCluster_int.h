@@ -8,7 +8,9 @@
 
 #import <Foundation/Foundation.h>
 #import <ArcGIS/ArcGIS.h>
+#import "AGSClusterGrid.h"
 
 @interface AGSCluster (_internal)
 @property (nonatomic, assign) CGPoint cellCoordinate;
+@property (nonatomic, strong) AGSClusterGrid *parentGrid;
 @end

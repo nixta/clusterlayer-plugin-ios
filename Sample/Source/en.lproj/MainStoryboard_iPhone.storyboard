@@ -42,6 +42,10 @@
                                         <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <progressView opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progressViewStyle="bar" id="toY-ne-5gi">
+                                        <rect key="frame" x="0.0" y="0.0" width="320" height="3"/>
+                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                    </progressView>
                                 </subviews>
                                 <color key="backgroundColor" white="0.71450159671532842" alpha="0.5" colorSpace="calibratedWhite"/>
                             </view>
@@ -52,6 +56,7 @@
                         <outlet property="clusteringFeedbackLabel" destination="33A-CU-vRi" id="0vp-00-2V0"/>
                         <outlet property="clusteringStatusLabel" destination="VrT-km-kDp" id="ru7-z9-fjA"/>
                         <outlet property="coverageSwitch" destination="hRx-wD-Mn1" id="Wai-Yw-7Ar"/>
+                        <outlet property="dataLoadProgressView" destination="toY-ne-5gi" id="8m2-Lm-kPd"/>
                         <outlet property="mapView" destination="gBB-Yb-c9p" id="K2v-QG-JTW"/>
                     </connections>
                 </viewController>

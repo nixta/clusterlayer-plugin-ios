@@ -14,8 +14,4 @@
 -(BOOL)isCluster {
     return NO;
 }
-
--(BOOL)isClusterCoverage {
-    return NO;
-}
 @end

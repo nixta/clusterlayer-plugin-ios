@@ -10,22 +10,11 @@
 #import "AGSCluster_int.h"
 #import "NSArray+Utils.h"
 #import "AGSGraphic+AGSClustering.h"
-
 #import "Common.h"
-
 #import <objc/runtime.h>
 
-#pragma mark - Cluster Coverage
-@interface AGSClusterCoverage : AGSGraphic
-@end
-
-@implementation AGSClusterCoverage
--(BOOL)isClusterCoverage {
-    return YES;
-}
-@end
-
 @interface AGSCluster ()
+@property (nonatomic, strong) AGSClusterGrid *parentGrid;
 @property (nonatomic, assign) NSUInteger clusterId;
 @property (nonatomic, assign) CGPoint cellCoordinate;
 
@@ -107,11 +96,19 @@
     }
 }
 
+#pragma mark - Category Override
 -(BOOL)isCluster {
     return YES;
 }
 
 #pragma mark - Geometry and Coverage
+-(AGSGeometry *)geometry {
+    if (self.isDirty) {
+        [self recalculateCentroid];
+    }
+    return super.geometry;
+}
+
 -(void)setGeometry:(AGSGeometry *)geometry {
     [super setGeometry:geometry];
     self.isDirty = NO;
@@ -139,14 +136,12 @@
 #pragma mark - Add and remove features
 -(void)addItem:(AGSClusterItem *)item {
     [self _addItem:item];
-    [self recalculateCentroid];
 }
 
 -(void)addItems:(NSArray *)items {
     for (AGSClusterItem *item in items) {
         [self _addItem:item];
     }
-    [self recalculateCentroid];
 }
 
 -(void)removeItem:(AGSClusterItem *)item {
@@ -188,19 +183,25 @@
 -(void) recalculateCentroid {
     if (!self.isDirty) return;
     
-    double xTotal = 0, yTotal = 0;
-    AGSSpatialReference *ref = nil;
-    NSArray *items = self.items;
-    for (AGSClusterItem *item in items) {
-        AGSPoint *pt = (AGSPoint *)item.geometry;
-        xTotal += pt.x;
-        yTotal += pt.y;
-        if (!ref) ref = pt.spatialReference;
+    AGSPoint *centroid = nil;
+    NSArray *items = self.features;
+    if (items.count == 1) {
+        centroid = (AGSPoint *)((AGSClusterItem *)items[0]).geometry;
+    } else if (items.count == 0) {
+        centroid = [self.parentGrid cellCentroid:self.cellCoordinate];
+    } else {
+        double xTotal = 0, yTotal = 0;
+        AGSSpatialReference *ref = nil;
+        for (AGSClusterItem *item in items) {
+            AGSPoint *pt = (AGSPoint *)item.geometry;
+            xTotal += pt.x;
+            yTotal += pt.y;
+            if (!ref) ref = pt.spatialReference;
+        }
+//        NSLog(@"Calculated centroid from %d points", items.count);
+        centroid = [AGSPoint pointWithX:xTotal/items.count y:yTotal/items.count spatialReference:ref];
     }
-//    NSLog(@"Calculated centroid from %d points", items.count);
-    AGSPoint *centroid = [AGSPoint pointWithX:xTotal/items.count y:yTotal/items.count spatialReference:ref];
     self.geometry = centroid;
-    self.isDirty = NO;
 }
 
 -(void) recalculateCoverage {
@@ -213,97 +214,6 @@
     self.coverage = coverage;
     self.isCoverageDirty = NO;
 }
-
-//    switch (AGSGeometryTypeForGeometry(coverage)) {
-//        case AGSGeometryTypePolygon:
-//            self.coverage = coverage;
-//            break;
-//            
-//        case AGSGeometryTypePolyline:
-//        {
-//            AGSPolyline *cl = (AGSPolyline *)coverage;
-//            self.calculatedCoverageGraphic.geometry = coverage;
-//            AGSPoint *pt1 = [cl pointOnPath:0 atIndex:0];
-//            AGSPoint *pt2 = [cl pointOnPath:0 atIndex:1];
-//            self.geometry = [AGSPoint pointWithX:(pt1.x+pt2.x)/2
-//                                               y:(pt1.y+pt2.y)/2
-//                                spatialReference:cl.spatialReference];
-//        }
-//            break;
-//            
-//        case AGSGeometryTypeMultipoint:
-//            if (((AGSMultipoint *)geom).numPoints > 1) {
-//                NSLog(@"Break here");
-//            } else {
-//                coverage = [((AGSMultipoint *)geom) pointAtIndex:0];
-//            }
-//        case AGSGeometryTypePoint:
-//            self.calculatedCoverageGraphic.geometry = coverage;
-//            self.geometry = coverage;
-//            break;
-//            
-//        default:
-//            @throw [NSException exceptionWithName:@"UnknownGeometryType"
-//                                           reason:@"Geometry Type Unknown!"
-//                                         userInfo:@{@"geomType": AGSGeometryTypeString(AGSGeometryTypeForGeometry(coverage))}];
-//    }
-
-//    if (childCount == 1) {
-//        // Super Simple. Inherit the location and coverage of the child.
-//        self.geometry = [((NSDictionary *)(self._clusters.count==1?self._clusters:self._features)).allValues[0] geometry];
-//    }
-//    if (self._clusters.count + self._features.count > 0) {
-//        // Get an array of geometries from all the clusters and features
-//        NSArray *allGeomsForCoverage = [[self._clusters.allValues map:^id(id obj) {
-//            return ((AGSCluster *)obj).coverage;
-//        }] arrayByAddingObjectsFromArray:[self._features.allValues map:^id(id obj) {
-//            return ((AGSClusterItem *)obj).geometry;
-//        }]];
-//        
-//        // Union and Convex Hull
-//        AGSGeometry *geom = [[AGSGeometryEngine defaultGeometryEngine] unionGeometries:allGeomsForCoverage];
-//        AGSGeometry *coverage = [[AGSGeometryEngine defaultGeometryEngine] convexHullForGeometry:geom];
-    
-        // Determine the centroid
-//        switch (AGSGeometryTypeForGeometry(coverage)) {
-//            case AGSGeometryTypePolygon:
-//                self.coverage = coverage;
-//                self.geometry = [[AGSGeometryEngine defaultGeometryEngine] labelPointForPolygon:(AGSPolygon *)self.calculatedCoverageGraphic.geometry];
-//                break;
-//                
-//            case AGSGeometryTypePolyline:
-//            {
-//                AGSPolyline *cl = (AGSPolyline *)coverage;
-//                self.calculatedCoverageGraphic.geometry = coverage;
-//                AGSPoint *pt1 = [cl pointOnPath:0 atIndex:0];
-//                AGSPoint *pt2 = [cl pointOnPath:0 atIndex:1];
-//                self.geometry = [AGSPoint pointWithX:(pt1.x+pt2.x)/2
-//                                                   y:(pt1.y+pt2.y)/2
-//                                    spatialReference:cl.spatialReference];
-//            }
-//                break;
-//                
-//            case AGSGeometryTypeMultipoint:
-//                if (((AGSMultipoint *)geom).numPoints > 1) {
-//                    NSLog(@"Break here");
-//                } else {
-//                    coverage = [((AGSMultipoint *)geom) pointAtIndex:0];
-//                }
-//            case AGSGeometryTypePoint:
-//                self.calculatedCoverageGraphic.geometry = coverage;
-//                self.geometry = coverage;
-//                break;
-//                
-//            default:
-//                @throw [NSException exceptionWithName:@"UnknownGeometryType"
-//                                               reason:@"Geometry Type Unknown!"
-//                                             userInfo:@{@"geomType": AGSGeometryTypeString(AGSGeometryTypeForGeometry(coverage))}];
-//        }
-//    } else {
-//        self.calculatedCoverageGraphic.geometry = self.gridCentroid;
-//        self.geometry = self.gridCentroid;
-//    }
-//}
 
 #pragma mark - Description Override
 -(NSString *)description {

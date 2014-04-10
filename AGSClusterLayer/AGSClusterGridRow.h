@@ -13,13 +13,11 @@
 @class AGSCluster;
 
 @interface AGSClusterGridRow : NSObject
-@property (nonatomic, strong) NSMutableDictionary *rowClusters;
 @property (nonatomic, weak) AGSClusterGrid *grid;
 @property (nonatomic, readonly) NSArray *clusters;
++(AGSClusterGridRow *)clusterGridRowForClusterGrid:(AGSClusterGrid *)parentGrid;
+
 -(AGSCluster *)clusterForGridCoord:(CGPoint)gridCoord atPoint:(AGSPoint *)point;
 -(void)removeAllClusters;
-
-+(AGSClusterGridRow *)clusterGridRowForClusterGrid:(AGSClusterGrid *)parentGrid;
-+(NSUInteger)createdCellCount;
 @end
 

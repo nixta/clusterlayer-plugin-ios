@@ -15,9 +15,18 @@
 
 #define kAddFeaturesArrayKey @"__tempArrayKey"
 
+NSString * const AGSClusterGridClusteringNotification = @"AGSClusterGridNotification_StartClustering";
+NSString * const AGSClusterGridClusteredNotification = @"AGSClusterGridNotification_EndClustering";
+
 #pragma mark - Helper Methods
 CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
     return CGPointMake(floor(pt.x/cellSize), floor(pt.y/cellSize));
+}
+
+AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
+    return [AGSPoint pointWithX:(cellCoord.x * cellSize) + (cellSize/2)
+                              y:cellCoord.y * cellSize + (cellSize/2)
+               spatialReference:[AGSSpatialReference webMercatorSpatialReference]];
 }
 
 #pragma mark - Internal Helper Classes
@@ -64,7 +73,7 @@ CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
 #pragma mark - Cluster Grid
 @interface AGSClusterGrid()
 @property (nonatomic, assign, readwrite) NSUInteger cellSize;
-@property (nonatomic, strong) NSMutableDictionary* grid;
+@property (nonatomic, strong) NSMutableDictionary* _int_rows;
 @property (nonatomic, strong, readwrite) NSMutableDictionary *items;
 @property (nonatomic, weak) AGSClusterLayer *owningClusterLayer;
 @end
@@ -74,7 +83,7 @@ CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
     self = [self init];
     if (self) {
         self.cellSize = cellSize;
-        self.grid = [NSMutableDictionary dictionary];
+        self._int_rows = [NSMutableDictionary dictionary];
         self.items = [NSMutableDictionary dictionary];
         self.owningClusterLayer = clusterLayer;
     }
@@ -82,27 +91,10 @@ CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
 }
 
 -(void)addItems:(NSArray *)items {
-//    NSUInteger addFeatureCount = 0;
-//    NSUInteger addClusterCount = 0;
     for (AGSClusterItem *item in items) {
         id key = item.clusterItemKey;
-//        if ([key isEqualToString:@"f0"]) {
-//            NSLog(@"Break here");
-//        }
-//        if (!self.items[key]) {
-//            if ([item isMemberOfClass:[AGSGraphic class]]) {
-//                addFeatureCount++;
-////                NSLog(@"Added %@ at zoom level %@", key, self.zoomLevel);
-//            } else {
-//                addClusterCount++;
-////                NSLog(@"Added %@ at zoom level %@", key, self.zoomLevel);
-//            }
-//        }
         self.items[key] = item;
-//        addClusterCount++;
     }
-//    if (addFeatureCount > 0) NSLog(@"Added %d features at zoom level %@!", addFeatureCount, self.zoomLevel);
-//    if (addClusterCount > 0) NSLog(@"Added %d clusters at zoom level %@!", addClusterCount, self.zoomLevel);
 
     [self clusterItems];
     [self.gridForPrevZoomLevel addItems:self.clusters];
@@ -113,7 +105,18 @@ CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
     [self addItems:@[]];
 }
 
+-(void)removeAllItems {
+    for (AGSClusterGridRow *row in self.rows) {
+        for (AGSCluster *cluster in row.clusters) {
+            [cluster clearItems];
+        }
+        [row removeAllClusters];
+    }
+    [self removeAllRows];
+}
+
 -(void)clusterItems {
+    [[NSNotificationCenter defaultCenter] postNotificationName:AGSClusterGridClusteringNotification object:self];
     NSDate *startTime = [NSDate date];
 
     NSMutableDictionary *items = self.items;
@@ -139,16 +142,25 @@ CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
     
     // Now go over the clusters we've touched
     // And bulk add items to each individual cluster.
+    NSUInteger featureCount = 0;
     for (AGSCluster *cluster in clustersForItems) {
         NSArray *itemsToAdd = objc_getAssociatedObject(cluster, kAddFeaturesArrayKey);
         [cluster addItems:itemsToAdd];
+        featureCount += cluster.displayCount;
         // Remove the temporary reference to the array that tracked the items to add to this cluster
         objc_setAssociatedObject(cluster, kAddFeaturesArrayKey, nil, OBJC_ASSOCIATION_ASSIGN);
     }
     
     NSTimeInterval clusteringDuration = -[startTime timeIntervalSinceNow];
+    [[NSNotificationCenter defaultCenter] postNotificationName:AGSClusterGridClusteredNotification object:self
+                                                      userInfo:@{
+                                                                 @"itemsClustered": @(featureCount),
+                                                                 @"clusters": @(self.clusters.count),
+                                                                 @"duration": @(clusteringDuration),
+                                                                 @"zoomLevel": self.zoomLevel
+                                                                 }];
     
-    NSLog(@"%2d [%4d items in %4d clusters sized %7d] in %.4fs :: %d", self.zoomLevel.unsignedIntegerValue, self.items.count, self.clusters.count, self.cellSize, clusteringDuration, [AGSClusterGridRow createdCellCount]);
+//    NSLog(@"%2d [%4d items in %4d clusters sized %7d] in %.4fs", self.zoomLevel.unsignedIntegerValue, self.items.count, self.clusters.count, self.cellSize, clusteringDuration);
 }
 
 -(AGSCluster *)clusterForItem:(AGSClusterItem *)item {
@@ -162,23 +174,27 @@ CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
     return [self clusterForGridCoord:gridCoord atPoint:pt];
 }
 
--(AGSClusterGridRow *)rowForGridCoord:(CGPoint)gridCoord {
-    AGSClusterGridRow *row = self.grid[@(gridCoord.y)];
-    if (!row) {
-        row = [AGSClusterGridRow clusterGridRowForClusterGrid:self];
-        [self.grid setObject:row forKey:@(gridCoord.y)];
-    }
-    return row;
-}
-
 -(AGSCluster *)clusterForGridCoord:(CGPoint)gridCoord atPoint:(AGSPoint *)point {
     // Find the cells along that row.
     AGSClusterGridRow *row = [self rowForGridCoord:gridCoord];
     return [row clusterForGridCoord:gridCoord atPoint:point];
 }
 
+-(AGSClusterGridRow *)rowForGridCoord:(CGPoint)gridCoord {
+    AGSClusterGridRow *row = self._int_rows[@(gridCoord.y)];
+    if (!row) {
+        row = [AGSClusterGridRow clusterGridRowForClusterGrid:self];
+        [self._int_rows setObject:row forKey:@(gridCoord.y)];
+    }
+    return row;
+}
+
+-(AGSPoint *)cellCentroid:(CGPoint)cellCoord {
+    return getGridCellCentroid(cellCoord, self.cellSize);
+}
+
 -(NSArray *)rows {
-    return self.grid.allValues;
+    return self._int_rows.allValues;
 }
 
 -(NSArray *)clusters {
@@ -192,17 +208,7 @@ CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
 }
 
 -(void)removeAllRows {
-    [self.grid removeAllObjects];
-}
-
--(void)removeAllItems {
-    for (AGSClusterGridRow *row in self.rows) {
-        for (AGSCluster *cluster in row.clusters) {
-            [cluster clearItems];
-        }
-        [row removeAllClusters];
-    }
-    [self removeAllRows];
+    [self._int_rows removeAllObjects];
 }
 
 //-(AGSGraphic *)getItemNear:(AGSPoint *)mapPoint {
@@ -232,6 +238,6 @@ CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
         }
         featureCount += cluster.features.count;
     }
-    return [NSString stringWithFormat:@"Cluster Layer: %d features in %d clusters (with %d unclustered)", featureCount, clusterCount, loneFeatures];
+    return [NSString stringWithFormat:@"Cluster Grid: %d features in %d clusters (with %d unclustered)", featureCount, clusterCount, loneFeatures];
 }
 @end

@@ -10,11 +10,12 @@
 #import <ArcGIS/ArcGIS.h>
 #import "AGSClusterLayerRenderer.h"
 
-extern NSString * const AGSClusterLayerDidCompleteClusteringNotification;
-extern NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_Duration;
-extern NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_ClusterCount;
-extern NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_FeatureCount;
-extern NSString * const AGSClusterLayerDidCompleteClusteringNotificationUserInfo_ClusteringCellsize;
+extern NSString * const AGSClusterLayerClusteringProgressNotification;
+extern NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_PercentComplete;
+extern NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_TotalZoomLevels;
+extern NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_CompletedZoomLevels;
+extern NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_FeatureCount;
+extern NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_Duration;
 
 extern NSString * const AGSClusterLayerLoadFeaturesProgressNotification;
 extern NSString * const AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_PercentComplete;

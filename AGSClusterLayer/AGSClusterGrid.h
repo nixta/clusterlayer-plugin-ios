@@ -13,6 +13,9 @@
 #import <ArcGIS/ArcGIS.h>
 #import "AGSClusterLayer.h"
 
+extern NSString * const AGSClusterGridClusteringNotification;
+extern NSString * const AGSClusterGridClusteredNotification;
+
 @interface AGSClusterGrid : NSObject
 @property (nonatomic, strong, readonly) NSArray *clusters;
 @property (nonatomic, readonly, assign) NSUInteger cellSize;
@@ -22,6 +25,8 @@
 @property (nonatomic, strong) AGSClusterGrid *gridForPrevZoomLevel;
 
 -(id)initWithCellSize:(NSUInteger)cellSize forClusterLayer:(AGSClusterLayer*)clusterLayer;
+
+-(AGSPoint *)cellCentroid:(CGPoint)cellCoord;
 
 -(void)addKeyedItems:(NSDictionary *)items;
 -(void)removeAllItems;

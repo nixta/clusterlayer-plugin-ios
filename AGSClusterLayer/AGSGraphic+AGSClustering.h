@@ -10,5 +10,4 @@
 
 @interface AGSGraphic (AGSClustering)
 @property (nonatomic, readonly) BOOL isCluster;
-@property (nonatomic, readonly) BOOL isClusterCoverage;
 @end

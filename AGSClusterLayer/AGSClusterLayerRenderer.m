@@ -26,7 +26,10 @@
     return self;
 }
 
--(id)initAsSurrogateFor:(AGSRenderer *)originalRenderer clusterSymbolBlock:(AGSClusterSymbolGeneratorBlock)clusterSymbolGenerator coverageSymbolBlock:(AGSClusterSymbolGeneratorBlock)coverageSymbolGenerator {
+-(id)initAsSurrogateFor:(AGSRenderer *)originalRenderer
+     clusterSymbolBlock:(AGSClusterSymbolGeneratorBlock)clusterSymbolGenerator
+    coverageSymbolBlock:(AGSClusterSymbolGeneratorBlock)coverageSymbolGenerator
+{
     self = [self initAsSurrogateFor:originalRenderer];
     if (self) {
         if (clusterSymbolGenerator) {
@@ -44,21 +47,24 @@
     if (self) {
         self.clusterGenBlock = ^(AGSCluster *cluster) {
             AGSCompositeSymbol *s = [AGSCompositeSymbol compositeSymbol];
-//            NSArray *clusterItems = cluster.items;
-            
+
             NSUInteger innerSize = 24;
             NSUInteger borderSize = 6;
             NSUInteger fontSize = 14;
+            
             UIColor *smallClusterColor = [UIColor colorWithRed:0.000 green:0.491 blue:0.000 alpha:1.000];
             UIColor *mediumClusterColor = [UIColor colorWithRed:0.838 green:0.500 blue:0.000 alpha:1.000];
             UIColor *largeClusterColor = [UIColor colorWithRed:0.615 green:0.178 blue:0.550 alpha:1.000];
             UIColor *c = cluster.displayCount < 10?smallClusterColor:(cluster.displayCount < 100?mediumClusterColor:largeClusterColor);
+            
             AGSSimpleMarkerSymbol *backgroundSymbol1 = [AGSSimpleMarkerSymbol simpleMarkerSymbolWithColor:[c colorWithAlphaComponent:0.7]];
             backgroundSymbol1.outline = nil;
             backgroundSymbol1.size = CGSizeMake(innerSize + borderSize, innerSize + borderSize);
+            
             AGSSimpleMarkerSymbol *backgroundSymbol2 = [AGSSimpleMarkerSymbol simpleMarkerSymbolWithColor:[[UIColor whiteColor] colorWithAlphaComponent:0.7]];
             backgroundSymbol2.outline = nil;
             backgroundSymbol2.size = CGSizeMake(innerSize + (borderSize/2), innerSize + (borderSize/2));
+            
             AGSSimpleMarkerSymbol *backgroundSymbol3 = [AGSSimpleMarkerSymbol simpleMarkerSymbolWithColor:[c colorWithAlphaComponent:0.7]];
             backgroundSymbol3.outline = nil;
             backgroundSymbol3.size = CGSizeMake(innerSize, innerSize);
