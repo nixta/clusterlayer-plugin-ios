@@ -91,19 +91,11 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
 }
 
 -(void)addItems:(NSArray *)items {
-//    for (AGSClusterItem *item in items) {
-//        id key = item.clusterItemKey;
-//        self.items[key] = item;
-//    }
     [self.items addObjectsFromArray:items];
 
     [self clusterItems];
     [self.gridForPrevZoomLevel addItems:self.clusters];
 }
-
-//-(void)addKeyedItems:(NSDictionary *)items {
-//    [self addItems:items.allValues];
-//}
 
 -(void)removeAllItems {
     for (AGSClusterGridRow *row in self.rows) {
@@ -120,7 +112,7 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
     NSDate *startTime = [NSDate date];
 
     NSArray *items = self.items;
-//    NSLog(@"Adding %d features/clusters to zoom level %@", items.count, self.zoomLevel);
+    // NSLog(@"Adding %d features/clusters to zoom level %@", items.count, self.zoomLevel);
 
     // Add each item to the clusters (creating new ones if necessary).
     NSMutableSet *clustersForItems = [NSMutableSet set];
@@ -160,7 +152,7 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
                                                                  @"zoomLevel": self.zoomLevel
                                                                  }];
     
-//    NSLog(@"%2d [%4d items in %4d clusters sized %7d] in %.4fs", self.zoomLevel.unsignedIntegerValue, self.items.count, self.clusters.count, self.cellSize, clusteringDuration);
+    // NSLog(@"%2d [%4d items in %4d clusters sized %7d] in %.4fs", self.zoomLevel.unsignedIntegerValue, self.items.count, self.clusters.count, self.cellSize, clusteringDuration);
 }
 
 -(AGSCluster *)clusterForItem:(AGSClusterItem *)item {
@@ -210,21 +202,6 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
 -(void)removeAllRows {
     [self._int_rows removeAllObjects];
 }
-
-//-(AGSGraphic *)getItemNear:(AGSPoint *)mapPoint {
-//    double closestDistance = (double)self.cellSize;
-//    id closestItem = nil;
-//    for (AGSCluster *cluster in self.clusters) {
-//        for (AGSGraphic *item in cluster.features) {
-//            double distance = [[AGSGeometryEngine defaultGeometryEngine] distanceFromGeometry:item.geometry toGeometry:mapPoint];
-//            if (distance < closestDistance) {
-//                closestItem = item;
-//                closestDistance = distance;
-//            }
-//        }
-//    }
-//    return closestItem;
-//}
 
 -(NSString *)description {
     NSUInteger clusterCount = 0;

@@ -126,7 +126,6 @@
 }
 
 -(AGSGraphic *)coverageGraphic {
-//    static dispatch_once_t token;
     if (!_coverageGraphic) {
         _coverageGraphic = [AGSGraphic graphicWithGeometry:self.coverage symbol:nil attributes:nil];
     }
@@ -205,13 +204,24 @@
 }
 
 -(void) recalculateCoverage {
-    NSArray *allGeomsForCoverage = [self.features map:^id(id obj) {
-        return ((AGSClusterItem *)obj).geometry;
-    }];
-    AGSGeometry *geom = [[AGSGeometryEngine defaultGeometryEngine] unionGeometries:allGeomsForCoverage];
-    AGSGeometry *coverage = [[AGSGeometryEngine defaultGeometryEngine] convexHullForGeometry:geom];
-
-    self.coverage = coverage;
+    if (self.features.count == 1) {
+        self.coverage = self.geometry;
+    } else if (self.features.count == 2) {
+        AGSPoint *pt1 = (AGSPoint *)((AGSClusterItem *)self.features[0]).geometry;
+        AGSPoint *pt2 = (AGSPoint *)((AGSClusterItem *)self.features[1]).geometry;
+        AGSMutablePolyline *line = [[AGSMutablePolyline alloc] initWithSpatialReference:pt1.spatialReference];
+        [line addPathToPolyline];
+        [line addPoint:pt1 toPath:0];
+        [line addPoint:pt2 toPath:0];
+        self.coverage = line;
+    } else {
+        NSArray *allGeomsForCoverage = [self.features map:^id(id obj) {
+            return ((AGSClusterItem *)obj).geometry;
+        }];
+        AGSGeometry *geom = [[AGSGeometryEngine defaultGeometryEngine] unionGeometries:allGeomsForCoverage];
+        AGSGeometry *coverage = [[AGSGeometryEngine defaultGeometryEngine] convexHullForGeometry:geom];
+        self.coverage = coverage;
+    }
     self.isCoverageDirty = NO;
 }
 

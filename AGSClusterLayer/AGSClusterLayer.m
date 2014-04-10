@@ -194,7 +194,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
             currentArray = [NSMutableArray array];
             [pagesToLoad addObject:currentArray];
             pageCount++;
-//            NSLog(@"Created page %d of IDs", pageCount);
+            // NSLog(@"Created page %d of IDs", pageCount);
         }
         [currentArray addObject:oid];
         count++;
@@ -209,7 +209,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
         NSOperation *queryOp = [self.featureLayer queryFeatures:q];
         objc_setAssociatedObject(queryOp, kBatchQueryOperationQueryKey, q, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         [self.openQueries addObject:queryOp];
-//        NSLog(@"Fired off query %d", [pagesToLoad indexOfObject:featureIds]);
+        // NSLog(@"Fired off query %d", [pagesToLoad indexOfObject:featureIds]);
     }
 }
 
@@ -240,7 +240,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
                                                                  AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_RecordsLoaded: @(featuresLoaded),
                                                                  AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_PercentComplete: @(percentComplete)}];
     
-//    NSLog(@"%d feature queries remaining for %d features", self.openQueries.count, self.featuresToLoad);
+    // NSLog(@"%d feature queries remaining for %d features", self.openQueries.count, self.featuresToLoad);
     if (self.openQueries.count == 0) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
             NSLog(@"Done loading %d features.", self.allFeatures.count);
@@ -254,22 +254,13 @@ NSString * NSStringFromBool(BOOL boolValue) {
 }
 
 -(void)addOrUpdateFeatures:(NSArray *)features {
-//    NSMutableDictionary *addedFeatures = [NSMutableDictionary dictionary];
-//    for (AGSGraphic *feature in features) {
-//        id key = feature.clusterItemKey;
-//        if (!self.allFeatures[key]) {
-//            addedFeatures[key] = feature;
-//        }
-//        self.allFeatures[feature.clusterItemKey] = feature;
-//    }
     [self.allFeatures addObjectsFromArray:features];
-//    return addedFeatures;
 }
 
 #pragma mark - Update Hooks
 -(void)featuresLoaded:(NSNotification *)notification {
     [self addOrUpdateFeatures:self.featureLayer.graphics];
-//    NSLog(@"Features Loaded: %d", newFeatures.count);
+    // NSLog(@"Features Loaded: %d", newFeatures.count);
     self.dataLoaded = YES;
     [self rebuildClusterGrid];
     [self refresh];
@@ -282,7 +273,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
 -(void)mapDidUpdate:(AGSMapUpdateType)updateType
 {
     if (updateType == AGSMapUpdateTypeSpatialExtent) {
-//        NSLog(@"Map Extent Updated: %@", NSStringFromBool(self.mapView.loaded));
+        // NSLog(@"Map Extent Updated: %@", NSStringFromBool(self.mapView.loaded));
         self.mapViewLoaded = self.mapView.loaded;
         self.willClusterAtCurrentScale = self.mapView.mapScale > self.minScaleForClustering;
         if (self.initialized) {
@@ -429,10 +420,6 @@ NSString * NSStringFromBool(BOOL boolValue) {
     
     AGSClusterGrid *grid = self.maxZoomLevelGrid;
     [grid addItems:self.allFeatures];
-    
-//    NSTimeInterval clusteringDuration = -[startTime timeIntervalSinceNow];
-    
-//    NSLog(@"Rebuilt %d features into %d clusters with cell size %d in %.4fs", self.allFeatures.count, grid.clusters.count, grid.cellSize, clusteringDuration);
 }
 
 -(void)gridClustered:(NSNotification *)notification {
@@ -460,20 +447,21 @@ NSString * NSStringFromBool(BOOL boolValue) {
     NSMutableArray *clusterGraphics = [NSMutableArray array];
     NSMutableArray *featureGraphics = [NSMutableArray array];
     
-//    NSLog(@"Rendering %d items at zoom level %@", self.gridForCurrentScale.clusters.count, self.gridForCurrentScale.zoomLevel);
+    // NSLog(@"Rendering %d items at zoom level %@", self.gridForCurrentScale.clusters.count, self.gridForCurrentScale.zoomLevel);
     
     for (AGSCluster *cluster in self.gridForCurrentScale.clusters) {
-//        NSLog(@"Cluster: %@", cluster);
+        // NSLog(@"Cluster: %@", cluster);
         if (self.mapView.mapScale > self.minScaleForClustering &&
             cluster.displayCount >= self.minClusterCount) {
             // Draw as cluster.
             if (self.showClusterCoverages && cluster.items.count > 2) {
+                // Draw the coverage if need be
                 AGSGraphic *coverageGraphic = cluster.coverageGraphic;
                 objc_setAssociatedObject(coverageGraphic, kClusterPayloadKey, cluster, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
                 coverageGraphic.symbol = [self.renderer symbolForFeature:coverageGraphic timeExtent:nil];
                 [coverageGraphics addObject:coverageGraphic];
             }
-            
+
             cluster.symbol = [self.renderer symbolForFeature:cluster timeExtent:nil];
             [clusterGraphics addObject:cluster];
         } else {
