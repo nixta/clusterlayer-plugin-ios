@@ -3,8 +3,7 @@
 //  Cluster Layer
 //
 //  Created by Nicholas Furness on 3/28/14.
-//  Copyright (c) 2014 ESRI. All rights reserved.
-//
+//  With thanks to https://mikeash.com/pyblog/friday-qa-2009-08-14-practical-blocks.html
 
 #import <Foundation/Foundation.h>
 

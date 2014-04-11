@@ -16,7 +16,7 @@
 @property (nonatomic, weak) AGSClusterGrid *parentGrid;
 @property (nonatomic, strong, readonly) NSMutableDictionary *clusters;
 
-+(AGSClusterGridRow *)clusterGridRowForClusterGrid:(AGSClusterGrid *)parentGrid;
++(AGSClusterGridRow *)clusterGridRowForClusterGrid:(AGSClusterGrid *)grid;
 
 -(AGSCluster *)clusterForGridCoord:(CGPoint)gridCoord atPoint:(AGSPoint *)point;
 -(void)removeAllClusters;

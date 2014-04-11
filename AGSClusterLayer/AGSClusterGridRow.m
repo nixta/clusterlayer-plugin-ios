@@ -16,15 +16,15 @@
 @end
 
 @implementation AGSClusterGridRow
-+(AGSClusterGridRow *)clusterGridRowForClusterGrid:(AGSClusterGrid *)parentGrid {
-    return [[AGSClusterGridRow alloc] initForClusterGrid:parentGrid];
++(AGSClusterGridRow *)clusterGridRowForClusterGrid:(AGSClusterGrid *)grid {
+    return [[AGSClusterGridRow alloc] initForClusterGrid:grid];
 }
 
--(id)initForClusterGrid:(AGSClusterGrid *)parentGrid {
+-(id)initForClusterGrid:(AGSClusterGrid *)grid {
     self = [super init];
     if (self) {
         self.clusters = [NSMutableDictionary dictionary];
-        self.parentGrid = parentGrid;
+        self.parentGrid = grid;
     }
     return self;
 }
