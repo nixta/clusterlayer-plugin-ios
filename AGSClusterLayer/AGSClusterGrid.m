@@ -30,6 +30,11 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize);
 @end
 
 @implementation AGSClusterGrid
+@synthesize clusters = _clusters;
+@synthesize zoomLevel = _zoomLevel;
+@synthesize gridForNextZoomLevel = _gridForNextZoomLevel;
+@synthesize gridForPrevZoomLevel = _gridForPrevZoomLevel;
+
 -(id)initWithCellSize:(NSUInteger)cellSize forClusterLayer:(AGSClusterLayer *)clusterLayer {
     self = [self init];
     if (self) {

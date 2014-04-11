@@ -29,4 +29,19 @@ extern NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_D
 extern NSString * const AGSClusterGridClusteringNotification;
 extern NSString * const AGSClusterGridClusteredNotification;
 
+#pragma mark - Protocols
+@protocol AGSClusterGridProvider <NSObject>
+@required
+@property (nonatomic, strong, readonly) NSArray *clusters;
+-(void)addItems:(NSArray *)items;
+-(void)removeAllItems;
+@end
+
+@protocol AGSZoomLevelClusterGridProvider <AGSClusterGridProvider>
+@required
+@property (nonatomic, strong) NSNumber *zoomLevel;
+@property (nonatomic, strong) id<AGSZoomLevelClusterGridProvider> gridForNextZoomLevel;
+@property (nonatomic, strong) id<AGSZoomLevelClusterGridProvider> gridForPrevZoomLevel;
+@end
+
 #endif

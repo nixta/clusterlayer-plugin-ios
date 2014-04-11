@@ -11,21 +11,10 @@
 
 #import <Foundation/Foundation.h>
 #import <ArcGIS/ArcGIS.h>
+#import "AGSCL.h"
 
-@class AGSClusterLayer;
-
-@interface AGSClusterGrid : NSObject
-@property (nonatomic, readonly, assign) NSUInteger cellSize;
-@property (nonatomic, strong, readonly) NSArray *clusters;
-
-@property (nonatomic, strong) NSNumber *zoomLevel;
-@property (nonatomic, strong) AGSClusterGrid *gridForNextZoomLevel;
-@property (nonatomic, strong) AGSClusterGrid *gridForPrevZoomLevel;
-
--(id)initWithCellSize:(NSUInteger)cellSize forClusterLayer:(AGSClusterLayer*)clusterLayer;
-
--(void)addItems:(NSArray *)items;
--(void)removeAllItems;
-
+@interface AGSClusterGrid : NSObject <AGSZoomLevelClusterGridProvider>
+@property (nonatomic, assign, readonly) NSUInteger cellSize;
+-(id)initWithCellSize:(NSUInteger)cellSize forClusterLayer:(AGSClusterLayer *)clusterLayer;
 -(AGSPoint *)cellCentroid:(CGPoint)cellCoord;
 @end
