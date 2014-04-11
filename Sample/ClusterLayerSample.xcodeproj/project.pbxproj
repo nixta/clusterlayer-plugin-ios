@@ -11,6 +11,7 @@
 		D919A35F18E0B09800B140BF /* AGSClusterLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = D919A35E18E0B09800B140BF /* AGSClusterLayer.m */; };
 		D919A36218E0B14700B140BF /* AGSClusterGrid.m in Sources */ = {isa = PBXBuildFile; fileRef = D919A36118E0B14700B140BF /* AGSClusterGrid.m */; };
 		D919A36518E203DD00B140BF /* AGSCluster.m in Sources */ = {isa = PBXBuildFile; fileRef = D919A36418E203DD00B140BF /* AGSCluster.m */; };
+		D98A0A7218F8666C00138B1C /* NSObject+NFNotificationsProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = D98A0A7118F8666C00138B1C /* NSObject+NFNotificationsProvider.m */; };
 		D9A8B11916BB27B9001653EE /* libc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D9A8B11816BB27B9001653EE /* libc++.dylib */; };
 		D9A8B11B16BB27BF001653EE /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9A8B11A16BB27BF001653EE /* OpenGLES.framework */; };
 		D9D1C8BE18E62D6400CD3CEF /* AGSGraphic+AGSClustering.m in Sources */ = {isa = PBXBuildFile; fileRef = D9D1C8BD18E62D6400CD3CEF /* AGSGraphic+AGSClustering.m */; };
@@ -48,6 +49,8 @@
 		D919A36118E0B14700B140BF /* AGSClusterGrid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = AGSClusterGrid.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		D919A36318E203DD00B140BF /* AGSCluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AGSCluster.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		D919A36418E203DD00B140BF /* AGSCluster.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = AGSCluster.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		D98A0A7018F8666C00138B1C /* NSObject+NFNotificationsProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+NFNotificationsProvider.h"; sourceTree = "<group>"; };
+		D98A0A7118F8666C00138B1C /* NSObject+NFNotificationsProvider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+NFNotificationsProvider.m"; sourceTree = "<group>"; };
 		D9A8B11816BB27B9001653EE /* libc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libc++.dylib"; path = "usr/lib/libc++.dylib"; sourceTree = SDKROOT; };
 		D9A8B11A16BB27BF001653EE /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
 		D9D1C8BB18E5942F00CD3CEF /* AGSCluster_int.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AGSCluster_int.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
@@ -130,6 +133,15 @@
 			path = ../AGSClusterLayer;
 			sourceTree = SOURCE_ROOT;
 		};
+		D98A0A7318F8749A00138B1C /* Categories */ = {
+			isa = PBXGroup;
+			children = (
+				D98A0A7018F8666C00138B1C /* NSObject+NFNotificationsProvider.h */,
+				D98A0A7118F8666C00138B1C /* NSObject+NFNotificationsProvider.m */,
+			);
+			name = Categories;
+			sourceTree = "<group>";
+		};
 		D9D1C8BF18E62D6900CD3CEF /* Categories */ = {
 			isa = PBXGroup;
 			children = (
@@ -187,6 +199,7 @@
 				D9F3D1C81668271A00FB6A8D /* MainStoryboard_iPad.storyboard */,
 				D9F3D1CB1668271A00FB6A8D /* AGSSampleViewController.h */,
 				D9F3D1CC1668271A00FB6A8D /* AGSSampleViewController.m */,
+				D98A0A7318F8749A00138B1C /* Categories */,
 				D9F3D1B41668271A00FB6A8D /* Supporting Files */,
 			);
 			path = Source;
@@ -280,6 +293,7 @@
 				D906E0A818F316940015EAF2 /* AGSClusterGridRow.m in Sources */,
 				D919A36518E203DD00B140BF /* AGSCluster.m in Sources */,
 				D919A36218E0B14700B140BF /* AGSClusterGrid.m in Sources */,
+				D98A0A7218F8666C00138B1C /* NSObject+NFNotificationsProvider.m in Sources */,
 				D9F3D1BA1668271A00FB6A8D /* main.m in Sources */,
 				D9F3D1BE1668271A00FB6A8D /* AGSSampleAppDelegate.m in Sources */,
 				D9D1C8BE18E62D6400CD3CEF /* AGSGraphic+AGSClustering.m in Sources */,

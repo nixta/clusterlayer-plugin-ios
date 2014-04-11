@@ -8,8 +8,8 @@
 
 #import "AGSSampleViewController.h"
 #import <ArcGIS/ArcGIS.h>
-
 #import "AGSCL.h"
+#import "NSObject+NFNotificationsProvider.h"
 
 #define kBasemap @"http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer"
 #define kFeatureLayerURL @"http://services.arcgis.com/OfH668nDRN7tbJh0/arcgis/rest/services/stops/FeatureServer/0"
@@ -41,14 +41,10 @@
     self.clusterLayer.showClusterCoverages = self.coverageSwitch.on;
     self.clusterLayer.minScaleForClustering = 15000;
 
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(dataLoadProgress:)
-                                                 name:AGSClusterLayerDataLoadingProgressNotification
-                                               object:self.clusterLayer];
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(clusteringProgress:)
-                                                 name:AGSClusterLayerClusteringProgressNotification
-                                               object:self.clusterLayer];
+    [self.clusterLayer registerListener:self forNotifications:@{AGSClusterLayerDataLoadingProgressNotification: strSelector(dataLoadProgress:),
+                                                                AGSClusterLayerDataLoadingErrorNotification: strSelector(dataLoadError:),
+                                                                AGSClusterLayerClusteringProgressNotification: strSelector(clusteringProgress:)
+                                                                }];
     
     [self.clusterLayer addObserver:self forKeyPath:@"willClusterAtCurrentScale" options:NSKeyValueObservingOptionNew context:nil];
     [self.mapView addObserver:self forKeyPath:@"mapScale" options:NSKeyValueObservingOptionNew context:nil];
@@ -95,6 +91,17 @@
     } else {
         self.clusteringFeedbackLabel.text = [NSString stringWithFormat:@"Clustering zoom levels %.4fs", duration];
     }
+}
+
+-(void)dataLoadError:(NSNotification *)notification {
+    NSError *error = notification.userInfo[AGSClusterLayerDataLoadingErrorNotification_UserInfo_Error];
+    NSString *strError = error.localizedDescription;
+    if (strError.length == 0) strError = error.localizedFailureReason;
+    [[[UIAlertView alloc] initWithTitle:@"Cluster Load Error"
+                                message:strError
+                               delegate:nil
+                      cancelButtonTitle:@"OK"
+                      otherButtonTitles:nil] show];
 }
 
 -(void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context {
