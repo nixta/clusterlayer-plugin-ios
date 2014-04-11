@@ -65,6 +65,7 @@
     [self.dataLoadProgressView setProgress:percentComplete/100 animated:YES];
     
     if (percentComplete == 100) {
+        NSLog(@"Done loading %d features", featuresLoaded);
         self.dataLoadProgressView.backgroundColor = self.dataLoadProgressView.tintColor;
         self.dataLoadProgressView.tintColor = [UIColor colorWithRed:0.756 green:0.137 blue:0.173 alpha:1.000];
         [self.dataLoadProgressView setProgress:0 animated:NO];
@@ -81,6 +82,7 @@
     
     if (percentComplete == 100) {
         self.clusteringFeedbackLabel.text = [NSString stringWithFormat:@"Clustering complete in %.2fs", duration];
+        NSLog(@"Done clustering features in %.4fs", duration);
         [UIView animateWithDuration:0.2
                          animations:^{
                              self.dataLoadProgressView.alpha = 0;

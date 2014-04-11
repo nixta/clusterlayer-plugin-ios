@@ -250,7 +250,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
     // NSLog(@"%d feature queries remaining for %d features", self.openQueries.count, self.featuresToLoad);
     if (self.openQueries.count == 0) {
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            NSLog(@"Done loading %d features.", self.allFeatures.count);
+            // NSLog(@"Done loading %d features.", self.allFeatures.count);
             self.dataLoaded = YES;
             [self rebuildClusterGrid];
             dispatch_async(dispatch_get_main_queue(), ^{
@@ -433,7 +433,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
     
     NSUInteger gridsClustered = self.grids.count - self.clusteringGrids.count;
     NSTimeInterval clusteringDuration = -[self.clusteringStartTime timeIntervalSinceNow];
-    NSLog(@"%f", clusteringDuration);
+    // NSLog(@"%f", clusteringDuration);
 
     dispatch_async(dispatch_get_main_queue(), ^{
         [[NSNotificationCenter defaultCenter] postNotificationName:kClusterLayerClusteringNotification
