@@ -12,5 +12,5 @@
 
 @interface NSObject (NFNotificationsProvider)
 -(void)registerListener:(id)listener forNotifications:(NSDictionary *)notificationSelectors;
--(void)unRegisterListener:(id)listener fromNotifications:(NSDictionary *)notificationSelectors;
+-(void)unRegisterListener:(id)listener fromNotifications:(NSArray *)notificationNames;
 @end

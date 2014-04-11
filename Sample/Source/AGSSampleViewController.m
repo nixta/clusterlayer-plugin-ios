@@ -40,11 +40,11 @@
     
     self.clusterLayer.showClusterCoverages = self.coverageSwitch.on;
     self.clusterLayer.minScaleForClustering = 15000;
-
-    [self.clusterLayer registerListener:self forNotifications:@{AGSClusterLayerDataLoadingProgressNotification: strSelector(dataLoadProgress:),
-                                                                AGSClusterLayerDataLoadingErrorNotification: strSelector(dataLoadError:),
-                                                                AGSClusterLayerClusteringProgressNotification: strSelector(clusteringProgress:)
-                                                                }];
+    
+    [self.clusterLayer registerListener:self
+                       forNotifications:@{AGSClusterLayerDataLoadingProgressNotification: strSelector(dataLoadProgress:),
+                                          AGSClusterLayerDataLoadingErrorNotification: strSelector(dataLoadError:),
+                                          AGSClusterLayerClusteringProgressNotification: strSelector(clusteringProgress:)}];
     
     [self.clusterLayer addObserver:self forKeyPath:@"willClusterAtCurrentScale" options:NSKeyValueObservingOptionNew context:nil];
     [self.mapView addObserver:self forKeyPath:@"mapScale" options:NSKeyValueObservingOptionNew context:nil];

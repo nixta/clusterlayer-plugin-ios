@@ -18,8 +18,8 @@
     }
 }
 
--(void)unRegisterListener:(id)listener fromNotifications:(NSDictionary *)notificationSelectors {
-    for (id notificationName in notificationSelectors) {
+-(void)unRegisterListener:(id)listener fromNotifications:(NSArray *)notificationNames {
+    for (id notificationName in notificationNames) {
         [[NSNotificationCenter defaultCenter] removeObserver:listener
                                                         name:notificationName
                                                       object:self];
