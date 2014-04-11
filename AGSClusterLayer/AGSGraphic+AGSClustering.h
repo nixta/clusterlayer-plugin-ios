@@ -10,4 +10,5 @@
 
 @interface AGSGraphic (AGSClustering)
 @property (nonatomic, readonly) BOOL isCluster;
+-(id)clusterItemKey;
 @end

@@ -13,7 +13,4 @@
 
 typedef AGSGraphic AGSClusterItem;
 
-@interface AGSGraphic (AGSClusterItem)
--(id)clusterItemKey;
-@end
 #endif

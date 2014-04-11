@@ -14,4 +14,41 @@
 -(BOOL)isCluster {
     return NO;
 }
+
+-(id)clusterItemKey {
+    static NSString *oidFieldName = @"FID";
+    
+    NSUInteger result = self.featureId;
+    if (result == 0) {
+        if (self.layer == nil ||
+            ![self.layer respondsToSelector:@selector(objectIdField)]) {
+            // No featureId (we're doubtless not on a featureLayer). Try to recover
+            @try {
+                NSNumber *oid = [self attributeForKey:oidFieldName];
+                if (oid) {
+                    result = oid.unsignedIntegerValue;
+                }
+            }
+            @catch (NSException *exception) {
+                NSLog(@"Could not read FeatureID: %@", exception);
+            }
+        } else {
+            // No id, but we can get a OID field
+            oidFieldName = [((id)self.layer) objectIdField];
+            NSNumber *oid = [self attributeForKey:oidFieldName];
+            if (oid) {
+                result = oid.unsignedIntegerValue;
+            } else {
+                NSLog(@"Cannot find feature OID!");
+            }
+        }
+    }
+    
+    if (result == 0) {
+        // If we could not recover, let's say so.
+        NSLog(@"Feature ID 0!!");
+    }
+    
+    return [NSString stringWithFormat:@"f%d", result];
+}
 @end
