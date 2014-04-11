@@ -12,7 +12,7 @@
 #import "AGSCL.h"
 
 #define kBasemap @"http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer"
-#define kFeatureLayerURL @"http://services.arcgis.com/rOo16HdIMeOBI4Mb/arcgis/rest/services/stops/FeatureServer/0"
+#define kFeatureLayerURL @"http://services.arcgis.com/OfH668nDRN7tbJh0/arcgis/rest/services/stops/FeatureServer/0"
 
 @interface AGSSampleViewController ()
 @property (weak, nonatomic) IBOutlet AGSMapView *mapView;
