@@ -1,6 +1,6 @@
 //
 //  AGSClusterGrid.h
-//  ClusterLayerSample
+//  Cluster Layer
 //
 //  With much thanks to Leaflet.markercluster's DistanceGrid code:
 //  https://github.com/Leaflet/Leaflet.markercluster/blob/master/src/DistanceGrid.js
@@ -11,14 +11,12 @@
 
 #import <Foundation/Foundation.h>
 #import <ArcGIS/ArcGIS.h>
-#import "AGSClusterLayer.h"
 
-extern NSString * const AGSClusterGridClusteringNotification;
-extern NSString * const AGSClusterGridClusteredNotification;
+@class AGSClusterLayer;
 
 @interface AGSClusterGrid : NSObject
-@property (nonatomic, strong, readonly) NSArray *clusters;
 @property (nonatomic, readonly, assign) NSUInteger cellSize;
+@property (nonatomic, strong, readonly) NSArray *clusters;
 
 @property (nonatomic, strong) NSNumber *zoomLevel;
 @property (nonatomic, strong) AGSClusterGrid *gridForNextZoomLevel;
@@ -26,8 +24,8 @@ extern NSString * const AGSClusterGridClusteredNotification;
 
 -(id)initWithCellSize:(NSUInteger)cellSize forClusterLayer:(AGSClusterLayer*)clusterLayer;
 
--(AGSPoint *)cellCentroid:(CGPoint)cellCoord;
-
 -(void)addItems:(NSArray *)items;
 -(void)removeAllItems;
+
+-(AGSPoint *)cellCentroid:(CGPoint)cellCoord;
 @end

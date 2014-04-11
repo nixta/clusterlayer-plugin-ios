@@ -1,6 +1,6 @@
 //
 //  AGSCluster.h
-//  ClusterLayerSample
+//  Cluster Layer
 //
 //  Created by Nicholas Furness on 3/25/14.
 //  Copyright (c) 2014 ESRI. All rights reserved.

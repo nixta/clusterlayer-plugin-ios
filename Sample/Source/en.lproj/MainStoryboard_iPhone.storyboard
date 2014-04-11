@@ -44,7 +44,7 @@
                                     </label>
                                     <progressView opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progressViewStyle="bar" id="toY-ne-5gi">
                                         <rect key="frame" x="0.0" y="0.0" width="320" height="3"/>
-                                        <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
                                     </progressView>
                                 </subviews>
                                 <color key="backgroundColor" white="0.71450159671532842" alpha="0.5" colorSpace="calibratedWhite"/>

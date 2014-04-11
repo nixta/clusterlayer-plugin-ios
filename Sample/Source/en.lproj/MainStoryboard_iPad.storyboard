@@ -36,12 +36,16 @@
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Feedback" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="nx1-fc-F0w" userLabel="Feedback Label">
-                                        <rect key="frame" x="689" y="21" width="60" height="16"/>
+                                        <rect key="frame" x="77" y="21" width="672" height="16"/>
                                         <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMinY="YES"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="10"/>
                                         <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                         <nil key="highlightedColor"/>
                                     </label>
+                                    <progressView opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" verticalHuggingPriority="750" id="4Ma-cE-Ojm">
+                                        <rect key="frame" x="0.0" y="0.0" width="769" height="2"/>
+                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" flexibleMaxY="YES"/>
+                                    </progressView>
                                 </subviews>
                                 <color key="backgroundColor" white="0.71450159670000002" alpha="0.5" colorSpace="calibratedWhite"/>
                             </view>
@@ -52,6 +56,7 @@
                         <outlet property="clusteringFeedbackLabel" destination="nx1-fc-F0w" id="lEj-BF-LE9"/>
                         <outlet property="clusteringStatusLabel" destination="X7M-zW-5tL" id="ug4-EH-Qz7"/>
                         <outlet property="coverageSwitch" destination="0a5-v2-L7w" id="FaC-FB-6Tc"/>
+                        <outlet property="dataLoadProgressView" destination="4Ma-cE-Ojm" id="6va-C2-khK"/>
                         <outlet property="mapView" destination="nmt-Jy-qhe" id="43k-To-u06"/>
                     </connections>
                 </viewController>

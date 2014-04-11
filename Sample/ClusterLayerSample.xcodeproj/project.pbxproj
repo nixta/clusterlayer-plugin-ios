@@ -39,24 +39,25 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		D906E0A618F316940015EAF2 /* AGSClusterGridRow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AGSClusterGridRow.h; sourceTree = "<group>"; };
-		D906E0A718F316940015EAF2 /* AGSClusterGridRow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AGSClusterGridRow.m; sourceTree = "<group>"; };
-		D919A35D18E0B09800B140BF /* AGSClusterLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AGSClusterLayer.h; sourceTree = "<group>"; };
-		D919A35E18E0B09800B140BF /* AGSClusterLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AGSClusterLayer.m; sourceTree = "<group>"; };
-		D919A36018E0B14700B140BF /* AGSClusterGrid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AGSClusterGrid.h; sourceTree = "<group>"; };
-		D919A36118E0B14700B140BF /* AGSClusterGrid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AGSClusterGrid.m; sourceTree = "<group>"; };
-		D919A36318E203DD00B140BF /* AGSCluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AGSCluster.h; sourceTree = "<group>"; };
-		D919A36418E203DD00B140BF /* AGSCluster.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AGSCluster.m; sourceTree = "<group>"; };
+		D906E0A618F316940015EAF2 /* AGSClusterGridRow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AGSClusterGridRow.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		D906E0A718F316940015EAF2 /* AGSClusterGridRow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = AGSClusterGridRow.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		D906E0A918F79B7B0015EAF2 /* AGSCL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AGSCL.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		D919A35D18E0B09800B140BF /* AGSClusterLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AGSClusterLayer.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		D919A35E18E0B09800B140BF /* AGSClusterLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = AGSClusterLayer.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		D919A36018E0B14700B140BF /* AGSClusterGrid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AGSClusterGrid.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		D919A36118E0B14700B140BF /* AGSClusterGrid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = AGSClusterGrid.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		D919A36318E203DD00B140BF /* AGSCluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AGSCluster.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		D919A36418E203DD00B140BF /* AGSCluster.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = AGSCluster.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		D9A8B11816BB27B9001653EE /* libc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libc++.dylib"; path = "usr/lib/libc++.dylib"; sourceTree = SDKROOT; };
 		D9A8B11A16BB27BF001653EE /* OpenGLES.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGLES.framework; path = System/Library/Frameworks/OpenGLES.framework; sourceTree = SDKROOT; };
-		D9D1C8BB18E5942F00CD3CEF /* AGSCluster_int.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AGSCluster_int.h; sourceTree = SOURCE_ROOT; };
-		D9D1C8BC18E62D6400CD3CEF /* AGSGraphic+AGSClustering.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AGSGraphic+AGSClustering.h"; sourceTree = "<group>"; };
-		D9D1C8BD18E62D6400CD3CEF /* AGSGraphic+AGSClustering.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AGSGraphic+AGSClustering.m"; sourceTree = "<group>"; };
-		D9D1C8C018E62DF000CD3CEF /* NSArray+Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSArray+Utils.h"; sourceTree = "<group>"; };
-		D9D1C8C118E62DF000CD3CEF /* NSArray+Utils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSArray+Utils.m"; sourceTree = "<group>"; };
-		D9D1C8C318E6338300CD3CEF /* Common.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Common.h; sourceTree = SOURCE_ROOT; };
-		D9E0F74818E232CC0009C771 /* AGSClusterLayerRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AGSClusterLayerRenderer.h; sourceTree = "<group>"; };
-		D9E0F74918E232CC0009C771 /* AGSClusterLayerRenderer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AGSClusterLayerRenderer.m; sourceTree = "<group>"; };
+		D9D1C8BB18E5942F00CD3CEF /* AGSCluster_int.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AGSCluster_int.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		D9D1C8BC18E62D6400CD3CEF /* AGSGraphic+AGSClustering.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = "AGSGraphic+AGSClustering.h"; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		D9D1C8BD18E62D6400CD3CEF /* AGSGraphic+AGSClustering.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = "AGSGraphic+AGSClustering.m"; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		D9D1C8C018E62DF000CD3CEF /* NSArray+Utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = "NSArray+Utils.h"; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		D9D1C8C118E62DF000CD3CEF /* NSArray+Utils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = "NSArray+Utils.m"; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		D9D1C8C318E6338300CD3CEF /* Common_int.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = Common_int.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		D9E0F74818E232CC0009C771 /* AGSClusterLayerRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AGSClusterLayerRenderer.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		D9E0F74918E232CC0009C771 /* AGSClusterLayerRenderer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = AGSClusterLayerRenderer.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		D9F3D1A91668271A00FB6A8D /* AGSClusterLayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AGSClusterLayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D9F3D1AD1668271A00FB6A8D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		D9F3D1AF1668271A00FB6A8D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -110,17 +111,18 @@
 		D919A35C18E0B06300B140BF /* AGSClusterLayer */ = {
 			isa = PBXGroup;
 			children = (
+				D906E0A918F79B7B0015EAF2 /* AGSCL.h */,
 				D919A35D18E0B09800B140BF /* AGSClusterLayer.h */,
 				D919A35E18E0B09800B140BF /* AGSClusterLayer.m */,
 				D9E0F74818E232CC0009C771 /* AGSClusterLayerRenderer.h */,
 				D9E0F74918E232CC0009C771 /* AGSClusterLayerRenderer.m */,
-				D919A36318E203DD00B140BF /* AGSCluster.h */,
-				D919A36418E203DD00B140BF /* AGSCluster.m */,
-				D906E0A618F316940015EAF2 /* AGSClusterGridRow.h */,
-				D906E0A718F316940015EAF2 /* AGSClusterGridRow.m */,
 				D919A36018E0B14700B140BF /* AGSClusterGrid.h */,
 				D919A36118E0B14700B140BF /* AGSClusterGrid.m */,
-				D9D1C8C318E6338300CD3CEF /* Common.h */,
+				D906E0A618F316940015EAF2 /* AGSClusterGridRow.h */,
+				D906E0A718F316940015EAF2 /* AGSClusterGridRow.m */,
+				D919A36318E203DD00B140BF /* AGSCluster.h */,
+				D919A36418E203DD00B140BF /* AGSCluster.m */,
+				D9D1C8C318E6338300CD3CEF /* Common_int.h */,
 				D9D1C8BB18E5942F00CD3CEF /* AGSCluster_int.h */,
 				D9D1C8BF18E62D6900CD3CEF /* Categories */,
 			);

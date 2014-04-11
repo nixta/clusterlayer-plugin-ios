@@ -1,6 +1,6 @@
 //
 //  AGSClusterGridRow.m
-//  ClusterLayerSample
+//  Cluster Layer
 //
 //  Created by Nicholas Furness on 4/7/14.
 //  Copyright (c) 2014 ESRI. All rights reserved.
@@ -24,7 +24,7 @@
     self = [super init];
     if (self) {
         self.clusters = [NSMutableDictionary dictionary];
-        self.grid = parentGrid;
+        self.parentGrid = parentGrid;
     }
     return self;
 }
@@ -34,7 +34,7 @@
     if (!result) {
         result = [AGSCluster clusterForPoint:point];
         result.cellCoordinate = gridCoord;
-        result.parentGrid = self.grid;
+        result.parentGrid = self.parentGrid;
         [self.clusters setObject:result forKey:@(gridCoord.x)];
     }
     return result;

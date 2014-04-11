@@ -1,6 +1,6 @@
 //
 //  AGSCluster.m
-//  ClusterLayerSample
+//  Cluster Layer
 //
 //  Created by Nicholas Furness on 3/25/14.
 //  Copyright (c) 2014 ESRI. All rights reserved.
@@ -10,17 +10,20 @@
 #import "AGSCluster_int.h"
 #import "NSArray+Utils.h"
 #import "AGSGraphic+AGSClustering.h"
-#import "Common.h"
+#import "Common_int.h"
 #import <objc/runtime.h>
 
 @interface AGSCluster ()
+@property (nonatomic, assign, readwrite) NSUInteger displayCount;
+
 @property (nonatomic, strong) AGSClusterGrid *parentGrid;
+@property (nonatomic, strong) AGSCluster *parentCluster;
+
 @property (nonatomic, assign) NSUInteger clusterId;
 @property (nonatomic, assign) CGPoint cellCoordinate;
 
-@property (nonatomic, strong) NSMutableArray *_int_features;
 @property (nonatomic, strong) NSMutableArray *_int_clusters;
-@property (nonatomic, strong) AGSCluster *parentCluster;
+@property (nonatomic, strong) NSMutableArray *_int_features;
 
 @property (nonatomic, strong, readwrite) AGSGeometry *coverage;
 @property (nonatomic, strong, readwrite) AGSGraphic *coverageGraphic;
@@ -28,7 +31,6 @@
 @property (nonatomic, assign) BOOL isDirty;
 @property (nonatomic, assign) BOOL isCoverageDirty;
 
-@property (nonatomic, assign, readwrite) NSUInteger displayCount;
 @end
 
 @implementation AGSCluster
@@ -73,15 +75,11 @@
     return [NSString stringWithFormat:@"c%d", self.featureId];
 }
 
--(NSArray *)items {
-    return [self.features arrayByAddingObjectsFromArray:self.clusters];
-}
-
 -(NSArray *)features {
     return self._int_features;
 }
 
--(NSArray *)clusters {
+-(NSArray *)childClusters {
     return self._int_clusters;
 }
 
@@ -114,6 +112,10 @@
     self.isDirty = NO;
 }
 
+-(AGSEnvelope *)envelope {
+    return self.coverage.envelope;
+}
+
 -(AGSGeometry *)coverage {
     if (self.isCoverageDirty) {
         [self recalculateCoverage];
@@ -133,22 +135,13 @@
 }
 
 #pragma mark - Add and remove features
--(void)addItem:(AGSClusterItem *)item {
-    [self _addItem:item];
-}
-
 -(void)addItems:(NSArray *)items {
     for (AGSClusterItem *item in items) {
         [self _addItem:item];
     }
 }
 
--(void)removeItem:(AGSClusterItem *)item {
-    [self _removeItem:item];
-    [self recalculateCentroid];
-}
-
--(void)clearItems {
+-(void)removeAllItems {
     [self._int_features removeAllObjects];
     [self._int_clusters removeAllObjects];
     self.isDirty = YES;
@@ -158,9 +151,10 @@
 #pragma mark - Add and remove features (internal methods for iteration)
 -(void)_addItem:(AGSClusterItem *)item {
     if (item.isCluster) {
-        ((AGSCluster *)item).parentCluster = self;
+        AGSCluster *clusterItem = (AGSCluster *)item;
+        clusterItem.parentCluster = self;
         [self._int_clusters addObject:item];
-        [self._int_features addObjectsFromArray:((AGSCluster *)item).features];
+        [self._int_features addObjectsFromArray:clusterItem.features];
     } else {
         [self._int_features addObject:item];
     }
@@ -169,9 +163,10 @@
 
 -(void)_removeItem:(AGSClusterItem *)item {
     if (item.isCluster) {
-        ((AGSCluster *)item).parentCluster = nil;
+        AGSCluster *clusterItem = (AGSCluster *)item;
+        clusterItem.parentCluster = nil;
         [self._int_clusters removeObject:item];
-        [self._int_features removeObjectsInArray:((AGSCluster *)item).features];
+        [self._int_features removeObjectsInArray:clusterItem.features];
     } else {
         [self._int_features removeObject:item];
     }
@@ -204,6 +199,8 @@
 }
 
 -(void) recalculateCoverage {
+    if (!self.isCoverageDirty) return;
+    
     if (self.features.count == 1) {
         self.coverage = self.geometry;
     } else if (self.features.count == 2) {

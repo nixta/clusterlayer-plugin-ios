@@ -1,15 +1,16 @@
 //
 //  AGSClusterLayer.m
-//  ClusterLayerSample
+//  Cluster Layer
 //
 //  Created by Nicholas Furness on 3/24/14.
 //  Copyright (c) 2014 ESRI. All rights reserved.
 //
 
+#import "AGSCL.h"
 #import "AGSClusterLayer.h"
 #import "AGSClusterGrid.h"
 #import "AGSCluster.h"
-#import "Common.h"
+#import "Common_int.h"
 #import "NSArray+Utils.h"
 #import <objc/runtime.h>
 
@@ -25,22 +26,14 @@
 
 #define kDefaultMinClusterCount 2
 
-#define kClusterNotificationUserInfoKey_Duration @"duration"
-#define kClusterNotificationUserInfoKey_PercentComplete @"percentComplete"
-#define kClusterNotificationUserInfoKey_FeatureCount @"featureCount"
-#define kClusterNotificationUserInfoKey_TotalZoomLevels @"totalLevels"
-#define kClusterNotificationUserInfoKey_ZoomLevelsClustered @"levelsComplete"
-
 #define kBatchQueryOperationQueryKey @"__batchquery"
 
-#define kKVOMapLoaded @"loaded"
-
 NSString * const AGSClusterLayerClusteringProgressNotification = @"AGSClusterLayerClusteringCompleteNotification";
-NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_PercentComplete = kClusterNotificationUserInfoKey_PercentComplete;
-NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_TotalZoomLevels = kClusterNotificationUserInfoKey_TotalZoomLevels;
-NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_CompletedZoomLevels = kClusterNotificationUserInfoKey_ZoomLevelsClustered;
-NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_FeatureCount = kClusterNotificationUserInfoKey_FeatureCount;
-NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_Duration = kClusterNotificationUserInfoKey_Duration;
+NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_PercentComplete = kClusterLayerClusteringNotification_Key_PercentComplete;
+NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_TotalZoomLevels = kClusterLayerClusteringNotification_Key_TotalZoomLevels;
+NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_CompletedZoomLevels = kClusterLayerClusteringNotification_Key_ZoomLevelsClustered;
+NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_FeatureCount = kClusterLayerClusteringNotification_Key_FeatureCount;
+NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_Duration = kClusterLayerClusteringNotification_Key_Duration;
 
 NSString * const AGSClusterLayerLoadFeaturesProgressNotification = @"AGSCLusterLayerLoadProgressNotification";
 NSString * const AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_PercentComplete = @"percentComplete";
@@ -393,7 +386,6 @@ NSString * NSStringFromBool(BOOL boolValue) {
 
 #pragma mark - Layer Refresh
 -(void)refresh {
-    [self initializeIfPossible];
     if (!self.initialized) return;
     
     [self refreshClusters];
@@ -433,11 +425,11 @@ NSString * NSStringFromBool(BOOL boolValue) {
         [[NSNotificationCenter defaultCenter] postNotificationName:AGSClusterLayerClusteringProgressNotification
                                                             object:self
                                                           userInfo:@{
-                                                                     kClusterNotificationUserInfoKey_Duration: @(clusteringDuration),
-                                                                     kClusterNotificationUserInfoKey_PercentComplete: @(100*gridsClustered/self.grids.count),
-                                                                     kClusterNotificationUserInfoKey_FeatureCount: @(self.allFeatures.count),
-                                                                     kClusterNotificationUserInfoKey_TotalZoomLevels: @(self.grids.count),
-                                                                     kClusterNotificationUserInfoKey_ZoomLevelsClustered: @(self.grids.count - self.clusteringGrids.count)
+                                                                     kClusterLayerClusteringNotification_Key_Duration: @(clusteringDuration),
+                                                                     kClusterLayerClusteringNotification_Key_PercentComplete: @(100*gridsClustered/self.grids.count),
+                                                                     kClusterLayerClusteringNotification_Key_FeatureCount: @(self.allFeatures.count),
+                                                                     kClusterLayerClusteringNotification_Key_TotalZoomLevels: @(self.grids.count),
+                                                                     kClusterLayerClusteringNotification_Key_ZoomLevelsClustered: @(self.grids.count - self.clusteringGrids.count)
                                                                      }];
     });
 }
@@ -454,7 +446,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
         if (self.mapView.mapScale > self.minScaleForClustering &&
             cluster.displayCount >= self.minClusterCount) {
             // Draw as cluster.
-            if (self.showClusterCoverages && cluster.items.count > 2) {
+            if (self.showClusterCoverages && cluster.features.count > 2) {
                 // Draw the coverage if need be
                 AGSGraphic *coverageGraphic = cluster.coverageGraphic;
                 objc_setAssociatedObject(coverageGraphic, kClusterPayloadKey, cluster, OBJC_ASSOCIATION_RETAIN_NONATOMIC);

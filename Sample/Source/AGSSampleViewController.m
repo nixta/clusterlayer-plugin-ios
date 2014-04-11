@@ -9,7 +9,7 @@
 #import "AGSSampleViewController.h"
 #import <ArcGIS/ArcGIS.h>
 
-#import "AGSClusterLayer.h"
+#import "AGSCL.h"
 
 #define kBasemap @"http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer"
 #define kFeatureLayerURL @"http://services.arcgis.com/rOo16HdIMeOBI4Mb/arcgis/rest/services/stops/FeatureServer/0"
@@ -23,9 +23,7 @@
 @property (weak, nonatomic) IBOutlet UIProgressView *dataLoadProgressView;
 @end
 
-@implementation AGSSampleViewController {
-    BOOL _initialZoomDone;
-}
+@implementation AGSSampleViewController
 
 - (void)viewDidLoad
 {
@@ -41,7 +39,7 @@
     [self.mapView addMapLayer:self.clusterLayer];
     
     self.clusterLayer.showClusterCoverages = self.coverageSwitch.on;
-    self.clusterLayer.minScaleForClustering = 14000;
+    self.clusterLayer.minScaleForClustering = 15000;
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(dataLoadProgress:)

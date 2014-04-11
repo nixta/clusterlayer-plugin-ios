@@ -1,15 +1,15 @@
 //
 //  AGSClusterLayerRenderer.m
-//  ClusterLayerSample
+//  Cluster Layer
 //
 //  Created by Nicholas Furness on 3/25/14.
 //  Copyright (c) 2014 ESRI. All rights reserved.
 //
 
 #import "AGSClusterLayerRenderer.h"
+#import "AGSCluster.h"
+#import "Common_int.h"
 #import <objc/runtime.h>
-
-#import "Common.h"
 
 @interface AGSClusterLayerRenderer ()
 @property (nonatomic, weak) AGSRenderer *originalRenderer;

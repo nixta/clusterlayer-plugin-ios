@@ -1,6 +1,6 @@
 //
 //  AGSClusterDistanceGrid.m
-//  ClusterLayerSample
+//  Cluster Layer
 //
 //  Created by Nicholas Furness on 3/24/14.
 //  Copyright (c) 2014 ESRI. All rights reserved.
@@ -10,31 +10,23 @@
 #import "AGSCluster.h"
 #import "AGSCluster_int.h"
 #import "AGSClusterGridRow.h"
-#import "Common.h"
+#import "Common_int.h"
 #import <objc/runtime.h>
 
 #define kAddFeaturesArrayKey @"__tempArrayKey"
 
-NSString * const AGSClusterGridClusteringNotification = @"AGSClusterGridNotification_StartClustering";
-NSString * const AGSClusterGridClusteredNotification = @"AGSClusterGridNotification_EndClustering";
+NSString * const AGSClusterGridClusteringNotification = kClusterGridClusteringNotification;
+NSString * const AGSClusterGridClusteredNotification = kClusterGridClusteredNotification;
 
-#pragma mark - Helper Methods
-CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
-    return CGPointMake(floor(pt.x/cellSize), floor(pt.y/cellSize));
-}
-
-AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
-    return [AGSPoint pointWithX:(cellCoord.x * cellSize) + (cellSize/2)
-                              y:cellCoord.y * cellSize + (cellSize/2)
-               spatialReference:[AGSSpatialReference webMercatorSpatialReference]];
-}
+CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize);
+AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize);
 
 #pragma mark - Cluster Grid
 @interface AGSClusterGrid()
-@property (nonatomic, assign, readwrite) NSUInteger cellSize;
+@property (nonatomic, weak) AGSClusterLayer *owningClusterLayer;
 @property (nonatomic, strong) NSMutableDictionary *rows;
 @property (nonatomic, strong, readwrite) NSMutableArray *items;
-@property (nonatomic, weak) AGSClusterLayer *owningClusterLayer;
+@property (nonatomic, assign, readwrite) NSUInteger cellSize;
 @end
 
 @implementation AGSClusterGrid
@@ -53,26 +45,24 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
     [self.items addObjectsFromArray:items];
 
     [self clusterItems];
+
     [self.gridForPrevZoomLevel addItems:self.clusters];
 }
 
 -(void)removeAllItems {
     for (AGSClusterGridRow *row in [self.rows objectEnumerator]) {
         for (AGSCluster *cluster in [row.clusters objectEnumerator]) {
-            [cluster clearItems];
+            [cluster removeAllItems];
         }
         [row removeAllClusters];
     }
     [self removeAllRows];
 }
 
--(void)clusterItems {
-    [[NSNotificationCenter defaultCenter] postNotificationName:AGSClusterGridClusteringNotification object:self];
-    NSDate *startTime = [NSDate date];
-
+- (NSMutableSet *)calculateClusters {
     NSArray *items = self.items;
     // NSLog(@"Adding %d features/clusters to zoom level %@", items.count, self.zoomLevel);
-
+    
     // Add each item to the clusters (creating new ones if necessary).
     NSMutableSet *clustersForItems = [NSMutableSet set];
     for (AGSClusterItem *item in items) {
@@ -90,9 +80,17 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
         // Also track the clusters we've touched with these items.
         [clustersForItems addObject:cluster];
     }
+    return clustersForItems;
+}
+
+-(void)clusterItems {
+    [[NSNotificationCenter defaultCenter] postNotificationName:kClusterGridClusteringNotification object:self];
+
+    NSDate *startTime = [NSDate date];
+
+    NSSet *clustersForItems = [self calculateClusters];
     
-    // Now go over the clusters we've touched
-    // And bulk add items to each individual cluster.
+    // Now go over the clusters we've touched and bulk add items to each individual cluster.
     NSUInteger featureCount = 0;
     for (AGSCluster *cluster in clustersForItems) {
         NSArray *itemsToAdd = objc_getAssociatedObject(cluster, kAddFeaturesArrayKey);
@@ -103,12 +101,13 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
     }
     
     NSTimeInterval clusteringDuration = -[startTime timeIntervalSinceNow];
-    [[NSNotificationCenter defaultCenter] postNotificationName:AGSClusterGridClusteredNotification object:self
+
+    [[NSNotificationCenter defaultCenter] postNotificationName:kClusterGridClusteredNotification object:self
                                                       userInfo:@{
-                                                                 @"itemsClustered": @(featureCount),
-                                                                 @"clusters": @(self.clusters.count),
-                                                                 @"duration": @(clusteringDuration),
-                                                                 @"zoomLevel": self.zoomLevel
+                                                                 kClusterGridClusteredNotification_Key_FeatureCount: @(featureCount),
+                                                                 kClusterGridClusteredNotification_Key_ClusterCount: @(self.clusters.count),
+                                                                 kClusterGridClusteredNotification_Key_Duration: @(clusteringDuration),
+                                                                 kClusterGridClusteredNotification_Key_ZoomLevel: self.zoomLevel
                                                                  }];
     
     // NSLog(@"%2d [%4d items in %4d clusters sized %7d] in %.4fs", self.zoomLevel.unsignedIntegerValue, self.items.count, self.clusters.count, self.cellSize, clusteringDuration);
@@ -173,3 +172,14 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
     return [NSString stringWithFormat:@"Cluster Grid: %d features in %d clusters (with %d unclustered)", featureCount, clusterCount, loneFeatures];
 }
 @end
+
+#pragma mark - Helper Methods
+CGPoint getGridCoordForMapPoint(AGSPoint* pt, NSUInteger cellSize) {
+    return CGPointMake(floor(pt.x/cellSize), floor(pt.y/cellSize));
+}
+
+AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
+    return [AGSPoint pointWithX:(cellCoord.x * cellSize) + (cellSize/2)
+                              y:cellCoord.y * cellSize + (cellSize/2)
+               spatialReference:[AGSSpatialReference webMercatorSpatialReference]];
+}
