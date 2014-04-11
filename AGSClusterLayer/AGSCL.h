@@ -19,6 +19,9 @@ extern NSString * const AGSClusterLayerDataLoadingProgressNotification_UserInfo_
 extern NSString * const AGSClusterLayerDataLoadingProgressNotification_UserInfo_TotalRecordsToLoad;
 extern NSString * const AGSClusterLayerDataLoadingProgressNotification_UserInfo_RecordsLoaded;
 
+extern NSString * const AGSClusterLayerDataLoadingErrorNotification;
+extern NSString * const AGSClusterLayerDataLoadingErrorNotification_UserInfo_Error;
+
 extern NSString * const AGSClusterLayerClusteringProgressNotification;
 extern NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_PercentComplete;
 extern NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_TotalZoomLevels;

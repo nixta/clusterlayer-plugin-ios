@@ -29,6 +29,10 @@
 #define kClusterLayerDataLoadingNotification_Key_TotalRecords @"totalRecords"
 #define kClusterLayerDataLoadingNotification_Key_LoadedCount @"recordsLoaded"
 
+#define kClusterLayerDataLoadingErrorNotification @"AGSCLusterLayerLoadErrorNotification"
+#define kClusterLayerDataLoadingErrorNotification_Key_Error @"error"
+
+
 #define kClusterPayloadKey @"__cluster"
 
 typedef AGSGraphic AGSClusterItem;

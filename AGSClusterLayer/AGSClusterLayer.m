@@ -35,6 +35,9 @@ NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_Complete
 NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_FeatureCount = kClusterLayerClusteringNotification_Key_FeatureCount;
 NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_Duration = kClusterLayerClusteringNotification_Key_Duration;
 
+NSString * const AGSClusterLayerDataLoadingErrorNotification = kClusterLayerDataLoadingErrorNotification;
+NSString * const AGSClusterLayerDataLoadingErrorNotification_UserInfo_Error = kClusterLayerDataLoadingErrorNotification_Key_Error;
+
 NSString * const AGSClusterLayerDataLoadingProgressNotification = kClusterLayerDataLoadingNotification;
 NSString * const AGSClusterLayerDataLoadingProgressNotification_UserInfo_PercentComplete = kClusterLayerDataLoadingNotification_Key_PercentComplete;
 NSString * const AGSClusterLayerDataLoadingProgressNotification_UserInfo_TotalRecordsToLoad = kClusterLayerDataLoadingNotification_Key_TotalRecords;
@@ -131,6 +134,10 @@ NSString * NSStringFromBool(BOOL boolValue) {
                                                  selector:@selector(featureLayerLoaded:)
                                                      name:AGSLayerDidLoadNotification
                                                    object:self.featureLayer];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(featureLayerFailedToLoad:)
+                                                     name:AGSLayerDidFailToLoadNotification
+                                                   object:self.featureLayer];
     }
     return self;
 }
@@ -154,7 +161,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
         __weak typeof(self) weakSelf = self;
         [self.syncTask setLoadCompletion:^(NSError *error) {
             if (error) {
-                NSLog(@"Uh oh, could not load FS definition: %@", error);
+                NSLog(@"Could not load FeatureServiceInfo: %@", error);
             } else {
                 weakSelf.maxRecordCount = weakTask.featureServiceInfo.maxRecordCount;
                 weakSelf.featureLayer.queryDelegate = weakSelf;
@@ -174,6 +181,14 @@ NSString * NSStringFromBool(BOOL boolValue) {
     }
     
     [self createBlankGridsForLods];
+}
+
+-(void)featureLayerFailedToLoad:(NSNotification *)notification {
+    NSLog(@"FeatureLayer failed to load: %@", self.featureLayer.error);
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:AGSClusterLayerDataLoadingErrorNotification
+                                                        object:self
+                                                      userInfo:@{kClusterLayerDataLoadingErrorNotification_Key_Error: self.featureLayer.error}];
 }
 
 -(void)featureLayer:(AGSFeatureLayer *)featureLayer operation:(NSOperation *)op didQueryObjectIdsWithResults:(NSArray *)objectIds {
