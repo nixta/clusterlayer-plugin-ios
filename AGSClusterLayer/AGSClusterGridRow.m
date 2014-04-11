@@ -12,7 +12,7 @@
 #import "AGSClusterGrid.h"
 
 @interface AGSClusterGridRow ()
-@property (nonatomic, strong) NSMutableDictionary *clusterCells;
+@property (nonatomic, strong, readwrite) NSMutableDictionary *clusters;
 @end
 
 @implementation AGSClusterGridRow
@@ -23,28 +23,24 @@
 -(id)initForClusterGrid:(AGSClusterGrid *)parentGrid {
     self = [super init];
     if (self) {
-        self.clusterCells = [NSMutableDictionary dictionary];
+        self.clusters = [NSMutableDictionary dictionary];
         self.grid = parentGrid;
     }
     return self;
 }
 
 -(AGSCluster *)clusterForGridCoord:(CGPoint)gridCoord atPoint:(AGSPoint *)point{
-    AGSCluster *result = self.clusterCells[@(gridCoord.x)];
+    AGSCluster *result = self.clusters[@(gridCoord.x)];
     if (!result) {
         result = [AGSCluster clusterForPoint:point];
         result.cellCoordinate = gridCoord;
         result.parentGrid = self.grid;
-        [self.clusterCells setObject:result forKey:@(gridCoord.x)];
+        [self.clusters setObject:result forKey:@(gridCoord.x)];
     }
     return result;
 }
 
--(NSArray *)clusters {
-    return self.clusterCells.allValues;
-}
-
 -(void)removeAllClusters {
-    [self.clusterCells removeAllObjects];
+    [self.clusters removeAllObjects];
 }
 @end

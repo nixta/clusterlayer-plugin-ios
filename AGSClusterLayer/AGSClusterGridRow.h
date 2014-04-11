@@ -14,7 +14,7 @@
 
 @interface AGSClusterGridRow : NSObject
 @property (nonatomic, weak) AGSClusterGrid *grid;
-@property (nonatomic, readonly) NSArray *clusters;
+@property (nonatomic, strong, readonly) NSMutableDictionary *clusters;
 +(AGSClusterGridRow *)clusterGridRowForClusterGrid:(AGSClusterGrid *)parentGrid;
 
 -(AGSCluster *)clusterForGridCoord:(CGPoint)gridCoord atPoint:(AGSPoint *)point;

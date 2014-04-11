@@ -73,7 +73,7 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
 #pragma mark - Cluster Grid
 @interface AGSClusterGrid()
 @property (nonatomic, assign, readwrite) NSUInteger cellSize;
-@property (nonatomic, strong) NSMutableDictionary* _int_rows;
+@property (nonatomic, strong) NSMutableDictionary *rows;
 @property (nonatomic, strong, readwrite) NSMutableArray *items;
 @property (nonatomic, weak) AGSClusterLayer *owningClusterLayer;
 @end
@@ -83,7 +83,7 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
     self = [self init];
     if (self) {
         self.cellSize = cellSize;
-        self._int_rows = [NSMutableDictionary dictionary];
+        self.rows = [NSMutableDictionary dictionary];
         self.items = [NSMutableArray array];
         self.owningClusterLayer = clusterLayer;
     }
@@ -98,8 +98,8 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
 }
 
 -(void)removeAllItems {
-    for (AGSClusterGridRow *row in self.rows) {
-        for (AGSCluster *cluster in row.clusters) {
+    for (AGSClusterGridRow *row in [self.rows objectEnumerator]) {
+        for (AGSCluster *cluster in [row.clusters objectEnumerator]) {
             [cluster clearItems];
         }
         [row removeAllClusters];
@@ -173,10 +173,10 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
 }
 
 -(AGSClusterGridRow *)rowForGridCoord:(CGPoint)gridCoord {
-    AGSClusterGridRow *row = self._int_rows[@(gridCoord.y)];
+    AGSClusterGridRow *row = self.rows[@(gridCoord.y)];
     if (!row) {
         row = [AGSClusterGridRow clusterGridRowForClusterGrid:self];
-        [self._int_rows setObject:row forKey:@(gridCoord.y)];
+        [self.rows setObject:row forKey:@(gridCoord.y)];
     }
     return row;
 }
@@ -185,14 +185,10 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
     return getGridCellCentroid(cellCoord, self.cellSize);
 }
 
--(NSArray *)rows {
-    return self._int_rows.allValues;
-}
-
 -(NSArray *)clusters {
     NSMutableArray *clusters = [NSMutableArray array];
-    for (AGSClusterGridRow *row in self.rows) {
-        for (AGSCluster *cluster in row.clusters) {
+    for (AGSClusterGridRow *row in [self.rows objectEnumerator]) {
+        for (AGSCluster *cluster in [row.clusters objectEnumerator]) {
             [clusters addObject:cluster];
         }
     }
@@ -200,7 +196,7 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize) {
 }
 
 -(void)removeAllRows {
-    [self._int_rows removeAllObjects];
+    [self.rows removeAllObjects];
 }
 
 -(NSString *)description {
