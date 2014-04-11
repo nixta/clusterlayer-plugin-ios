@@ -14,10 +14,10 @@
 #define ClusterLayerSample_AGSCL_h
 
 #pragma mark - Notifications
-extern NSString * const AGSClusterLayerLoadFeaturesProgressNotification;
-extern NSString * const AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_PercentComplete;
-extern NSString * const AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_TotalRecordsToLoad;
-extern NSString * const AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_RecordsLoaded;
+extern NSString * const AGSClusterLayerDataLoadingProgressNotification;
+extern NSString * const AGSClusterLayerDataLoadingProgressNotification_UserInfo_PercentComplete;
+extern NSString * const AGSClusterLayerDataLoadingProgressNotification_UserInfo_TotalRecordsToLoad;
+extern NSString * const AGSClusterLayerDataLoadingProgressNotification_UserInfo_RecordsLoaded;
 
 extern NSString * const AGSClusterLayerClusteringProgressNotification;
 extern NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_PercentComplete;
@@ -26,6 +26,8 @@ extern NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_C
 extern NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_FeatureCount;
 extern NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_Duration;
 
+// AGSClusterGridClusteredNotification is abstracted by the above AGSClusterLayerClusteringProgressNotification
+// It can be listened to, but exposes internal workings that are subject to change. Use at your own risk.
 extern NSString * const AGSClusterGridClusteringNotification;
 extern NSString * const AGSClusterGridClusteredNotification;
 

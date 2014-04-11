@@ -17,11 +17,17 @@
 #define kClusterGridClusteredNotification_Key_Duration @"duration"
 #define kClusterGridClusteredNotification_Key_ZoomLevel @"zoomLevel"
 
+#define kClusterLayerClusteringNotification @"AGSClusterLayerClusteringNotification_Progress"
 #define kClusterLayerClusteringNotification_Key_Duration @"duration"
 #define kClusterLayerClusteringNotification_Key_PercentComplete @"percentComplete"
 #define kClusterLayerClusteringNotification_Key_FeatureCount @"featureCount"
 #define kClusterLayerClusteringNotification_Key_TotalZoomLevels @"totalLevels"
 #define kClusterLayerClusteringNotification_Key_ZoomLevelsClustered @"levelsComplete"
+
+#define kClusterLayerDataLoadingNotification @"AGSCLusterLayerLoadProgressNotification"
+#define kClusterLayerDataLoadingNotification_Key_PercentComplete @"percentComplete"
+#define kClusterLayerDataLoadingNotification_Key_TotalRecords @"totalRecords"
+#define kClusterLayerDataLoadingNotification_Key_LoadedCount @"recordsLoaded"
 
 #define kClusterPayloadKey @"__cluster"
 

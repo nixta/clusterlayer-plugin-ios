@@ -28,18 +28,17 @@
 
 #define kBatchQueryOperationQueryKey @"__batchquery"
 
-NSString * const AGSClusterLayerClusteringProgressNotification = @"AGSClusterLayerClusteringCompleteNotification";
+NSString * const AGSClusterLayerClusteringProgressNotification = kClusterLayerClusteringNotification;
 NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_PercentComplete = kClusterLayerClusteringNotification_Key_PercentComplete;
 NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_TotalZoomLevels = kClusterLayerClusteringNotification_Key_TotalZoomLevels;
 NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_CompletedZoomLevels = kClusterLayerClusteringNotification_Key_ZoomLevelsClustered;
 NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_FeatureCount = kClusterLayerClusteringNotification_Key_FeatureCount;
 NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_Duration = kClusterLayerClusteringNotification_Key_Duration;
 
-NSString * const AGSClusterLayerLoadFeaturesProgressNotification = @"AGSCLusterLayerLoadProgressNotification";
-NSString * const AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_PercentComplete = @"percentComplete";
-NSString * const AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_TotalRecordsToLoad = @"totalRecords";
-NSString * const AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_RecordsLoaded = @"recordsLoaded";
-
+NSString * const AGSClusterLayerDataLoadingProgressNotification = kClusterLayerDataLoadingNotification;
+NSString * const AGSClusterLayerDataLoadingProgressNotification_UserInfo_PercentComplete = kClusterLayerDataLoadingNotification_Key_PercentComplete;
+NSString * const AGSClusterLayerDataLoadingProgressNotification_UserInfo_TotalRecordsToLoad = kClusterLayerDataLoadingNotification_Key_TotalRecords;
+NSString * const AGSClusterLayerDataLoadingProgressNotification_UserInfo_RecordsLoaded = kClusterLayerDataLoadingNotification_Key_LoadedCount;
 
 NSString * NSStringFromBool(BOOL boolValue) {
     return boolValue?@"YES":@"NO";
@@ -227,11 +226,11 @@ NSString * NSStringFromBool(BOOL boolValue) {
     NSUInteger featuresLoaded = self.featuresToLoadTotal - self.featuresToLoad;
     double percentComplete = 100.0f * featuresLoaded / self.featuresToLoadTotal;
     
-    [[NSNotificationCenter defaultCenter] postNotificationName:AGSClusterLayerLoadFeaturesProgressNotification
+    [[NSNotificationCenter defaultCenter] postNotificationName:kClusterLayerDataLoadingNotification
                                                         object:self
-                                                      userInfo:@{AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_TotalRecordsToLoad: @(self.featuresToLoadTotal),
-                                                                 AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_RecordsLoaded: @(featuresLoaded),
-                                                                 AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_PercentComplete: @(percentComplete)}];
+                                                      userInfo:@{kClusterLayerDataLoadingNotification_Key_TotalRecords: @(self.featuresToLoadTotal),
+                                                                 kClusterLayerDataLoadingNotification_Key_LoadedCount: @(featuresLoaded),
+                                                                 kClusterLayerDataLoadingNotification_Key_PercentComplete: @(percentComplete)}];
     
     // NSLog(@"%d feature queries remaining for %d features", self.openQueries.count, self.featuresToLoad);
     if (self.openQueries.count == 0) {
@@ -422,7 +421,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
     NSLog(@"%f", clusteringDuration);
 
     dispatch_async(dispatch_get_main_queue(), ^{
-        [[NSNotificationCenter defaultCenter] postNotificationName:AGSClusterLayerClusteringProgressNotification
+        [[NSNotificationCenter defaultCenter] postNotificationName:kClusterLayerClusteringNotification
                                                             object:self
                                                           userInfo:@{
                                                                      kClusterLayerClusteringNotification_Key_Duration: @(clusteringDuration),

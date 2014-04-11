@@ -43,7 +43,7 @@
 
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(dataLoadProgress:)
-                                                 name:AGSClusterLayerLoadFeaturesProgressNotification
+                                                 name:AGSClusterLayerDataLoadingProgressNotification
                                                object:self.clusterLayer];
     [[NSNotificationCenter defaultCenter] addObserver:self
                                              selector:@selector(clusteringProgress:)
@@ -62,9 +62,9 @@
 }
 
 -(void)dataLoadProgress:(NSNotification *)notification {
-    double percentComplete = [notification.userInfo[AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_PercentComplete] doubleValue];
-    NSUInteger featuresLoaded = [notification.userInfo[AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_RecordsLoaded] unsignedIntegerValue];
-    NSUInteger totalFeaturesToLoad = [notification.userInfo[AGSClusterLayerLoadFeaturesProgressNotification_UserInfo_TotalRecordsToLoad] unsignedIntegerValue];
+    double percentComplete = [notification.userInfo[AGSClusterLayerDataLoadingProgressNotification_UserInfo_PercentComplete] doubleValue];
+    NSUInteger featuresLoaded = [notification.userInfo[AGSClusterLayerDataLoadingProgressNotification_UserInfo_RecordsLoaded] unsignedIntegerValue];
+    NSUInteger totalFeaturesToLoad = [notification.userInfo[AGSClusterLayerDataLoadingProgressNotification_UserInfo_TotalRecordsToLoad] unsignedIntegerValue];
     
     [self.dataLoadProgressView setProgress:percentComplete/100 animated:YES];
     
