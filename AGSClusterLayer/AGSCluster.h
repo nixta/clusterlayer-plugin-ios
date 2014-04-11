@@ -13,8 +13,8 @@
 @property (nonatomic, readonly) NSUInteger displayCount;
 @property (nonatomic, readonly) id clusterItemKey;
 
-@property (nonatomic, readonly) NSArray *childClusters;
-@property (nonatomic, readonly) NSArray *features;
+@property (nonatomic, readonly) NSArray *childClusters; // Direct child clusters of this cluster
+@property (nonatomic, readonly) NSArray *features; // All features, including (recursively) those of child-clusters
 
 @property (nonatomic, readonly) AGSGeometry *coverage;
 @property (nonatomic, readonly) AGSEnvelope *envelope;

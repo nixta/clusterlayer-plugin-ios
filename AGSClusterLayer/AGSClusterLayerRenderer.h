@@ -10,11 +10,12 @@
 
 @class AGSCluster;
 
+// A block with this signature will be passed a cluster and is expected to return an AGSSymbol.
 typedef AGSSymbol*(^AGSClusterSymbolGeneratorBlock)(AGSCluster *);
 
 @interface AGSClusterLayerRenderer : AGSSimpleRenderer
 -(id)initAsSurrogateFor:(AGSRenderer *)originalRenderer;
 -(id)initAsSurrogateFor:(AGSRenderer *)originalRenderer
-     clusterSymbolBlock:(AGSClusterSymbolGeneratorBlock)clusterSymbolGenerator
-    coverageSymbolBlock:(AGSClusterSymbolGeneratorBlock)coverageSymbolGenerator;
+     clusterSymbolBlock:(AGSClusterSymbolGeneratorBlock)clusterSymbolGenerator   // Symbol for the cluster point
+    coverageSymbolBlock:(AGSClusterSymbolGeneratorBlock)coverageSymbolGenerator; // Symbol for the cluster coverage
 @end

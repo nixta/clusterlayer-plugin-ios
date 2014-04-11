@@ -6,22 +6,26 @@
 //  Copyright (c) 2014 ESRI. All rights reserved.
 //
 
-#import "AGSCluster.h"
-#import "AGSClusterLayerRenderer.h"
 #import "AGSClusterLayer.h"
+#import "AGSClusterLayerRenderer.h"
+#import "AGSCluster.h"
 
 #ifndef ClusterLayerSample_AGSCL_h
 #define ClusterLayerSample_AGSCL_h
 
 #pragma mark - Notifications
+// AGSClusterLayerDataLoadingProgressNotification is posted periodically during data load.
 extern NSString * const AGSClusterLayerDataLoadingProgressNotification;
 extern NSString * const AGSClusterLayerDataLoadingProgressNotification_UserInfo_PercentComplete;
 extern NSString * const AGSClusterLayerDataLoadingProgressNotification_UserInfo_TotalRecordsToLoad;
 extern NSString * const AGSClusterLayerDataLoadingProgressNotification_UserInfo_RecordsLoaded;
 
+// AGSClusterLayerDataLoadingErrorNotification is posted if data fails to load. UserInfo contains an NSError object.
 extern NSString * const AGSClusterLayerDataLoadingErrorNotification;
 extern NSString * const AGSClusterLayerDataLoadingErrorNotification_UserInfo_Error;
 
+// AGSClusterLayerClusteringProgressNotification is posted each time a zoom level has clustered. When all zoom levels
+// have been clustered, the percentage will be 100.
 extern NSString * const AGSClusterLayerClusteringProgressNotification;
 extern NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_PercentComplete;
 extern NSString * const AGSClusterLayerClusteringProgressNotification_UserInfo_TotalZoomLevels;

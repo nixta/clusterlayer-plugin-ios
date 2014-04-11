@@ -10,8 +10,8 @@
 #import "AGSClusterLayerRenderer.h"
 
 @interface AGSClusterLayer : AGSGraphicsLayer
-@property (nonatomic, assign) NSUInteger minClusterCount;
-@property (nonatomic, assign) double minScaleForClustering;
+@property (nonatomic, assign) NSUInteger minClusterCount; // Min number of features required to render as a cluster.
+@property (nonatomic, assign) double minScaleForClustering; // Min scale beyond which clustering is not rendered.
 @property (nonatomic, readonly) BOOL willClusterAtCurrentScale;
 @property (nonatomic, assign) BOOL showClusterCoverages;
 
