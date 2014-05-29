@@ -164,6 +164,9 @@ NSString * NSStringFromBool(BOOL boolValue) {
                 NSLog(@"Could not load FeatureServiceInfo: %@", error);
             } else {
                 weakSelf.maxRecordCount = weakTask.featureServiceInfo.maxRecordCount;
+                if (weakSelf.maxRecordCount == 0) {
+                    weakSelf.maxRecordCount = 1000;
+                }
                 weakSelf.featureLayer.queryDelegate = weakSelf;
                 AGSQuery *q = [AGSQuery query];
                 q.where = @"1=1";
