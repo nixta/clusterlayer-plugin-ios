@@ -216,6 +216,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
         AGSQuery *q = [AGSQuery query];
         q.objectIds = featureIds;
         q.returnGeometry = YES;
+        q.outSpatialReference = self.mapView.spatialReference;
         NSOperation *queryOp = [self.featureLayer queryFeatures:q];
         objc_setAssociatedObject(queryOp, kBatchQueryOperationQueryKey, q, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         [self.openQueries addObject:queryOp];
