@@ -35,19 +35,16 @@
     AGSFeatureLayer *featureLayer = [AGSFeatureLayer featureServiceLayerWithURL:[NSURL URLWithString:kFeatureLayerURL] mode:AGSFeatureLayerModeOnDemand];
     [self.mapView addMapLayer:featureLayer];
     
+
+    
     self.clusterLayer = [AGSClusterLayer clusterLayerForFeatureLayer:featureLayer];
     [self.mapView addMapLayer:self.clusterLayer];
-    
+
+    // Cluster layer config
     self.clusterLayer.showClusterCoverages = self.coverageSwitch.on;
     self.clusterLayer.minScaleForClustering = 15000;
+
     
-    [self.clusterLayer registerListener:self
-                       forNotifications:@{AGSClusterLayerDataLoadingProgressNotification: strSelector(dataLoadProgress:),
-                                          AGSClusterLayerDataLoadingErrorNotification: strSelector(dataLoadError:),
-                                          AGSClusterLayerClusteringProgressNotification: strSelector(clusteringProgress:)}];
-    
-    [self.clusterLayer addObserver:self forKeyPath:@"willClusterAtCurrentScale" options:NSKeyValueObservingOptionNew context:nil];
-    [self.mapView addObserver:self forKeyPath:@"mapScale" options:NSKeyValueObservingOptionNew context:nil];
     
     AGSEnvelope *initialEnv = [AGSEnvelope envelopeWithXmin:-13743980.503617
                                                        ymin:5553033.545344
@@ -55,6 +52,15 @@
                                                        ymax:5845311.308181
                                            spatialReference:[AGSSpatialReference webMercatorSpatialReference]];
     [self.mapView zoomToEnvelope:initialEnv animated:NO];
+    
+    // Cluster layer events - this is all UI stuff...
+    [self.clusterLayer registerListener:self
+                       forNotifications:@{AGSClusterLayerDataLoadingProgressNotification: strSelector(dataLoadProgress:),
+                                          AGSClusterLayerDataLoadingErrorNotification: strSelector(dataLoadError:),
+                                          AGSClusterLayerClusteringProgressNotification: strSelector(clusteringProgress:)}];
+    
+    [self.clusterLayer addObserver:self forKeyPath:@"willClusterAtCurrentScale" options:NSKeyValueObservingOptionNew context:nil];
+    [self.mapView addObserver:self forKeyPath:@"mapScale" options:NSKeyValueObservingOptionNew context:nil];
 }
 
 -(void)dataLoadProgress:(NSNotification *)notification {
