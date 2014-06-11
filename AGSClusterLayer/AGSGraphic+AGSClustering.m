@@ -11,12 +11,15 @@
 #import "AGSCluster.h"
 
 @implementation AGSGraphic (AGSClustering)
+
+
 -(BOOL)isCluster {
     return NO;
 }
 
 -(id)clusterItemKey {
-    static NSString *oidFieldName = @"FID";
+    
+	static NSString *oidFieldName = @"FID";
     
     NSUInteger result = self.featureId;
     if (result == 0) {
@@ -45,8 +48,15 @@
     }
     
     if (result == 0) {
-        // If we could not recover, let's say so.
+        
+		// If we could not recover, let's say so.
         NSLog(@"Feature ID 0!!");
+		UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"Feature ID 0!!"
+														message:nil
+													   delegate:nil
+											  cancelButtonTitle:@"OK"
+											  otherButtonTitles:nil];
+		[alert show];
     }
     
     return [NSString stringWithFormat:@"f%d", result];

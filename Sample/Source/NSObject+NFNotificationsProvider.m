@@ -9,6 +9,7 @@
 #import "NSObject+NFNotificationsProvider.h"
 
 @implementation NSObject (NFNotificationsProvider)
+
 -(void)registerListener:(id)listener forNotifications:(NSDictionary *)notificationSelectors {
     for (id notificationName in notificationSelectors) {
         [[NSNotificationCenter defaultCenter] addObserver:listener
@@ -19,10 +20,12 @@
 }
 
 -(void)unRegisterListener:(id)listener fromNotifications:(NSArray *)notificationNames {
-    for (id notificationName in notificationNames) {
+    
+	for (id notificationName in notificationNames) {
         [[NSNotificationCenter defaultCenter] removeObserver:listener
                                                         name:notificationName
                                                       object:self];
     }
 }
+
 @end

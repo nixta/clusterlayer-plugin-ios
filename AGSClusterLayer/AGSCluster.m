@@ -14,7 +14,7 @@
 #import <objc/runtime.h>
 
 @interface AGSCluster ()
-@property (nonatomic, assign, readwrite) NSUInteger displayCount;
+@property (nonatomic, assign, readwrite) NSUInteger featureCount;
 
 @property (nonatomic, strong) AGSClusterGrid *parentGrid;
 @property (nonatomic, strong) AGSCluster *parentCluster;
@@ -38,17 +38,14 @@
 @synthesize coverageGraphic = _coverageGraphic;
 
 #pragma mark - Initializers
+
 -(id)initWithPoint:(AGSPoint *)point {
     self = [self init];
     if (self) {
-        self.isDirty = NO;
-        self.isCoverageDirty = NO;
-
+	
         self.geometry = point;
-
         self._int_features = [NSMutableArray array];
         self._int_clusters = [NSMutableArray array];
-        
         self.clusterId = [AGSCluster nextClusterId];
         
     }
@@ -83,7 +80,7 @@
     return self._int_clusters;
 }
 
--(NSUInteger)displayCount {
+-(NSUInteger)featureCount {
     return self.features.count;
 }
 
@@ -192,7 +189,6 @@
             yTotal += pt.y;
             if (!ref) ref = pt.spatialReference;
         }
-//        NSLog(@"Calculated centroid from %d points", items.count);
         centroid = [AGSPoint pointWithX:xTotal/items.count y:yTotal/items.count spatialReference:ref];
     }
     self.geometry = centroid;

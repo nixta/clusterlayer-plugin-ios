@@ -9,6 +9,9 @@
 #import <ArcGIS/ArcGIS.h>
 
 @interface AGSGraphic (AGSClustering)
+
+//Determines whether the graphic is a cluster
 @property (nonatomic, readonly) BOOL isCluster;
+
 -(id)clusterItemKey;
 @end
