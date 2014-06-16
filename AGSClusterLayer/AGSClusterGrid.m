@@ -49,7 +49,7 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize);
 -(void)addItems:(NSArray *)items {
 
     [self.items addObjectsFromArray:items];
-    [self clusterAndAddItemsToClusters];
+    [self clusterItems];
     [self.gridForPrevZoomLevel addItems:self.clusters];
 }
 
@@ -88,7 +88,7 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize);
     return clustersForItems;
 }
 
--(void)clusterAndAddItemsToClusters {
+-(void)clusterItems {
 
     [[NSNotificationCenter defaultCenter] postNotificationName:kClusterGridClusteringNotification object:self];
 
