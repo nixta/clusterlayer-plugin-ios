@@ -11,7 +11,7 @@
 
 #import <Foundation/Foundation.h>
 #import <ArcGIS/ArcGIS.h>
-#import "AGSCL.h"
+#import "AGSClustering.h"
 
 @interface AGSClusterGrid : NSObject <AGSZoomLevelClusterGridProvider>
 

@@ -14,6 +14,7 @@
 //Number of features in the cluster
 @property (nonatomic, readonly) NSUInteger featureCount;
 
+//Unique key identifying the cluster item
 @property (nonatomic, readonly) id clusterItemKey;
 
 //Direct child clusters of this cluster

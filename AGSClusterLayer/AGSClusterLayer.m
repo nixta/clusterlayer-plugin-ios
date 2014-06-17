@@ -6,7 +6,7 @@
 //  Copyright (c) 2014 ESRI. All rights reserved.
 //
 
-#import "AGSCL.h"
+#import "AGSClustering.h"
 #import "AGSClusterLayer.h"
 #import "AGSClusterGrid.h"
 #import "AGSCluster.h"

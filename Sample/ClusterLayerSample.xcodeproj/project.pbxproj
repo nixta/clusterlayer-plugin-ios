@@ -42,7 +42,7 @@
 /* Begin PBXFileReference section */
 		D906E0A618F316940015EAF2 /* AGSClusterGridRow.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AGSClusterGridRow.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		D906E0A718F316940015EAF2 /* AGSClusterGridRow.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = AGSClusterGridRow.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
-		D906E0A918F79B7B0015EAF2 /* AGSCL.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AGSCL.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		D906E0A918F79B7B0015EAF2 /* AGSClustering.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AGSClustering.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		D919A35D18E0B09800B140BF /* AGSClusterLayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AGSClusterLayer.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		D919A35E18E0B09800B140BF /* AGSClusterLayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = AGSClusterLayer.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		D919A36018E0B14700B140BF /* AGSClusterGrid.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AGSClusterGrid.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
@@ -114,7 +114,7 @@
 		D919A35C18E0B06300B140BF /* AGSClusterLayer */ = {
 			isa = PBXGroup;
 			children = (
-				D906E0A918F79B7B0015EAF2 /* AGSCL.h */,
+				D906E0A918F79B7B0015EAF2 /* AGSClustering.h */,
 				D919A35D18E0B09800B140BF /* AGSClusterLayer.h */,
 				D919A35E18E0B09800B140BF /* AGSClusterLayer.m */,
 				D9E0F74818E232CC0009C771 /* AGSClusterLayerRenderer.h */,

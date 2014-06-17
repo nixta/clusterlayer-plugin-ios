@@ -1,5 +1,5 @@
 //
-//  AGSCL.h
+//  AGSClustering.h
 //  Cluster Layer
 //
 //  Created by Nicholas Furness on 4/10/14.

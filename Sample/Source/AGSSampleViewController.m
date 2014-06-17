@@ -8,7 +8,7 @@
 
 #import "AGSSampleViewController.h"
 #import <ArcGIS/ArcGIS.h>
-#import "AGSCL.h"
+#import "AGSClustering.h"
 #import "NSObject+NFNotificationsProvider.h"
 
 #define kBasemap @"http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer"
