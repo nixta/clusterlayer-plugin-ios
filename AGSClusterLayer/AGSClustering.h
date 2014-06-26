@@ -1,5 +1,5 @@
 //
-//  AGSCL.h
+//  AGSClustering.h
 //  Cluster Layer
 //
 //  Created by Nicholas Furness on 4/10/14.
@@ -14,6 +14,7 @@
 #define ClusterLayerSample_AGSCL_h
 
 #pragma mark - Notifications
+
 // AGSClusterLayerDataLoadingProgressNotification is posted periodically during data load.
 extern NSString * const AGSClusterLayerDataLoadingProgressNotification;
 extern NSString * const AGSClusterLayerDataLoadingProgressNotification_UserInfo_PercentComplete;

@@ -14,7 +14,7 @@
 #import <objc/runtime.h>
 
 @interface AGSCluster ()
-@property (nonatomic, assign, readwrite) NSUInteger displayCount;
+@property (nonatomic, assign, readwrite) NSUInteger featureCount;
 
 @property (nonatomic, strong) AGSClusterGrid *parentGrid;
 @property (nonatomic, strong) AGSCluster *parentCluster;
@@ -28,8 +28,8 @@
 @property (nonatomic, strong, readwrite) AGSGeometry *coverage;
 @property (nonatomic, strong, readwrite) AGSGraphic *coverageGraphic;
 
-@property (nonatomic, assign) BOOL isDirty;
-@property (nonatomic, assign) BOOL isCoverageDirty;
+@property (nonatomic, assign) BOOL shouldRecalculateGeometry;
+@property (nonatomic, assign) BOOL shouldRecalculateCoverageGeometry;
 
 @end
 
@@ -38,17 +38,14 @@
 @synthesize coverageGraphic = _coverageGraphic;
 
 #pragma mark - Initializers
+
 -(id)initWithPoint:(AGSPoint *)point {
     self = [self init];
     if (self) {
-        self.isDirty = NO;
-        self.isCoverageDirty = NO;
-
+	
         self.geometry = point;
-
         self._int_features = [NSMutableArray array];
         self._int_clusters = [NSMutableArray array];
-        
         self.clusterId = [AGSCluster nextClusterId];
         
     }
@@ -83,14 +80,14 @@
     return self._int_clusters;
 }
 
--(NSUInteger)displayCount {
+-(NSUInteger)featureCount {
     return self.features.count;
 }
 
--(void)setIsDirty:(BOOL)isDirty {
-    _isDirty = isDirty;
-    if (_isDirty) {
-        self.isCoverageDirty = YES;
+-(void)setShouldRecalculateGeometry:(BOOL)isDirty {
+    _shouldRecalculateGeometry = isDirty;
+    if (_shouldRecalculateGeometry) {
+        self.shouldRecalculateCoverageGeometry = YES;
     }
 }
 
@@ -101,7 +98,7 @@
 
 #pragma mark - Geometry and Coverage
 -(AGSGeometry *)geometry {
-    if (self.isDirty) {
+    if (self.shouldRecalculateGeometry) {
         [self recalculateCentroid];
     }
     return super.geometry;
@@ -109,7 +106,7 @@
 
 -(void)setGeometry:(AGSGeometry *)geometry {
     [super setGeometry:geometry];
-    self.isDirty = NO;
+    self.shouldRecalculateGeometry = NO;
 }
 
 -(AGSEnvelope *)envelope {
@@ -117,7 +114,7 @@
 }
 
 -(AGSGeometry *)coverage {
-    if (self.isCoverageDirty) {
+    if (self.shouldRecalculateCoverageGeometry) {
         [self recalculateCoverage];
     }
     return _coverage;
@@ -144,7 +141,7 @@
 -(void)removeAllItems {
     [self._int_features removeAllObjects];
     [self._int_clusters removeAllObjects];
-    self.isDirty = YES;
+    self.shouldRecalculateGeometry = YES;
     [self recalculateCentroid];
 }
 
@@ -158,7 +155,7 @@
     } else {
         [self._int_features addObject:item];
     }
-    self.isDirty = YES;
+    self.shouldRecalculateGeometry = YES;
 }
 
 -(void)_removeItem:(AGSClusterItem *)item {
@@ -170,12 +167,12 @@
     } else {
         [self._int_features removeObject:item];
     }
-    self.isDirty = YES;
+    self.shouldRecalculateGeometry = YES;
 }
 
 #pragma mark - Centroid logic
 -(void) recalculateCentroid {
-    if (!self.isDirty) return;
+    if (!self.shouldRecalculateGeometry) return;
     
     AGSPoint *centroid = nil;
     NSArray *items = self.features;
@@ -192,14 +189,13 @@
             yTotal += pt.y;
             if (!ref) ref = pt.spatialReference;
         }
-//        NSLog(@"Calculated centroid from %d points", items.count);
         centroid = [AGSPoint pointWithX:xTotal/items.count y:yTotal/items.count spatialReference:ref];
     }
     self.geometry = centroid;
 }
 
 -(void) recalculateCoverage {
-    if (!self.isCoverageDirty) return;
+    if (!self.shouldRecalculateCoverageGeometry) return;
     
     if (self.features.count == 1) {
         self.coverage = self.geometry;
@@ -219,7 +215,7 @@
         AGSGeometry *coverage = [[AGSGeometryEngine defaultGeometryEngine] convexHullForGeometry:geom];
         self.coverage = coverage;
     }
-    self.isCoverageDirty = NO;
+    self.shouldRecalculateCoverageGeometry = NO;
 }
 
 #pragma mark - Description Override

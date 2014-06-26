@@ -10,18 +10,35 @@
 #import <ArcGIS/ArcGIS.h>
 
 @interface AGSCluster : AGSGraphic
-@property (nonatomic, readonly) NSUInteger displayCount;
+
+//Number of features in the cluster
+@property (nonatomic, readonly) NSUInteger featureCount;
+
+//Unique key identifying the cluster item
 @property (nonatomic, readonly) id clusterItemKey;
 
-@property (nonatomic, readonly) NSArray *childClusters; // Direct child clusters of this cluster
-@property (nonatomic, readonly) NSArray *features; // All features, including (recursively) those of child-clusters
+//Direct child clusters of this cluster
+@property (nonatomic, readonly) NSArray *childClusters; 
 
+//All features, including (recursively) those of child-clusters
+@property (nonatomic, readonly) NSArray *features; 
+
+//Coverage geometry of the cluster
 @property (nonatomic, readonly) AGSGeometry *coverage;
+
+//Envelope of the coverage
 @property (nonatomic, readonly) AGSEnvelope *envelope;
+
+//The coverage graphic of the cluster
 @property (nonatomic, readonly) AGSGraphic *coverageGraphic;
 
+//Initializes and returns an AGSCluster object for the given point
 +(AGSCluster *)clusterForPoint:(AGSPoint *)point;
 
+//Adds a list of AGSClusterItem objects on the cluster
 -(void)addItems:(NSArray *)items;
+
+//Removes all features and child clusters in the cluster
 -(void)removeAllItems;
+
 @end

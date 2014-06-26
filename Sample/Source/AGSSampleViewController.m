@@ -8,7 +8,7 @@
 
 #import "AGSSampleViewController.h"
 #import <ArcGIS/ArcGIS.h>
-#import "AGSCL.h"
+#import "AGSClustering.h"
 #import "NSObject+NFNotificationsProvider.h"
 
 #define kBasemap @"http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer"
@@ -41,7 +41,7 @@
     [self.mapView addMapLayer:self.clusterLayer];
 
     // Cluster layer config
-    self.clusterLayer.showClusterCoverages = self.coverageSwitch.on;
+    self.clusterLayer.showsClusterCoverages = self.coverageSwitch.on;
     self.clusterLayer.minScaleForClustering = 15000;
 
     
@@ -64,6 +64,7 @@
 }
 
 -(void)dataLoadProgress:(NSNotification *)notification {
+
     double percentComplete = [notification.userInfo[AGSClusterLayerDataLoadingProgressNotification_UserInfo_PercentComplete] doubleValue];
     NSUInteger featuresLoaded = [notification.userInfo[AGSClusterLayerDataLoadingProgressNotification_UserInfo_RecordsLoaded] unsignedIntegerValue];
     NSUInteger totalFeaturesToLoad = [notification.userInfo[AGSClusterLayerDataLoadingProgressNotification_UserInfo_TotalRecordsToLoad] unsignedIntegerValue];
@@ -81,7 +82,8 @@
 }
 
 -(void)clusteringProgress:(NSNotification *)notification {
-    double percentComplete = [notification.userInfo[AGSClusterLayerClusteringProgressNotification_UserInfo_PercentComplete] doubleValue];
+   
+	double percentComplete = [notification.userInfo[AGSClusterLayerClusteringProgressNotification_UserInfo_PercentComplete] doubleValue];
     NSTimeInterval duration = [notification.userInfo[AGSClusterLayerClusteringProgressNotification_UserInfo_Duration] doubleValue];
     
     [self.dataLoadProgressView setProgress:percentComplete/100 animated:YES];
@@ -102,7 +104,8 @@
 }
 
 -(void)dataLoadError:(NSNotification *)notification {
-    NSError *error = notification.userInfo[AGSClusterLayerDataLoadingErrorNotification_UserInfo_Error];
+    
+	NSError *error = notification.userInfo[AGSClusterLayerDataLoadingErrorNotification_UserInfo_Error];
     NSString *strError = error.localizedDescription;
     if (strError.length == 0) strError = error.localizedFailureReason;
     [[[UIAlertView alloc] initWithTitle:@"Cluster Load Error"
@@ -117,7 +120,7 @@
 }
 
 - (IBAction)toggleCoverages:(id)sender {
-    self.clusterLayer.showClusterCoverages = self.coverageSwitch.on;
+    self.clusterLayer.showsClusterCoverages = self.coverageSwitch.on;
 }
 
 - (void)didReceiveMemoryWarning

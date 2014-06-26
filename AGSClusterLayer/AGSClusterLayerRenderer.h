@@ -14,8 +14,15 @@
 typedef AGSSymbol*(^AGSClusterSymbolGeneratorBlock)(AGSCluster *);
 
 @interface AGSClusterLayerRenderer : AGSSimpleRenderer
--(id)initAsSurrogateFor:(AGSRenderer *)originalRenderer;
--(id)initAsSurrogateFor:(AGSRenderer *)originalRenderer
-     clusterSymbolBlock:(AGSClusterSymbolGeneratorBlock)clusterSymbolGenerator   // Symbol for the cluster point
-    coverageSymbolBlock:(AGSClusterSymbolGeneratorBlock)coverageSymbolGenerator; // Symbol for the cluster coverage
+
+//Initialize an AGSClusterLayerRenderer object with the provided renderer
+-(id)initWithRenderer:(AGSRenderer *)originalRenderer;
+
+//Initialize an AGSClusterLayerRenderer object with the provided renderer, cluster symbol block and coverage symbol block
+-(id)initWithRenderer:(AGSRenderer *)originalRenderer
+     clusterSymbolBlock:(AGSClusterSymbolGeneratorBlock)clusterSymbolGenerator   
+    coverageSymbolBlock:(AGSClusterSymbolGeneratorBlock)coverageSymbolGenerator; 
+	
+	
+
 @end

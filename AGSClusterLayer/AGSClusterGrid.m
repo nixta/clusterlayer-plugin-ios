@@ -47,14 +47,14 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize);
 }
 
 -(void)addItems:(NSArray *)items {
+
     [self.items addObjectsFromArray:items];
-
     [self clusterItems];
-
     [self.gridForPrevZoomLevel addItems:self.clusters];
 }
 
 -(void)removeAllItems {
+
     for (AGSClusterGridRow *row in [self.rows objectEnumerator]) {
         for (AGSCluster *cluster in [row.clusters objectEnumerator]) {
             [cluster removeAllItems];
@@ -65,8 +65,8 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize);
 }
 
 - (NSMutableSet *)calculateClusters {
-    NSArray *items = self.items;
-    // NSLog(@"Adding %d features/clusters to zoom level %@", items.count, self.zoomLevel);
+    
+	NSArray *items = self.items;
     
     // Add each item to the clusters (creating new ones if necessary).
     NSMutableSet *clustersForItems = [NSMutableSet set];
@@ -89,6 +89,7 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize);
 }
 
 -(void)clusterItems {
+
     [[NSNotificationCenter defaultCenter] postNotificationName:kClusterGridClusteringNotification object:self];
 
     NSDate *startTime = [NSDate date];
@@ -96,11 +97,11 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize);
     NSSet *clustersForItems = [self calculateClusters];
     
     // Now go over the clusters we've touched and bulk add items to each individual cluster.
-    NSUInteger featureCount = 0;
+    NSUInteger totalFeatureCount = 0;
     for (AGSCluster *cluster in clustersForItems) {
         NSArray *itemsToAdd = objc_getAssociatedObject(cluster, kAddFeaturesArrayKey);
         [cluster addItems:itemsToAdd];
-        featureCount += cluster.displayCount;
+        totalFeatureCount += cluster.featureCount;
         // Remove the temporary reference to the array that tracked the items to add to this cluster
         objc_setAssociatedObject(cluster, kAddFeaturesArrayKey, nil, OBJC_ASSOCIATION_ASSIGN);
     }
@@ -109,13 +110,11 @@ AGSPoint* getGridCellCentroid(CGPoint cellCoord, NSUInteger cellSize);
 
     [[NSNotificationCenter defaultCenter] postNotificationName:kClusterGridClusteredNotification object:self
                                                       userInfo:@{
-                                                                 kClusterGridClusteredNotification_Key_FeatureCount: @(featureCount),
+                                                                 kClusterGridClusteredNotification_Key_FeatureCount: @(totalFeatureCount),
                                                                  kClusterGridClusteredNotification_Key_ClusterCount: @(self.clusters.count),
                                                                  kClusterGridClusteredNotification_Key_Duration: @(clusteringDuration),
                                                                  kClusterGridClusteredNotification_Key_ZoomLevel: self.zoomLevel
                                                                  }];
-    
-    // NSLog(@"%2d [%4d items in %4d clusters sized %7d] in %.4fs", self.zoomLevel.unsignedIntegerValue, self.items.count, self.clusters.count, self.cellSize, clusteringDuration);
 }
 
 -(AGSCluster *)clusterForItem:(AGSClusterItem *)item {
