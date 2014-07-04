@@ -7,11 +7,14 @@
 //
 
 #import <ArcGIS/ArcGIS.h>
+@class AGSCluster;
 
 @interface AGSGraphic (AGSClustering)
 
 //Determines whether the graphic is a cluster
 @property (nonatomic, readonly) BOOL isCluster;
+@property (nonatomic, readonly) BOOL isClusterCoverage;
+@property (nonatomic, readonly) AGSCluster *owningCluster;
 
 -(id)clusterItemKey;
 @end

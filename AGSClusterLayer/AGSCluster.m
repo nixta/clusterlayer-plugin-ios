@@ -127,6 +127,7 @@
 -(AGSGraphic *)coverageGraphic {
     if (!_coverageGraphic) {
         _coverageGraphic = [AGSGraphic graphicWithGeometry:self.coverage symbol:nil attributes:nil];
+        objc_setAssociatedObject(_coverageGraphic, kClusterPayloadKey, self, OBJC_ASSOCIATION_ASSIGN);
     }
     return _coverageGraphic;
 }

@@ -9,12 +9,19 @@
 #import "AGSGraphic+AGSClustering.h"
 #import <objc/runtime.h>
 #import "AGSCluster.h"
+#import "Common_int.h"
 
 @implementation AGSGraphic (AGSClustering)
-
-
 -(BOOL)isCluster {
     return NO;
+}
+
+-(BOOL)isClusterCoverage {
+    return self.owningCluster != nil;
+}
+
+-(AGSCluster *)owningCluster {
+    return objc_getAssociatedObject(self, kClusterPayloadKey);
 }
 
 -(id)clusterItemKey {

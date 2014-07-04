@@ -9,6 +9,7 @@
 #import "AGSClusterLayerRenderer.h"
 #import "AGSCluster.h"
 #import "Common_int.h"
+#import "AGSGraphic+AGSClustering.h"
 #import <objc/runtime.h>
 
 @interface AGSClusterLayerRenderer ()
@@ -93,12 +94,12 @@
         return self.clusterGenBlock((AGSCluster *)feature);
     }
     
-    AGSCluster *cluster = objc_getAssociatedObject(feature, kClusterPayloadKey);
+    AGSCluster *cluster = ((AGSGraphic *)feature).owningCluster;
     if (cluster != nil &&
         [feature.geometry isKindOfClass:[AGSPolygon class]]) {
-        return self.coverageGenBlock((AGSCluster *)feature);
+        return self.coverageGenBlock(cluster);
     }
-        
+
     return [self.originalRenderer symbolForFeature:feature timeExtent:timeExtent];
 }
 @end

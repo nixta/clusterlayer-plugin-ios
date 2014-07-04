@@ -26,11 +26,13 @@
 //Coverage geometry of the cluster
 @property (nonatomic, readonly) AGSGeometry *coverage;
 
+//The coverage graphic of the cluster
+@property (nonatomic, readonly) AGSGraphic *coverageGraphic;
+
 //Envelope of the coverage
 @property (nonatomic, readonly) AGSEnvelope *envelope;
 
-//The coverage graphic of the cluster
-@property (nonatomic, readonly) AGSGraphic *coverageGraphic;
+@property (nonatomic, assign) BOOL showCoverage;
 
 //Initializes and returns an AGSCluster object for the given point
 +(AGSCluster *)clusterForPoint:(AGSPoint *)point;
