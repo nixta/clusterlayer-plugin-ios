@@ -12,6 +12,7 @@
 #import "AGSCluster.h"
 #import "Common_int.h"
 #import "NSArray+Utils.h"
+#import "AGSGraphic+AGSClustering.h"
 #import <objc/runtime.h>
 
 #pragma mark - Constants and Defines
@@ -48,7 +49,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
 }
 
 #pragma mark - Internal properties
-@interface AGSClusterLayer () <AGSLayerCalloutDelegate, AGSFeatureLayerQueryDelegate>
+@interface AGSClusterLayer () <AGSLayerCalloutDelegate, AGSFeatureLayerQueryDelegate, AGSLayerDelegate, AGSCalloutDelegate>
 
 @property (nonatomic, strong) NSMutableDictionary *grids;
 @property (nonatomic, strong) NSArray *sortedGridKeys;
@@ -123,6 +124,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
     self = [self init];
     if (self) {
         self.featureLayer = featureLayer;
+        self.featureLayer.delegate = self;
         [[NSNotificationCenter defaultCenter] addObserver:self
                                                  selector:@selector(featureLayerLoaded:)
                                                      name:AGSLayerDidLoadNotification
@@ -136,6 +138,13 @@ NSString * NSStringFromBool(BOOL boolValue) {
 }
 
 #pragma mark - Asynchronous Setup
+
+-(void)layerDidLoad:(AGSLayer *)layer {
+    if (layer == self.featureLayer) {
+        NSLog(@"FeatureLayer Loaded");
+        [self featureLayerLoaded:nil];
+    }
+}
 
 -(void)featureLayerLoaded:(NSNotification *)notification {
     AGSClusterSymbolGeneratorBlock clusterGenBlock = self.symbolGeneratorBlocks[kClusterRenderBlockParameterKey];
@@ -166,6 +175,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
                 q.where = @"1=1";
                 [weakSelf.featureLayer queryIds:q];
             }
+            weakSelf.syncTask = nil;
         }];
     } else {
         // Load as the underlying feature layer updates its data. We build an accumulative copy of all the data.
@@ -442,8 +452,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
     });
 }
 
--(void) renderClusters {
-
+-(void)renderClusters {
     NSMutableArray *coverageGraphics = [NSMutableArray array];
     NSMutableArray *clusterGraphics = [NSMutableArray array];
     NSMutableArray *featureGraphics = [NSMutableArray array];
@@ -452,10 +461,9 @@ NSString * NSStringFromBool(BOOL boolValue) {
         if (self.mapView.mapScale > self.minScaleForClustering &&
             cluster.featureCount >= self.minClusterCount) {
             // Draw as cluster.
-            if (self.showsClusterCoverages && cluster.features.count > 2) {
+            if ((self.showsClusterCoverages || cluster.showCoverage) && cluster.features.count > 2) {
                 // Draw the coverage if need be
                 AGSGraphic *coverageGraphic = cluster.coverageGraphic;
-                objc_setAssociatedObject(coverageGraphic, kClusterPayloadKey, cluster, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
                 coverageGraphic.symbol = [self.renderer symbolForFeature:coverageGraphic timeExtent:nil];
                 [coverageGraphics addObject:coverageGraphic];
             }
@@ -478,20 +486,40 @@ NSString * NSStringFromBool(BOOL boolValue) {
 
 #pragma mark - UI/Callouts
 -(BOOL)callout:(AGSCallout *)callout willShowForFeature:(id<AGSFeature>)feature layer:(AGSLayer<AGSHitTestable> *)layer mapPoint:(AGSPoint *)mapPoint {
-    if ([feature isMemberOfClass:[AGSCluster class]]) {
-        AGSCluster *cluster = (AGSCluster*)feature;
+    [self handleCalloutChange:callout];
+    
+    AGSCluster *cluster = [feature isMemberOfClass:[AGSCluster class]]?(AGSCluster *)feature:((AGSGraphic *)feature).owningCluster;
+    
+    if (cluster) {
         NSLog(@"%@ :: %d", cluster, cluster.featureCount);
-        if (cluster) {
-            callout.title = @"Cluster";
-            callout.detail = [NSString stringWithFormat:@"Cluster contains %d features", cluster.features.count];
-            callout.accessoryButtonHidden = YES;
-        }
+        callout.title = @"Cluster";
+        callout.detail = [NSString stringWithFormat:@"Cluster contains %d features", cluster.features.count];
+        callout.accessoryButtonHidden = YES;
+        callout.delegate = self;
+        cluster.showCoverage = YES;
+        [self refresh];
     } else {
         callout.title = @"Ordinary feature";
         callout.detail = @"Might have a bunch of attributes on it";
         callout.accessoryButtonHidden = NO;
     }
+    
     return YES;
+}
+
+-(void)calloutWillDismiss:(AGSCallout *)callout {
+    [self handleCalloutChange:callout];
+}
+
+-(void)handleCalloutChange:(AGSCallout *)callout {
+    if (callout.representedFeature) {
+        id feature = callout.representedFeature;
+        AGSCluster *cluster = [feature isKindOfClass:[AGSCluster class]]?(AGSCluster *)feature:((AGSGraphic *)feature).owningCluster;
+        if (cluster) {
+            cluster.showCoverage = NO;
+            [self refresh];
+        }
+    }
 }
 
 #pragma mark - Build All Grids

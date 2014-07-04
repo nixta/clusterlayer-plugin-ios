@@ -33,16 +33,23 @@
     [self.mapView addMapLayer:[AGSTiledMapServiceLayer tiledMapServiceLayerWithURL:[NSURL URLWithString:kBasemap]]];
     
     AGSFeatureLayer *featureLayer = [AGSFeatureLayer featureServiceLayerWithURL:[NSURL URLWithString:kFeatureLayerURL] mode:AGSFeatureLayerModeOnDemand];
-    [self.mapView addMapLayer:featureLayer];
     
 
-    
+    /// *******************************
+    /// Cluster Layer Setup
+
+    // Must add the source layer to connect it to its end point.
+    [self.mapView addMapLayer:featureLayer];
+
+    // Now wrap it in an AGSClusterLayer. The original FeatureLayer will be hidden in the map.
     self.clusterLayer = [AGSClusterLayer clusterLayerForFeatureLayer:featureLayer];
     [self.mapView addMapLayer:self.clusterLayer];
 
     // Cluster layer config
     self.clusterLayer.showsClusterCoverages = self.coverageSwitch.on;
     self.clusterLayer.minScaleForClustering = 15000;
+    
+    /// *******************************
 
     
     
