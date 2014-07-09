@@ -9,21 +9,8 @@
 #ifndef ClusterLayerSample_Common_h
 #define ClusterLayerSample_Common_h
 
-#define kClusterGridClusteringNotification @"AGSClusterGridNotification_StartClustering"
 
-#define kClusterGridClusteredNotification @"AGSClusterGridNotification_EndClustering"
-#define kClusterGridClusteredNotification_Key_FeatureCount @"itemsClustered"
-#define kClusterGridClusteredNotification_Key_ClusterCount @"clusters"
-#define kClusterGridClusteredNotification_Key_Duration @"duration"
-#define kClusterGridClusteredNotification_Key_ZoomLevel @"zoomLevel"
-
-#define kClusterLayerClusteringNotification @"AGSClusterLayerClusteringNotification_Progress"
-#define kClusterLayerClusteringNotification_Key_Duration @"duration"
-#define kClusterLayerClusteringNotification_Key_PercentComplete @"percentComplete"
-#define kClusterLayerClusteringNotification_Key_FeatureCount @"featureCount"
-#define kClusterLayerClusteringNotification_Key_TotalZoomLevels @"totalLevels"
-#define kClusterLayerClusteringNotification_Key_ZoomLevelsClustered @"levelsComplete"
-
+#pragma mark - DATA LOADING
 #define kClusterLayerDataLoadingNotification @"AGSCLusterLayerLoadProgressNotification"
 #define kClusterLayerDataLoadingNotification_Key_PercentComplete @"percentComplete"
 #define kClusterLayerDataLoadingNotification_Key_TotalRecords @"totalRecords"
@@ -31,6 +18,27 @@
 
 #define kClusterLayerDataLoadingErrorNotification @"AGSCLusterLayerLoadErrorNotification"
 #define kClusterLayerDataLoadingErrorNotification_Key_Error @"error"
+
+
+#pragma mark - LAYER CLUSTERING
+#define kClusterLayerClusteringNotification @"AGSClusterLayerClusteringNotification_Progress"
+#define kClusterLayerClusteringNotification_Key_Duration @"duration"
+#define kClusterLayerClusteringNotification_Key_PercentComplete @"percentComplete"
+#define kClusterLayerClusteringNotification_Key_FeatureCount @"featureCount"
+#define kClusterLayerClusteringNotification_Key_TotalZoomLevels @"totalLevels"
+#define kClusterLayerClusteringNotification_Key_ZoomLevelsClustered @"levelsComplete"
+
+
+
+#pragma mark - GRID CLUSTERING
+#define kClusterGridClusteringNotification @"AGSClusterGridNotification_StartClustering"
+
+#pragma mark - GRID CLUSTERED
+#define kClusterGridClusteredNotification @"AGSClusterGridNotification_EndClustering"
+#define kClusterGridClusteredNotification_Key_FeatureCount @"itemsClustered"
+#define kClusterGridClusteredNotification_Key_ClusterCount @"clusters"
+#define kClusterGridClusteredNotification_Key_Duration @"duration"
+#define kClusterGridClusteredNotification_Key_ZoomLevel @"zoomLevel"
 
 
 #define kClusterPayloadKey @"__cluster"

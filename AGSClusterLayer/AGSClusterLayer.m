@@ -45,7 +45,7 @@ NSString * const AGSClusterLayerDataLoadingProgressNotification_UserInfo_TotalRe
 NSString * const AGSClusterLayerDataLoadingProgressNotification_UserInfo_RecordsLoaded = kClusterLayerDataLoadingNotification_Key_LoadedCount;
 
 NSString * NSStringFromBool(BOOL boolValue) {
-    return boolValue?@"YES":@"NO";
+    return boolValue?@"Yes":@"No";
 }
 
 #pragma mark - Internal properties
@@ -107,6 +107,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
     self = [super init];
     if (self) {
 
+        self.clusteringEnabled = YES;
         self.loadsAllFeatures = YES;
         self.calloutDelegate = self;
         self.minClusterCount = kDefaultMinClusterCount;
@@ -157,7 +158,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
     if (self.loadsAllFeatures) {
         // Load all the data up-front.
         // We are then not dependent on the underlying feature layer for data updates.
-        self.featureLayer.visible = NO;
+        self.featureLayer.visible = !self.clusteringEnabled;
         
         self.syncTask = [[AGSGDBSyncTask alloc] initWithURL:self.featureLayer.URL credential:self.featureLayer.credential];
         __weak AGSGDBSyncTask *weakTask = self.syncTask;
@@ -244,7 +245,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
 
 -(void)continueLoadingFeatures:(NSOperation *)op {
    
-	 AGSQuery *q = objc_getAssociatedObject(op, kBatchQueryOperationQueryKey);
+    AGSQuery *q = objc_getAssociatedObject(op, kBatchQueryOperationQueryKey);
     [self.openQueries removeObject:op];
     self.featureCountToLoad -= q.objectIds.count;
     NSUInteger featuresLoaded = self.totalFeatureCountToLoad - self.featureCountToLoad;
@@ -352,6 +353,11 @@ NSString * NSStringFromBool(BOOL boolValue) {
 }
 
 #pragma mark - Properties
+-(void)setClusteringEnabled:(BOOL)clusteringEnabled {
+    _clusteringEnabled = clusteringEnabled;
+    [self refresh];
+}
+
 -(void)setShowsClusterCoverages:(BOOL)showClusterCoverages {
     _showsClusterCoverages = showClusterCoverages;
     [self refresh];
@@ -458,7 +464,8 @@ NSString * NSStringFromBool(BOOL boolValue) {
     NSMutableArray *featureGraphics = [NSMutableArray array];
     
     for (AGSCluster *cluster in self.gridForCurrentScale.clusters) {
-        if (self.mapView.mapScale > self.minScaleForClustering &&
+        if (self.clusteringEnabled &&
+            self.mapView.mapScale > self.minScaleForClustering &&
             cluster.featureCount >= self.minClusterCount) {
             // Draw as cluster.
             if ((self.showsClusterCoverages || cluster.showCoverage) && cluster.features.count > 2) {

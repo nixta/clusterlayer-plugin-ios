@@ -18,9 +18,11 @@
 @property (weak, nonatomic) IBOutlet AGSMapView *mapView;
 @property (nonatomic, strong) AGSClusterLayer *clusterLayer;
 @property (weak, nonatomic) IBOutlet UISwitch *coverageSwitch;
+@property (weak, nonatomic) IBOutlet UISwitch *clusteringSwitch;
 @property (weak, nonatomic) IBOutlet UILabel *clusteringStatusLabel;
 @property (weak, nonatomic) IBOutlet UILabel *clusteringFeedbackLabel;
 @property (weak, nonatomic) IBOutlet UIProgressView *dataLoadProgressView;
+@property (weak, nonatomic) IBOutlet UILabel *clusteringEnabledLabel;
 @end
 
 @implementation AGSSampleViewController
@@ -32,13 +34,13 @@
 
     [self.mapView addMapLayer:[AGSTiledMapServiceLayer tiledMapServiceLayerWithURL:[NSURL URLWithString:kBasemap]]];
     
-    AGSFeatureLayer *featureLayer = [AGSFeatureLayer featureServiceLayerWithURL:[NSURL URLWithString:kFeatureLayerURL] mode:AGSFeatureLayerModeOnDemand];
     
 
     /// *******************************
     /// Cluster Layer Setup
 
     // Must add the source layer to connect it to its end point.
+    AGSFeatureLayer *featureLayer = [AGSFeatureLayer featureServiceLayerWithURL:[NSURL URLWithString:kFeatureLayerURL] mode:AGSFeatureLayerModeOnDemand];
     [self.mapView addMapLayer:featureLayer];
 
     // Now wrap it in an AGSClusterLayer. The original FeatureLayer will be hidden in the map.
@@ -130,10 +132,18 @@
     self.clusterLayer.showsClusterCoverages = self.coverageSwitch.on;
 }
 
-- (void)didReceiveMemoryWarning
-{
+- (IBAction)toggleClustering {
+    self.clusterLayer.clusteringEnabled = self.clusteringSwitch.on;
+    self.coverageSwitch.enabled = self.clusterLayer.clusteringEnabled;
+    self.clusteringEnabledLabel.text = [NSString stringWithFormat:@"Clustering %@", self.clusterLayer.clusteringEnabled?@"Enabled":@"Disabled"];
+}
+
+- (void)didReceiveMemoryWarning {
     [super didReceiveMemoryWarning];
     // Dispose of any resources that can be recreated.
 }
 
+-(BOOL)prefersStatusBarHidden {
+    return YES;
+}
 @end
