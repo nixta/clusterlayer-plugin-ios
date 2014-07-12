@@ -33,26 +33,26 @@
 	// Do any additional setup after loading the view, typically from a nib.
 
     [self.mapView addMapLayer:[AGSTiledMapServiceLayer tiledMapServiceLayerWithURL:[NSURL URLWithString:kBasemap]]];
-    
-    
-
-    /// *******************************
-    /// Cluster Layer Setup
 
     // Must add the source layer to connect it to its end point.
     AGSFeatureLayer *featureLayer = [AGSFeatureLayer featureServiceLayerWithURL:[NSURL URLWithString:kFeatureLayerURL] mode:AGSFeatureLayerModeOnDemand];
     [self.mapView addMapLayer:featureLayer];
+
+    
+    
+    /// *******************************
+    /// Cluster Layer Setup
 
     // Now wrap it in an AGSClusterLayer. The original FeatureLayer will be hidden in the map.
     self.clusterLayer = [AGSClusterLayer clusterLayerForFeatureLayer:featureLayer];
     [self.mapView addMapLayer:self.clusterLayer];
 
     // Cluster layer config
-    self.clusterLayer.showsClusterCoverages = self.coverageSwitch.on;
     self.clusterLayer.minScaleForClustering = 15000;
     
     /// *******************************
 
+    
     
     
     AGSEnvelope *initialEnv = [AGSEnvelope envelopeWithXmin:-13743980.503617
@@ -70,6 +70,7 @@
     
     [self.clusterLayer addObserver:self forKeyPath:@"willClusterAtCurrentScale" options:NSKeyValueObservingOptionNew context:nil];
     [self.mapView addObserver:self forKeyPath:@"mapScale" options:NSKeyValueObservingOptionNew context:nil];
+    self.clusterLayer.showsClusterCoverages = self.coverageSwitch.on;
 }
 
 -(void)dataLoadProgress:(NSNotification *)notification {
