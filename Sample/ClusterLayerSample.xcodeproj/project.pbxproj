@@ -11,6 +11,8 @@
 		D919A35F18E0B09800B140BF /* AGSClusterLayer.m in Sources */ = {isa = PBXBuildFile; fileRef = D919A35E18E0B09800B140BF /* AGSClusterLayer.m */; };
 		D919A36218E0B14700B140BF /* AGSClusterGrid.m in Sources */ = {isa = PBXBuildFile; fileRef = D919A36118E0B14700B140BF /* AGSClusterGrid.m */; };
 		D919A36518E203DD00B140BF /* AGSCluster.m in Sources */ = {isa = PBXBuildFile; fileRef = D919A36418E203DD00B140BF /* AGSCluster.m */; };
+		D977B2901971B1C3004E179E /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = D977B28E1971B1C3004E179E /* icon.png */; };
+		D977B2911971B1C3004E179E /* icon@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = D977B28F1971B1C3004E179E /* icon@2x.png */; };
 		D98A0A7218F8666C00138B1C /* NSObject+NFNotificationsProvider.m in Sources */ = {isa = PBXBuildFile; fileRef = D98A0A7118F8666C00138B1C /* NSObject+NFNotificationsProvider.m */; };
 		D9A8B11916BB27B9001653EE /* libc++.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = D9A8B11816BB27B9001653EE /* libc++.dylib */; };
 		D9A8B11B16BB27BF001653EE /* OpenGLES.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9A8B11A16BB27BF001653EE /* OpenGLES.framework */; };
@@ -49,6 +51,8 @@
 		D919A36118E0B14700B140BF /* AGSClusterGrid.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = AGSClusterGrid.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		D919A36318E203DD00B140BF /* AGSCluster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AGSCluster.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		D919A36418E203DD00B140BF /* AGSCluster.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = AGSCluster.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		D977B28E1971B1C3004E179E /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = icon.png; sourceTree = "<group>"; };
+		D977B28F1971B1C3004E179E /* icon@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "icon@2x.png"; sourceTree = "<group>"; };
 		D98A0A7018F8666C00138B1C /* NSObject+NFNotificationsProvider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSObject+NFNotificationsProvider.h"; sourceTree = "<group>"; };
 		D98A0A7118F8666C00138B1C /* NSObject+NFNotificationsProvider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSObject+NFNotificationsProvider.m"; sourceTree = "<group>"; };
 		D9A8B11816BB27B9001653EE /* libc++.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libc++.dylib"; path = "usr/lib/libc++.dylib"; sourceTree = SDKROOT; };
@@ -208,6 +212,8 @@
 		D9F3D1B41668271A00FB6A8D /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				D977B28E1971B1C3004E179E /* icon.png */,
+				D977B28F1971B1C3004E179E /* icon@2x.png */,
 				D9F3D1E31668293000FB6A8D /* ArcGIS.bundle */,
 				D9F3D1B51668271A00FB6A8D /* AGSSample-Info.plist */,
 				D9F3D1B61668271A00FB6A8D /* InfoPlist.strings */,
@@ -276,9 +282,11 @@
 				D9F3D1C01668271A00FB6A8D /* Default.png in Resources */,
 				D9F3D1C21668271A00FB6A8D /* Default@2x.png in Resources */,
 				D9F3D1C41668271A00FB6A8D /* Default-568h@2x.png in Resources */,
+				D977B2901971B1C3004E179E /* icon.png in Resources */,
 				D9F3D1C71668271A00FB6A8D /* MainStoryboard_iPhone.storyboard in Resources */,
 				D9F3D1CA1668271A00FB6A8D /* MainStoryboard_iPad.storyboard in Resources */,
 				D9F3D1E41668293000FB6A8D /* ArcGIS.bundle in Resources */,
+				D977B2911971B1C3004E179E /* icon@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
