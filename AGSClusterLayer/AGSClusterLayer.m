@@ -173,7 +173,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
                 }
                 weakSelf.featureLayer.queryDelegate = weakSelf;
                 AGSQuery *q = [AGSQuery query];
-                q.where = @"1=1";
+                q.whereClause = @"1=1";
                 [weakSelf.featureLayer queryIds:q];
             }
             weakSelf.syncTask = nil;
