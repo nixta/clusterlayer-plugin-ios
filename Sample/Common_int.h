@@ -42,6 +42,7 @@
 
 
 #define kClusterPayloadKey @"__cluster"
+#define kClusterGraphicCustomAttributeKey @"__clusterIDKey"
 
 typedef AGSGraphic AGSClusterItem;
 

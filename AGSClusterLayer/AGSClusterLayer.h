@@ -41,4 +41,12 @@
                         usingClusterSymbolBlock:(AGSClusterSymbolGeneratorBlock)clusterBlock
                             coverageSymbolBlock:(AGSClusterSymbolGeneratorBlock)coverageBlock;
 
+// Initializes and returns a cluster layer for the provided graphics layer
++(AGSClusterLayer *)clusterLayerForGraphicsLayer:(AGSGraphicsLayer *)graphicsLayer;
+
+// Initializes and returns a cluster layer for the provided graphics layer, cluster symbol block and coverage symbol block
++(AGSClusterLayer *)clusterLayerForGraphicsLayer:(AGSGraphicsLayer *)graphicsLayer
+                         usingClusterSymbolBlock:(AGSClusterSymbolGeneratorBlock)clusterBlock
+                             coverageSymbolBlock:(AGSClusterSymbolGeneratorBlock)coverageBlock;
+
 @end

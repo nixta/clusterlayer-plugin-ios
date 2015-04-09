@@ -14,9 +14,10 @@
 #define kBasemap @"http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer"
 #define kFeatureLayerURL @"http://services.arcgis.com/OfH668nDRN7tbJh0/arcgis/rest/services/stops/FeatureServer/0"
 
-@interface AGSSampleViewController ()
+@interface AGSSampleViewController () <AGSMapViewLayerDelegate>
 @property (weak, nonatomic) IBOutlet AGSMapView *mapView;
 @property (nonatomic, strong) AGSClusterLayer *clusterLayer;
+@property (nonatomic, strong) AGSClusterLayer *graphicsClusterLayer;
 @property (weak, nonatomic) IBOutlet UISwitch *coverageSwitch;
 @property (weak, nonatomic) IBOutlet UISwitch *clusteringSwitch;
 @property (weak, nonatomic) IBOutlet UILabel *clusteringStatusLabel;
@@ -26,6 +27,17 @@
 @end
 
 @implementation AGSSampleViewController
+
+-(double)randomDoubleBetween:(double)smallNumber and:(double)bigNumber {
+    double diff = bigNumber - smallNumber;
+    return (((double) (arc4random() % ((unsigned)RAND_MAX + 1)) / RAND_MAX) * diff) + smallNumber;
+}
+
+-(AGSPoint *)randomPointInEnvelope:(AGSEnvelope *)envelope {
+    return [AGSPoint pointWithX:[self randomDoubleBetween:envelope.xmax and:envelope.xmin]
+                              y:[self randomDoubleBetween:envelope.ymin and:envelope.ymax]
+               spatialReference:envelope.spatialReference];
+}
 
 - (void)viewDidLoad
 {
@@ -71,6 +83,49 @@
     [self.clusterLayer addObserver:self forKeyPath:@"willClusterAtCurrentScale" options:NSKeyValueObservingOptionNew context:nil];
     [self.mapView addObserver:self forKeyPath:@"mapScale" options:NSKeyValueObservingOptionNew context:nil];
     self.clusterLayer.showsClusterCoverages = self.coverageSwitch.on;
+    
+    
+    self.mapView.layerDelegate = self;
+}
+
+-(void)mapViewDidLoad:(AGSMapView *)mapView {
+    AGSEnvelope *initialEnv = mapView.visibleAreaEnvelope;
+    
+    // Note, we need to add the GraphicsLayer after the AGSMapView has loaded so we know there's a spatial reference
+    // we can use. You will see a warning in the console logs if you don't.
+    AGSGraphicsLayer *graphicsLayer = [AGSGraphicsLayer graphicsLayer];
+    NSInteger numberOfRecords = 10000;
+    NSInteger currentOID = 1;
+    AGSSimpleMarkerSymbol *symbol = [AGSSimpleMarkerSymbol simpleMarkerSymbolWithColor:[[UIColor orangeColor] colorWithAlphaComponent:0.75]];
+    symbol.outline = nil;
+    symbol.style = AGSSimpleMarkerSymbolStyleCircle;
+    symbol.size = CGSizeMake(4, 4);
+    
+    for (NSInteger i = 0; i < numberOfRecords; i++) {
+        AGSPoint *newPoint = [self randomPointInEnvelope:initialEnv];
+        [graphicsLayer addGraphic:[AGSGraphic graphicWithGeometry:newPoint symbol:symbol attributes:@{
+                                                                                                      @"FID": @(currentOID)
+                                                                                                      }]];
+        currentOID++;
+    }
+    
+    graphicsLayer.renderer = [AGSSimpleRenderer simpleRendererWithSymbol:symbol];
+    
+    NSLog(@"Created %d features!", graphicsLayer.graphicsCount);
+    
+    [self.mapView addMapLayer:graphicsLayer];
+
+    /// *******************************
+    /// Cluster Layer Setup
+    
+    // Now wrap it in an AGSClusterLayer. The original GraphicsLayer will be hidden in the map.
+    self.graphicsClusterLayer = [AGSClusterLayer clusterLayerForGraphicsLayer:graphicsLayer];
+    self.graphicsClusterLayer.opacity = 0.3;
+    [self.mapView insertMapLayer:self.graphicsClusterLayer atIndex:[self.mapView.mapLayers indexOfObject:self.clusterLayer]];
+    
+    // Cluster layer config
+    self.graphicsClusterLayer.minScaleForClustering = 15000;
+    /// *******************************
 }
 
 -(void)dataLoadProgress:(NSNotification *)notification {
