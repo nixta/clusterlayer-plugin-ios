@@ -58,7 +58,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
 
 @property (nonatomic, strong) NSArray *lodData;
 
-@property (nonatomic, weak) AGSFeatureLayer *featureLayer;
+@property (nonatomic, weak) AGSGraphicsLayer *graphicsLayer;
 @property (nonatomic, strong) NSMutableDictionary *symbolGeneratorBlocks;
 @property (nonatomic, assign, readwrite) BOOL willClusterAtCurrentScale;
 
@@ -102,6 +102,20 @@ NSString * NSStringFromBool(BOOL boolValue) {
     return clusterLayer;
 }
 
++(AGSClusterLayer *)clusterLayerForGraphicsLayer:(AGSGraphicsLayer *)graphicsLayer {
+    return [[AGSClusterLayer alloc] initWithGraphicsLayer:graphicsLayer];
+}
+
++(AGSClusterLayer *)clusterLayerForGraphicsLayer:(AGSGraphicsLayer *)graphicsLayer
+                         usingClusterSymbolBlock:(AGSClusterSymbolGeneratorBlock)clusterBlock
+                             coverageSymbolBlock:(AGSClusterSymbolGeneratorBlock)coverageBlock {
+    AGSClusterLayer *clusterLayer = [AGSClusterLayer clusterLayerForGraphicsLayer:graphicsLayer];
+    if (clusterBlock) [clusterLayer.symbolGeneratorBlocks setObject:clusterBlock forKey:kClusterRenderBlockParameterKey];
+    if (coverageBlock) [clusterLayer.symbolGeneratorBlocks setObject:coverageBlock forKey:kCoverageRenderBlockParameterKey];
+    return clusterLayer;
+}
+
+
 #pragma mark - Initializers
 -(id)init {
     self = [super init];
@@ -121,88 +135,109 @@ NSString * NSStringFromBool(BOOL boolValue) {
     return self;
 }
 
--(id)initWithFeatureLayer:(AGSFeatureLayer *)featureLayer {
+-(id)initWithGraphicsLayer:(AGSGraphicsLayer *)graphicsLayer {
     self = [self init];
     if (self) {
-        self.featureLayer = featureLayer;
-        self.featureLayer.delegate = self;
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(featureLayerLoaded:)
-                                                     name:AGSLayerDidLoadNotification
-                                                   object:self.featureLayer];
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(featureLayerFailedToLoad:)
-                                                     name:AGSLayerDidFailToLoadNotification
-                                                   object:self.featureLayer];
+        self.graphicsLayer = graphicsLayer;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self featureLayerLoaded:nil];
+        });
     }
     return self;
 }
 
-#pragma mark - Asynchronous Setup
+-(id)initWithFeatureLayer:(AGSFeatureLayer *)featureLayer {
+    self = [self init];
+    if (self) {
+        self.graphicsLayer = featureLayer;
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(featureLayerLoaded:)
+                                                     name:AGSLayerDidLoadNotification
+                                                   object:featureLayer];
+        [[NSNotificationCenter defaultCenter] addObserver:self
+                                                 selector:@selector(featureLayerFailedToLoad:)
+                                                     name:AGSLayerDidFailToLoadNotification
+                                                   object:featureLayer];
+    }
+    return self;
+}
 
--(void)layerDidLoad:(AGSLayer *)layer {
-    if (layer == self.featureLayer) {
-        NSLog(@"FeatureLayer Loaded");
-        [self featureLayerLoaded:nil];
+#pragma mark - Internal Checks on the Graphics Layer Setup
+-(void)setGraphicsLayer:(AGSGraphicsLayer *)graphicsLayer {
+    _graphicsLayer = graphicsLayer;
+    
+    if (graphicsLayer && graphicsLayer.mapView && !graphicsLayer.mapView.loaded) {
+        NSLog(@"Warning: The AGSMapView for the source GraphicsLayer is not yet loaded! Your layer will likely not cluster.");
     }
 }
+
+#pragma mark - Asynchronous Setup
 
 -(void)featureLayerLoaded:(NSNotification *)notification {
     AGSClusterSymbolGeneratorBlock clusterGenBlock = self.symbolGeneratorBlocks[kClusterRenderBlockParameterKey];
     AGSClusterSymbolGeneratorBlock coverageGenBlock = self.symbolGeneratorBlocks[kCoverageRenderBlockParameterKey];
     self.symbolGeneratorBlocks = nil;
     
-    self.renderer = [[AGSClusterLayerRenderer alloc] initWithRenderer:self.featureLayer.renderer
+    self.renderer = [[AGSClusterLayerRenderer alloc] initWithRenderer:self.graphicsLayer.renderer
                                                      clusterSymbolBlock:clusterGenBlock
                                                     coverageSymbolBlock:coverageGenBlock];
-    if (self.loadsAllFeatures) {
-        // Load all the data up-front.
-        // We are then not dependent on the underlying feature layer for data updates.
-        self.featureLayer.visible = !self.clusteringEnabled;
-        
-        self.syncTask = [[AGSGDBSyncTask alloc] initWithURL:self.featureLayer.URL credential:self.featureLayer.credential];
-        __weak AGSGDBSyncTask *weakTask = self.syncTask;
-        __weak typeof(self) weakSelf = self;
-        [self.syncTask setLoadCompletion:^(NSError *error) {
-            if (error) {
-			     NSLog(@"Couldn't load FeatureServiceInfo: %@",[error localizedDescription]);
-            } else {
-                weakSelf.maxRecordCount = weakTask.featureServiceInfo.maxRecordCount;
-                if (weakSelf.maxRecordCount == 0) {
-                    weakSelf.maxRecordCount = 1000;
-                }
-                weakSelf.featureLayer.queryDelegate = weakSelf;
-                AGSQuery *q = [AGSQuery query];
-                q.whereClause = @"1=1";
-                [weakSelf.featureLayer queryIds:q];
-            }
-            weakSelf.syncTask = nil;
-        }];
-    } else {
-        // Load as the underlying feature layer updates its data. We build an accumulative copy of all the data.
-        self.featureLayer.opacity = 0.5;
 
-        [[NSNotificationCenter defaultCenter] addObserver:self
-                                                 selector:@selector(featuresLoaded:)
-                                                     name:AGSFeatureLayerDidLoadFeaturesNotification
-                                                   object:self.featureLayer];
+    self.graphicsLayer.visible = !self.clusteringEnabled;
+
+    if ([self.graphicsLayer isKindOfClass:[AGSFeatureLayer class]]) {
+        if (self.loadsAllFeatures) {
+            // Load all the data up-front.
+            // We are then not dependent on the underlying feature layer for data updates.
+            
+            AGSFeatureLayer *featureLayer = (AGSFeatureLayer *)self.graphicsLayer;
+            self.syncTask = [[AGSGDBSyncTask alloc] initWithURL:featureLayer.URL credential:featureLayer.credential];
+            __weak AGSFeatureLayer *weakFL = featureLayer;
+            __weak AGSGDBSyncTask *weakTask = self.syncTask;
+            __weak typeof(self) weakSelf = self;
+            [self.syncTask setLoadCompletion:^(NSError *error) {
+                if (error) {
+                    NSLog(@"Couldn't load FeatureServiceInfo: %@", error.localizedDescription);
+                } else {
+                    weakSelf.maxRecordCount = weakTask.featureServiceInfo.maxRecordCount;
+                    if (weakSelf.maxRecordCount == 0) {
+                        weakSelf.maxRecordCount = 1000;
+                    }
+                    weakFL.queryDelegate = weakSelf;
+                    AGSQuery *q = [AGSQuery query];
+                    q.whereClause = @"1=1";
+                    [weakFL queryIds:q];
+                }
+                weakSelf.syncTask = nil;
+            }];
+        } else {
+            // Load as the underlying feature layer updates its data. We build an accumulative copy of all the data.
+            self.graphicsLayer.opacity = 0.5;
+            
+            [[NSNotificationCenter defaultCenter] addObserver:self
+                                                     selector:@selector(featuresLoaded:)
+                                                         name:AGSFeatureLayerDidLoadFeaturesNotification
+                                                       object:self.graphicsLayer];
+        }
+
+        [self createBlankGridsForLods];
+    } else {
+        [self addOrUpdateFeatures:self.graphicsLayer.graphics];
+        [self createBlankGridsForLods];
+        [self dataLoadCompleted];
     }
-    
-    [self createBlankGridsForLods];
 }
 
 -(void)featureLayerFailedToLoad:(NSNotification *)notification {
-	
-	NSLog(@"FeatureLayer failed to load: %@",[self.featureLayer.error localizedDescription]);
-	    
+    AGSFeatureLayer *featureLayer = (AGSFeatureLayer *)self.graphicsLayer;
+    NSLog(@"FeatureLayer failed to load: %@", [featureLayer.error localizedDescription]);
+
     [[NSNotificationCenter defaultCenter] postNotificationName:AGSClusterLayerDataLoadingErrorNotification
                                                         object:self
-                                                      userInfo:@{kClusterLayerDataLoadingErrorNotification_Key_Error: self.featureLayer.error}];
+                                                      userInfo:@{kClusterLayerDataLoadingErrorNotification_Key_Error: featureLayer.error}];
 }
 
 -(void)featureLayer:(AGSFeatureLayer *)featureLayer operation:(NSOperation *)op didQueryObjectIdsWithResults:(NSArray *)objectIds {
-   
-	 NSUInteger count = 0;
+    NSUInteger count = 0;
     NSUInteger pageCount = 0;
     NSMutableArray *pagesToLoad = [NSMutableArray array];
     NSMutableArray *currentObjectIds = nil;
@@ -223,7 +258,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
         q.objectIds = featureIds;
         q.returnGeometry = YES;
         q.outSpatialReference = self.mapView.spatialReference;
-        NSOperation *queryOp = [self.featureLayer queryFeatures:q];
+        NSOperation *queryOp = [featureLayer queryFeatures:q];
         objc_setAssociatedObject(queryOp, kBatchQueryOperationQueryKey, q, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
         [self.openQueries addObject:queryOp];
     }
@@ -244,7 +279,6 @@ NSString * NSStringFromBool(BOOL boolValue) {
 }
 
 -(void)continueLoadingFeatures:(NSOperation *)op {
-   
     AGSQuery *q = objc_getAssociatedObject(op, kBatchQueryOperationQueryKey);
     [self.openQueries removeObject:op];
     self.featureCountToLoad -= q.objectIds.count;
@@ -258,14 +292,18 @@ NSString * NSStringFromBool(BOOL boolValue) {
                                                                  kClusterLayerDataLoadingNotification_Key_PercentComplete: @(percentComplete)}];
     
     if (self.openQueries.count == 0) {
-        dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-            self.dataLoaded = YES;
-            [self rebuildClusterGrid];
-            dispatch_async(dispatch_get_main_queue(), ^{
-                [self refresh];
-            });
-        });
+        [self dataLoadCompleted];
     }
+}
+
+-(void)dataLoadCompleted {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        self.dataLoaded = YES;
+        [self rebuildClusterGrid];
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self refresh];
+        });
+    });
 }
 
 -(void)addOrUpdateFeatures:(NSArray *)features {
@@ -274,14 +312,22 @@ NSString * NSStringFromBool(BOOL boolValue) {
 
 #pragma mark - Update Hooks
 -(void)featuresLoaded:(NSNotification *)notification {
-    [self addOrUpdateFeatures:self.featureLayer.graphics];
-    self.dataLoaded = YES;
-    [self rebuildClusterGrid];
-    [self refresh];
+    if ([notification.object isKindOfClass:[AGSFeatureLayer class]]) {
+        AGSFeatureLayer *featureLayer = notification.object;
+        [self addOrUpdateFeatures:featureLayer.graphics];
+        self.dataLoaded = YES;
+        [self rebuildClusterGrid];
+        [self refresh];
+    }
 }
 
 -(NSString *)objectIdField {
-    return self.featureLayer.objectIdField;
+    if ([self.graphicsLayer isKindOfClass:[AGSFeatureLayer class]]) {
+        AGSFeatureLayer *featureLayer = (AGSFeatureLayer *)self.graphicsLayer;
+        return featureLayer.objectIdField;
+    } else {
+        return @"FID";
+    }
 }
 
 -(void)mapDidUpdate:(AGSMapUpdateType)updateType

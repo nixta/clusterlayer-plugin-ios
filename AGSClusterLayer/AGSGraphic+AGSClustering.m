@@ -24,13 +24,31 @@
     return objc_getAssociatedObject(self, kClusterPayloadKey);
 }
 
+-(NSString *)idAttributeName {
+    return objc_getAssociatedObject(self, kClusterGraphicCustomAttributeKey);
+}
+
+-(void)setIdAttributeName:(NSString *)idAttributeName {
+    objc_setAssociatedObject(self, kClusterGraphicCustomAttributeKey, idAttributeName, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
+
 -(id)clusterItemKey {
     
 	static NSString *oidFieldName = @"FID";
     
     NSUInteger result = self.featureId;
     if (result == 0) {
-        if (self.layer == nil ||
+        if (self.idAttributeName) {
+            @try {
+                NSNumber *oid = [self attributeForKey:self.idAttributeName];
+                if (oid) {
+                    result = oid.unsignedIntegerValue;
+                }
+            }
+            @catch (NSException *exception) {
+                NSLog(@"If you set the 'idAttributeName' property, you MUST populate the AGSGraphic's attribute with an Unsigned Int > 0");
+            }
+        } else if (self.layer == nil ||
             ![self.layer respondsToSelector:@selector(objectIdField)]) {
             // No featureId (we're doubtless not on a featureLayer). Try to recover
             @try {
