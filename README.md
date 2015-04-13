@@ -28,7 +28,13 @@ The gridding code is based heavily on [Leaflet.markercluster](https://github.com
     
     self.clusterLayer = [AGSClusterLayer clusterLayerForFeatureLayer:featureLayer];
     [self.mapView addMapLayer:self.clusterLayer];
-
-    self.clusterLayer.showClusterCoverages = self.coverageSwitch.on; // By default, coverages are not shown
 }
+```
+
+You can also use an `AGSGraphicsLayer` to load data into a cluster layer, but you need to do this in the `mapViewDidLoad:` delegate method of `AGSMapViewLayerDelegate`:
+
+``` ObjC
+    self.graphicsClusterLayer = [AGSClusterLayer clusterLayerForGraphicsLayer:graphicsLayer];
+    self.graphicsClusterLayer.opacity = 0.3;
+    [self.mapView addMapLayer:self.graphicsClusterLayer];
 ```
