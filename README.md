@@ -31,10 +31,21 @@ The gridding code is based heavily on [Leaflet.markercluster](https://github.com
 }
 ```
 
-You can also use an `AGSGraphicsLayer` to load data into a cluster layer, but you need to do this in the `mapViewDidLoad:` delegate method of `AGSMapViewLayerDelegate`:
+You can also use an `AGSGraphicsLayer` to load data into a cluster layer, but you need to do this once the `AGSMapView` has loaded, for example in the `mapViewDidLoad:` delegate method of `AGSMapViewLayerDelegate`:
 
 ``` ObjC
+-(void)mapViewDidLoad:(AGSMapView *)mapView {
+    // Note, we need to add the GraphicsLayer after the AGSMapView has loaded so we know
+    // there's a spatial reference we can use. You will see a warning in the console
+    // logs if you don't.
+    AGSGraphicsLayer *graphicsLayer = [AGSGraphicsLayer graphicsLayer];
+    graphicsLayer.renderer = [AGSSimpleRenderer simpleRendererWithSymbol:self.symbol];
+    [self.mapView addMapLayer:graphicsLayer];
+
+    [graphicsLayer addGraphics:[self generateRandomPointGraphics:10000 inEnvelope:self.mapView.visibleAreaEnvelope]];
+
+    // Now wrap it in an AGSClusterLayer. The original GraphicsLayer will be hidden in the map.
     self.graphicsClusterLayer = [AGSClusterLayer clusterLayerForGraphicsLayer:graphicsLayer];
-    self.graphicsClusterLayer.opacity = 0.3;
     [self.mapView addMapLayer:self.graphicsClusterLayer];
+}
 ```
