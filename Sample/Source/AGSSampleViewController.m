@@ -89,43 +89,50 @@
 }
 
 -(void)mapViewDidLoad:(AGSMapView *)mapView {
-    AGSEnvelope *initialEnv = mapView.visibleAreaEnvelope;
-    
-    // Note, we need to add the GraphicsLayer after the AGSMapView has loaded so we know there's a spatial reference
-    // we can use. You will see a warning in the console logs if you don't.
-    AGSGraphicsLayer *graphicsLayer = [AGSGraphicsLayer graphicsLayer];
-    NSInteger numberOfRecords = 10000;
-    NSInteger currentOID = 1;
+    // Note, we need to add the GraphicsLayer after the AGSMapView has loaded so we know
+    // there's a spatial reference we can use. You will see a warning in the console
+    // logs if you don't.
     AGSSimpleMarkerSymbol *symbol = [AGSSimpleMarkerSymbol simpleMarkerSymbolWithColor:[[UIColor orangeColor] colorWithAlphaComponent:0.75]];
     symbol.outline = nil;
     symbol.style = AGSSimpleMarkerSymbolStyleCircle;
     symbol.size = CGSizeMake(4, 4);
     
-    for (NSInteger i = 0; i < numberOfRecords; i++) {
-        AGSPoint *newPoint = [self randomPointInEnvelope:initialEnv];
-        [graphicsLayer addGraphic:[AGSGraphic graphicWithGeometry:newPoint symbol:symbol attributes:@{
-                                                                                                      @"FID": @(currentOID)
-                                                                                                      }]];
-        currentOID++;
-    }
-    
+    AGSGraphicsLayer *graphicsLayer = [AGSGraphicsLayer graphicsLayer];
     graphicsLayer.renderer = [AGSSimpleRenderer simpleRendererWithSymbol:symbol];
-    
-    NSLog(@"Created %d features!", graphicsLayer.graphicsCount);
-    
     [self.mapView addMapLayer:graphicsLayer];
+
+    [graphicsLayer addGraphics:[self generateRandomPointGraphics:10000 inEnvelope:self.mapView.visibleAreaEnvelope]];
 
     /// *******************************
     /// Cluster Layer Setup
     
     // Now wrap it in an AGSClusterLayer. The original GraphicsLayer will be hidden in the map.
     self.graphicsClusterLayer = [AGSClusterLayer clusterLayerForGraphicsLayer:graphicsLayer];
-    self.graphicsClusterLayer.opacity = 0.3;
+    self.graphicsClusterLayer.opacity = 0.6;
     [self.mapView insertMapLayer:self.graphicsClusterLayer atIndex:[self.mapView.mapLayers indexOfObject:self.clusterLayer]];
     
     // Cluster layer config
     self.graphicsClusterLayer.minScaleForClustering = 15000;
     /// *******************************
+}
+
+-(NSArray *)generateRandomPointGraphics:(NSUInteger)count inEnvelope:(AGSEnvelope *)envelope {
+    return [self generateRandomPointGraphics:count withSymbol:nil inEnvelope:envelope];
+}
+
+-(NSArray *)generateRandomPointGraphics:(NSUInteger)count withSymbol:(AGSSymbol *)symbol inEnvelope:(AGSEnvelope *)envelope {
+    NSInteger currentOID = 1;
+    NSMutableArray *output = [NSMutableArray arrayWithCapacity:count];
+    for (NSInteger i = 0; i < count; i++) {
+        AGSPoint *newPoint = [self randomPointInEnvelope:envelope];
+        [output addObject:[AGSGraphic graphicWithGeometry:newPoint
+                                                   symbol:symbol
+                                               attributes:@{
+                                                            @"FID": @(currentOID)
+                                                            }]];
+        currentOID++;
+    }
+    return output;
 }
 
 -(void)dataLoadProgress:(NSNotification *)notification {
@@ -186,10 +193,12 @@
 
 - (IBAction)toggleCoverages:(id)sender {
     self.clusterLayer.showsClusterCoverages = self.coverageSwitch.on;
+    self.graphicsClusterLayer.showsClusterCoverages = self.coverageSwitch.on;
 }
 
 - (IBAction)toggleClustering {
     self.clusterLayer.clusteringEnabled = self.clusteringSwitch.on;
+    self.graphicsClusterLayer.clusteringEnabled = self.clusteringSwitch.on;
     self.coverageSwitch.enabled = self.clusterLayer.clusteringEnabled;
     self.clusteringEnabledLabel.text = [NSString stringWithFormat:@"Clustering %@", self.clusterLayer.clusteringEnabled?@"Enabled":@"Disabled"];
 }

@@ -166,7 +166,8 @@ NSString * NSStringFromBool(BOOL boolValue) {
 -(void)setGraphicsLayer:(AGSGraphicsLayer *)graphicsLayer {
     _graphicsLayer = graphicsLayer;
     
-    if (graphicsLayer && graphicsLayer.mapView && !graphicsLayer.mapView.loaded) {
+    if ([graphicsLayer isMemberOfClass:[AGSGraphicsLayer class]] &&
+        graphicsLayer && graphicsLayer.mapView && !graphicsLayer.mapView.loaded) {
         NSLog(@"Warning: The AGSMapView for the source GraphicsLayer is not yet loaded! Your layer will likely not cluster.");
     }
 }
