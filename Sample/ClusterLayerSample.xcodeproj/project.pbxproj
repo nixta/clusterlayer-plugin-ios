@@ -19,6 +19,9 @@
 		D9D1C8BE18E62D6400CD3CEF /* AGSGraphic+AGSClustering.m in Sources */ = {isa = PBXBuildFile; fileRef = D9D1C8BD18E62D6400CD3CEF /* AGSGraphic+AGSClustering.m */; };
 		D9D1C8C218E62DF000CD3CEF /* NSArray+Utils.m in Sources */ = {isa = PBXBuildFile; fileRef = D9D1C8C118E62DF000CD3CEF /* NSArray+Utils.m */; };
 		D9E0F74A18E232CC0009C771 /* AGSClusterLayerRenderer.m in Sources */ = {isa = PBXBuildFile; fileRef = D9E0F74918E232CC0009C771 /* AGSClusterLayerRenderer.m */; };
+		D9EFFAEB1C821E1400166983 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D9EFFAEA1C821E1400166983 /* Launch Screen.storyboard */; };
+		D9EFFAEE1C822ADE00166983 /* stops.geodatabase in Resources */ = {isa = PBXBuildFile; fileRef = D9EFFAED1C822ADE00166983 /* stops.geodatabase */; };
+		D9EFFAF11C822EF700166983 /* AGSGDBFeature+AGSClustering.m in Sources */ = {isa = PBXBuildFile; fileRef = D9EFFAF01C822EF700166983 /* AGSGDBFeature+AGSClustering.m */; };
 		D9F3D1AE1668271A00FB6A8D /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9F3D1AD1668271A00FB6A8D /* UIKit.framework */; };
 		D9F3D1B01668271A00FB6A8D /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9F3D1AF1668271A00FB6A8D /* Foundation.framework */; };
 		D9F3D1B21668271A00FB6A8D /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D9F3D1B11668271A00FB6A8D /* CoreGraphics.framework */; };
@@ -65,6 +68,10 @@
 		D9D1C8C318E6338300CD3CEF /* Common_int.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = Common_int.h; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		D9E0F74818E232CC0009C771 /* AGSClusterLayerRenderer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = AGSClusterLayerRenderer.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
 		D9E0F74918E232CC0009C771 /* AGSClusterLayerRenderer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = AGSClusterLayerRenderer.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		D9EFFAEA1C821E1400166983 /* Launch Screen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
+		D9EFFAED1C822ADE00166983 /* stops.geodatabase */ = {isa = PBXFileReference; lastKnownFileType = file; name = stops.geodatabase; path = Data/stops.geodatabase; sourceTree = "<group>"; };
+		D9EFFAEF1C822EF700166983 /* AGSGDBFeature+AGSClustering.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AGSGDBFeature+AGSClustering.h"; sourceTree = "<group>"; };
+		D9EFFAF01C822EF700166983 /* AGSGDBFeature+AGSClustering.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AGSGDBFeature+AGSClustering.m"; sourceTree = "<group>"; };
 		D9F3D1A91668271A00FB6A8D /* AGSClusterLayer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AGSClusterLayer.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D9F3D1AD1668271A00FB6A8D /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
 		D9F3D1AF1668271A00FB6A8D /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -149,12 +156,22 @@
 		D9D1C8BF18E62D6900CD3CEF /* Categories */ = {
 			isa = PBXGroup;
 			children = (
+				D9EFFAEF1C822EF700166983 /* AGSGDBFeature+AGSClustering.h */,
+				D9EFFAF01C822EF700166983 /* AGSGDBFeature+AGSClustering.m */,
 				D9D1C8BC18E62D6400CD3CEF /* AGSGraphic+AGSClustering.h */,
 				D9D1C8BD18E62D6400CD3CEF /* AGSGraphic+AGSClustering.m */,
 				D9D1C8C018E62DF000CD3CEF /* NSArray+Utils.h */,
 				D9D1C8C118E62DF000CD3CEF /* NSArray+Utils.m */,
 			);
 			name = Categories;
+			sourceTree = "<group>";
+		};
+		D9EFFAEC1C822AD300166983 /* Data */ = {
+			isa = PBXGroup;
+			children = (
+				D9EFFAED1C822ADE00166983 /* stops.geodatabase */,
+			);
+			name = Data;
 			sourceTree = "<group>";
 		};
 		D9F3D19E1668271900FB6A8D = {
@@ -212,6 +229,7 @@
 		D9F3D1B41668271A00FB6A8D /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				D9EFFAEC1C822AD300166983 /* Data */,
 				D977B28E1971B1C3004E179E /* icon.png */,
 				D977B28F1971B1C3004E179E /* icon@2x.png */,
 				D9F3D1E31668293000FB6A8D /* ArcGIS.bundle */,
@@ -222,6 +240,7 @@
 				D9F3D1BF1668271A00FB6A8D /* Default.png */,
 				D9F3D1C11668271A00FB6A8D /* Default@2x.png */,
 				D9F3D1C31668271A00FB6A8D /* Default-568h@2x.png */,
+				D9EFFAEA1C821E1400166983 /* Launch Screen.storyboard */,
 			);
 			name = "Supporting Files";
 			sourceTree = "<group>";
@@ -253,7 +272,7 @@
 			isa = PBXProject;
 			attributes = {
 				CLASSPREFIX = EQS;
-				LastUpgradeCheck = 0450;
+				LastUpgradeCheck = 0720;
 				ORGANIZATIONNAME = ESRI;
 			};
 			buildConfigurationList = D9F3D1A31668271900FB6A8D /* Build configuration list for PBXProject "ClusterLayerSample" */;
@@ -283,9 +302,11 @@
 				D9F3D1C21668271A00FB6A8D /* Default@2x.png in Resources */,
 				D9F3D1C41668271A00FB6A8D /* Default-568h@2x.png in Resources */,
 				D977B2901971B1C3004E179E /* icon.png in Resources */,
+				D9EFFAEE1C822ADE00166983 /* stops.geodatabase in Resources */,
 				D9F3D1C71668271A00FB6A8D /* MainStoryboard_iPhone.storyboard in Resources */,
 				D9F3D1CA1668271A00FB6A8D /* MainStoryboard_iPad.storyboard in Resources */,
 				D9F3D1E41668293000FB6A8D /* ArcGIS.bundle in Resources */,
+				D9EFFAEB1C821E1400166983 /* Launch Screen.storyboard in Resources */,
 				D977B2911971B1C3004E179E /* icon@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -303,6 +324,7 @@
 				D919A36218E0B14700B140BF /* AGSClusterGrid.m in Sources */,
 				D98A0A7218F8666C00138B1C /* NSObject+NFNotificationsProvider.m in Sources */,
 				D9F3D1BA1668271A00FB6A8D /* main.m in Sources */,
+				D9EFFAF11C822EF700166983 /* AGSGDBFeature+AGSClustering.m in Sources */,
 				D9F3D1BE1668271A00FB6A8D /* AGSSampleAppDelegate.m in Sources */,
 				D9D1C8BE18E62D6400CD3CEF /* AGSGraphic+AGSClustering.m in Sources */,
 				D919A35F18E0B09800B140BF /* AGSClusterLayer.m in Sources */,
@@ -352,6 +374,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				COPY_PHASE_STRIP = NO;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -363,7 +386,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -385,7 +408,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				OTHER_CFLAGS = "-DNS_BLOCK_ASSERTIONS=1";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -396,6 +419,7 @@
 		D9F3D1D11668271A00FB6A8D /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(HOME)/Library/SDKs/ArcGIS/iOS/**";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Source/AGSSample-Prefix.pch";
@@ -408,6 +432,7 @@
 					"-l",
 					"c++",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.esri.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = AGSClusterLayer;
 				VALID_ARCHS = armv7;
 				WRAPPER_EXTENSION = app;
@@ -417,6 +442,7 @@
 		D9F3D1D21668271A00FB6A8D /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = "$(HOME)/Library/SDKs/ArcGIS/iOS/**";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Source/AGSSample-Prefix.pch";
@@ -428,6 +454,7 @@
 					"-l",
 					"c++",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = "com.esri.${PRODUCT_NAME:rfc1034identifier}";
 				PRODUCT_NAME = AGSClusterLayer;
 				VALID_ARCHS = armv7;
 				WRAPPER_EXTENSION = app;

@@ -13,6 +13,7 @@
 #import "Common_int.h"
 #import "NSArray+Utils.h"
 #import "AGSGraphic+AGSClustering.h"
+#import "AGSGDBFeature+AGSClustering.h"
 #import <objc/runtime.h>
 
 #pragma mark - Constants and Defines
@@ -58,7 +59,7 @@ NSString * NSStringFromBool(BOOL boolValue) {
 
 @property (nonatomic, strong) NSArray *lodData;
 
-@property (nonatomic, weak) AGSGraphicsLayer *graphicsLayer;
+@property (nonatomic, weak) AGSLayer *graphicsLayer;
 @property (nonatomic, strong) NSMutableDictionary *symbolGeneratorBlocks;
 @property (nonatomic, assign, readwrite) BOOL willClusterAtCurrentScale;
 
@@ -115,6 +116,10 @@ NSString * NSStringFromBool(BOOL boolValue) {
     return clusterLayer;
 }
 
++(AGSClusterLayer *)clusterLayerForFeatureTableLayer:(AGSFeatureTableLayer *)featureTableLayer {
+    return [[AGSClusterLayer alloc] initWithFeatureTableLayer:featureTableLayer];
+}
+
 
 #pragma mark - Initializers
 -(id)init {
@@ -139,6 +144,17 @@ NSString * NSStringFromBool(BOOL boolValue) {
     self = [self init];
     if (self) {
         self.graphicsLayer = graphicsLayer;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            [self featureLayerLoaded:nil];
+        });
+    }
+    return self;
+}
+
+-(id)initWithFeatureTableLayer:(AGSFeatureTableLayer *)featureTableLayer {
+    self = [self init];
+    if (self) {
+        self.graphicsLayer = featureTableLayer;
         dispatch_async(dispatch_get_main_queue(), ^{
             [self featureLayerLoaded:nil];
         });
@@ -179,9 +195,22 @@ NSString * NSStringFromBool(BOOL boolValue) {
     AGSClusterSymbolGeneratorBlock coverageGenBlock = self.symbolGeneratorBlocks[kCoverageRenderBlockParameterKey];
     self.symbolGeneratorBlocks = nil;
     
-    self.renderer = [[AGSClusterLayerRenderer alloc] initWithRenderer:self.graphicsLayer.renderer
-                                                     clusterSymbolBlock:clusterGenBlock
-                                                    coverageSymbolBlock:coverageGenBlock];
+    AGSRenderer *sourceRenderer = nil;
+    if ([self.graphicsLayer isKindOfClass:[AGSFeatureLayer class]]) {
+        sourceRenderer = ((AGSFeatureLayer *)self.graphicsLayer).renderer;
+    } else if ([self.graphicsLayer isKindOfClass:[AGSFeatureTableLayer class]]) {
+        sourceRenderer = ((AGSFeatureTableLayer *)self.graphicsLayer).renderer;
+    } else if ([self.graphicsLayer isKindOfClass:[AGSGraphicsLayer class]]) {
+        sourceRenderer = ((AGSGraphicsLayer *)self.graphicsLayer).renderer;
+    }
+
+    if (sourceRenderer != nil) {
+        self.renderer = [[AGSClusterLayerRenderer alloc] initWithRenderer:sourceRenderer
+                                                         clusterSymbolBlock:clusterGenBlock
+                                                        coverageSymbolBlock:coverageGenBlock];
+    } else {
+        NSLog(@"Source layer doesn't have a renderer that we could use. What did you pass in?!?");
+    }
 
     self.graphicsLayer.visible = !self.clusteringEnabled;
 
@@ -221,8 +250,19 @@ NSString * NSStringFromBool(BOOL boolValue) {
         }
 
         [self createBlankGridsForLods];
-    } else {
-        [self addOrUpdateFeatures:self.graphicsLayer.graphics];
+    } else if ([self.graphicsLayer isKindOfClass:[AGSFeatureTableLayer class]]) {
+        AGSFeatureTableLayer *layer = (AGSFeatureTableLayer *)self.graphicsLayer;
+        AGSFeatureTable *table = layer.table;
+        AGSQuery *q = [AGSQuery query];
+        q.whereClause = layer.definitionExpression;
+        [table queryResultsWithParameters:q completion:^(NSArray *results, NSError *error) {
+            [self addOrUpdateFeatures:results];
+            [self createBlankGridsForLods];
+            [self dataLoadCompleted];
+        }];
+    } else if ([self.graphicsLayer isKindOfClass:[AGSGraphicsLayer class]]) {
+        AGSGraphicsLayer *sourceLayer = (AGSGraphicsLayer *)self.graphicsLayer;
+        [self addOrUpdateFeatures:sourceLayer.graphics];
         [self createBlankGridsForLods];
         [self dataLoadCompleted];
     }
@@ -526,9 +566,17 @@ NSString * NSStringFromBool(BOOL boolValue) {
             [clusterGraphics addObject:cluster];
         } else {
             // Draw as feature(s).
-            for (AGSGraphic *feature in cluster.features) {
-                feature.symbol = [self.renderer symbolForFeature:feature timeExtent:nil];
-                [featureGraphics addObject:feature];
+            if ([self.graphicsLayer isKindOfClass:[AGSFeatureTableLayer class]]) {
+                for (AGSGDBFeature *feature in cluster.features) {
+                    AGSGraphic *g = feature.graphicForGDBFeature;
+                    g.symbol = [self.renderer symbolForFeature:feature timeExtent:nil];
+                    [featureGraphics addObject:g];
+                }
+            } else {
+                for (AGSGraphic *feature in cluster.features) {
+                    feature.symbol = [self.renderer symbolForFeature:feature timeExtent:nil];
+                    [featureGraphics addObject:feature];
+                }
             }
         }
     }

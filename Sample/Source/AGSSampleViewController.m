@@ -11,8 +11,9 @@
 #import "AGSClustering.h"
 #import "NSObject+NFNotificationsProvider.h"
 
-#define kBasemap @"http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer"
-#define kFeatureLayerURL @"http://services.arcgis.com/OfH668nDRN7tbJh0/arcgis/rest/services/stops/FeatureServer/0"
+#define kBasemap @"https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer"
+#define kFeatureLayerURL @"https://services.arcgis.com/OfH668nDRN7tbJh0/arcgis/rest/services/stops/FeatureServer/0"
+#define kGeodatabaseName @"stops"
 
 @interface AGSSampleViewController () <AGSMapViewLayerDelegate>
 @property (weak, nonatomic) IBOutlet AGSMapView *mapView;
@@ -46,17 +47,33 @@
 
     [self.mapView addMapLayer:[AGSTiledMapServiceLayer tiledMapServiceLayerWithURL:[NSURL URLWithString:kBasemap]]];
 
-    // Must add the source layer to connect it to its end point.
-    AGSFeatureLayer *featureLayer = [AGSFeatureLayer featureServiceLayerWithURL:[NSURL URLWithString:kFeatureLayerURL] mode:AGSFeatureLayerModeOnDemand];
-    [self.mapView addMapLayer:featureLayer];
-
+    NSError *error = nil;
+    AGSGDBGeodatabase *gdb = [AGSGDBGeodatabase geodatabaseWithName:kGeodatabaseName error:&error];
     
+    if (error) {
+        NSLog(@"Error opening the geodatabase: %@", error);
+    } else {
+        if (gdb.featureTables.count > 0) {
+            AGSFeatureTable *table = gdb.featureTables[0];
+            AGSFeatureTableLayer *layer = [[AGSFeatureTableLayer alloc] initWithFeatureTable:table];
+            [self.mapView addMapLayer:layer];
+            
+            self.clusterLayer = [AGSClusterLayer clusterLayerForFeatureTableLayer:layer];
+        }
+    }
     
     /// *******************************
     /// Cluster Layer Setup
 
-    // Now wrap it in an AGSClusterLayer. The original FeatureLayer will be hidden in the map.
-    self.clusterLayer = [AGSClusterLayer clusterLayerForFeatureLayer:featureLayer];
+    if (self.clusterLayer == nil) {
+        // Must add the source layer to connect it to its end point.
+        AGSFeatureLayer *featureLayer = [AGSFeatureLayer featureServiceLayerWithURL:[NSURL URLWithString:kFeatureLayerURL] mode:AGSFeatureLayerModeOnDemand];
+        [self.mapView addMapLayer:featureLayer];
+
+        // Now wrap it in an AGSClusterLayer. The original FeatureLayer will be hidden in the map.
+        self.clusterLayer = [AGSClusterLayer clusterLayerForFeatureLayer:featureLayer];
+    }
+    
     [self.mapView addMapLayer:self.clusterLayer];
 
     // Cluster layer config

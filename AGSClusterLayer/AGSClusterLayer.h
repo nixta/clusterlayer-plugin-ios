@@ -49,4 +49,6 @@
                          usingClusterSymbolBlock:(AGSClusterSymbolGeneratorBlock)clusterBlock
                              coverageSymbolBlock:(AGSClusterSymbolGeneratorBlock)coverageBlock;
 
++(AGSClusterLayer *)clusterLayerForFeatureTableLayer:(AGSFeatureTableLayer *)featureTableLayer;
+
 @end
