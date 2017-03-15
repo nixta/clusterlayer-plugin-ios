@@ -47,7 +47,7 @@
     
 	static NSString *oidFieldName = @"FID";
     
-    NSUInteger result = self.featureId;
+    long long result = self.featureId;
     if (result == 0) {
         result = self.objectID;
     }
@@ -87,6 +87,6 @@
 		[alert show];
     }
     
-    return [NSString stringWithFormat:@"f%d", result];
+    return [NSString stringWithFormat:@"f%lld", result];
 }
 @end
