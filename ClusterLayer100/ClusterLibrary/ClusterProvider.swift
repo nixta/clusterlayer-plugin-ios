@@ -17,6 +17,6 @@ import ArcGIS
 
 protocol ClusterProvider {
     var clusters: Set<Cluster> { get }
-    func addItems(geoElements: Array<AGSGeoElement>)
+    func add<T: Sequence>(items: T) where T.Element == AGSFeature
     func removeAllItems()
 }

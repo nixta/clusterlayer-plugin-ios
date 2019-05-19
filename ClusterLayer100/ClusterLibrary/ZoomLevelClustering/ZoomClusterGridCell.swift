@@ -21,6 +21,15 @@ class ZoomClusterGridCell: ClusterCell, Hashable {
     var row: Int
     var col: Int
     var clusters = Set<Cluster>()
+    var cluster: Cluster {
+        guard let clusterForCell = clusters.first else {
+            let newCluster = Cluster()
+            newCluster.containingCell = self
+            clusters.insert(newCluster)
+            return newCluster
+        }
+        return clusterForCell
+    }
     
     func hash(into hasher: inout Hasher) {
         hasher.combine(row)

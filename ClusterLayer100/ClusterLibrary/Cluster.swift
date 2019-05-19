@@ -22,29 +22,31 @@ private func getNextClusterKey() -> Int {
 }
 
 class Cluster {
+    let clusterKey: Int = getNextClusterKey()
+    
+    var features = Set<AGSFeature>()
+    
+    var childClusters = Set<Cluster>()
+    
+    internal unowned var containingCell: ZoomClusterGridCell!
+    private weak var parentCluster: Cluster?
+
     private var grid: ClusterProvider {
         return containingCell.grid
     }
-    private unowned var containingCell: ZoomClusterGridCell!
-    private weak var parentCluster: Cluster?
-    
-    var features: [AGSFeature] = []
 
     var featureCount: Int {
         return features.count
     }
     
-    let clusterKey: Int = getNextClusterKey()
+    private var pendingAdds: Set<AGSFeature>?
     
-    var childClusters = Set<Cluster>()
 
     
     
     var showCoverage: Bool = false
 
     private var isGeometryDirty = true
-    
-    
     private var cachedCentroid: AGSPoint?
     private var cachedCoverage: AGSGeometry?
     private var cachedExtent: AGSEnvelope?
@@ -59,60 +61,23 @@ class Cluster {
     var coverage: AGSPolygon? { fatalError("NOT IMPLEMENTED") }
     var envelope: AGSEnvelope? { fatalError("NOT IMPLEMENTED") }
 
-    init() {
-    }
-    
-    
-    func calculateCentroid(features: [AGSFeature]) -> AGSPoint {
-        let points = features.compactMap { (feature) -> AGSPoint? in
-            if let pt = feature.geometry as? AGSPoint {
-                return pt
-            } else {
-                return feature.geometry?.extent.center
-            }
-        }
-        
-        guard points.count > 0 else {
-            assertionFailure("Attempting to get centroid for empty cluster!")
-            return containingCell.center
-        }
-        
-        if points.count == 1 {
-            return points.first!
-        }
-        
-        var totalX: Double = 0
-        var totalY: Double = 0
-        var count = 0
-        
-        var sr: AGSSpatialReference?
-        for feature in features {
-            guard let featurePoint = feature.geometry as? AGSPoint else { continue }
-
-            if sr == nil { sr = featurePoint.spatialReference }
-            
-            totalX += featurePoint.x
-            totalY += featurePoint.y
-            count += 1
-        }
-        
-        return AGSPoint(x: totalX/Double(count), y: totalY/Double(count), spatialReference: sr)
-    }
-    
     
     var coverageGraphic: AGSGraphic { fatalError("NOT IMPLEMENTED") }
+}
 
-    func add(child: Cluster) {
-        child.parentCluster = self
+extension Cluster {
+    
+    func add(childCluster: Cluster) {
+        childCluster.parentCluster = self
         
-        childClusters.insert(child)
-        features.append(contentsOf: child.features)
+        childClusters.insert(childCluster)
+        features.formUnion(childCluster.features)
         
         isGeometryDirty = true
     }
     
     func add(feature: AGSFeature) {
-        features.append(feature)
+        features.insert(feature)
         
         isGeometryDirty = true
     }
@@ -121,23 +86,38 @@ class Cluster {
         childCluster.parentCluster = nil
         
         childClusters.remove(childCluster)
-        features.removeAll { childCluster.features.contains($0) }
+        features.subtract(childCluster.features)
         
         isGeometryDirty = true
     }
     
     func remove(feature: AGSFeature) {
-        features.removeAll { $0 == feature }
+        features.remove(feature)
         
         isGeometryDirty = true
     }
     
-    func add(geoElements: Array<AGSGeoElement>) {
-        for element in geoElements {
-            
-        }
+    func add<T: Sequence>(features: T) where T.Element == AGSFeature {
+        self.features.formUnion(features)
+        
+        isGeometryDirty = true
     }
 
+    func addPending(feature: AGSFeature) {
+        if pendingAdds == nil {
+            pendingAdds = Set<AGSFeature>()
+        }
+        pendingAdds?.insert(feature)
+    }
+    
+    func flushPending() {
+        guard let pending = pendingAdds else { return }
+        
+        self.add(features: pending)
+        
+        pendingAdds?.removeAll()
+        pendingAdds = nil
+    }
 }
 
 extension AGSFeature {

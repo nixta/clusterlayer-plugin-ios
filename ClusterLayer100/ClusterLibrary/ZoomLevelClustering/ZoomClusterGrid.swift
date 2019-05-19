@@ -15,25 +15,6 @@
 import Foundation
 import ArcGIS
 
-typealias ZoomClusterGridRows = Dictionary<Int, ZoomClusterGridCellsForRow>
-typealias ZoomClusterGridCellsForRow = Dictionary<Int, ZoomClusterGridCell>
-
-extension ZoomClusterGridRows {
-    mutating func getCell(grid: ZoomClusterGrid, row: Int, col: Int) -> ZoomClusterGridCell {
-        var gridRow = self[row]
-        if gridRow == nil {
-            gridRow = ZoomClusterGridCellsForRow()
-            self[row] = gridRow
-        }
-        var gridCell = gridRow![col]
-        if gridCell == nil {
-            gridCell = ZoomClusterGridCell(grid: grid, row: row, col: col)
-            gridRow![col] = gridCell
-        }
-        return gridCell!
-    }
-}
-
 class ZoomClusterGrid: ZoomLevelClusterGridProvider {
     static func makeManager() -> ZoomClusterGridManager {
         return ZoomClusterGridManager()
@@ -44,7 +25,7 @@ class ZoomClusterGrid: ZoomLevelClusterGridProvider {
     // Minfill set of rows by Int ID from origin
     // Each row is a minfill set of columns by Int ID from origin
     // Origin is origin of the spatial reference of points added.
-    var rows = ZoomClusterGridRows()
+    var rows = ZoomClusterGridRow()
     
     var lod: AGSLevelOfDetail
     var cellSize: CGSize
@@ -57,28 +38,48 @@ class ZoomClusterGrid: ZoomLevelClusterGridProvider {
         return lod.scale
     }
     
-    func scaleInRange(scale: Double) -> Bool {
-        if scale >= self.scale {
-            if let prevLevelScale = gridForPrevZoomLevel?.scale, scale >= prevLevelScale {
-                // This scale falls into another LOD range, not this one
-                return false
-            }
-            // No previous LOD, or the range between this LOD scale and previous LOD scale covers it.
-            return true
-        }
-        // Outside of this LOD range.
-        return false
-    }
-
     var gridForPrevZoomLevel: ZoomLevelClusterGridProvider?
     var gridForNextZoomLevel: ZoomLevelClusterGridProvider?
     
+    var items = Set<AGSFeature>()
+    
     var clusters: Set<Cluster> {
-        return Set<Cluster>()
+        var clusters = Set<Cluster>()
+        for (_, row) in rows {
+            for (_, cell) in row {
+                clusters.formUnion(cell.clusters)
+            }
+        }
+        
+        return clusters
+    }
+
+    
+    init(cellSize: CGSize, zoomLevel: Int) {
+        self.cellSize = cellSize
+        lod = makeWebMercatorLod(level: zoomLevel)
     }
     
-    func addItems(geoElements: Array<AGSGeoElement>) {
+
+    
+    func add<T: Sequence>(items: T) where T.Element == AGSFeature {
+        self.items.formUnion(items)
         
+        var touchedClusters = Set<Cluster>()
+        var count = 0
+        var skipped = 0
+        for item in items {
+            guard let itemLocation = item.geometry as? AGSPoint else {
+                print("Skipping feature - it has no point!")
+                skipped += 1
+                continue
+            }
+            let cluster = getClusterForMapPoint(mapPoint: itemLocation)
+            cluster.addPending(feature: item)
+            count += 1
+            touchedClusters.insert(cluster)
+        }
+        print("Touched \(touchedClusters.count) clusters while adding \(count) items and skipping \(skipped)")
     }
     
     func removeAllItems() {
@@ -99,13 +100,27 @@ class ZoomClusterGrid: ZoomLevelClusterGridProvider {
         return cellFor(row: row, col: col).center
     }
     
-    init(cellSize: CGSize, zoomLevel: Int) {
-        self.cellSize = cellSize
-        lod = makeWebMercatorLod(level: zoomLevel)
+    func getClusterForMapPoint(mapPoint: AGSPoint) -> Cluster {
+        let (row, col) = getGridCoordForMapPoint(mapPoint: mapPoint)
+        let cell = cellFor(row: row, col: col)
+        return cell.cluster
     }
     
-    func getGridCoordForMapPoint(mapPoint: AGSPoint) -> CGPoint {
-        return CGPoint(x: floor(mapPoint.x/Double(cellSize.width)), y: floor(mapPoint.y/Double(cellSize.height)))
+    func getGridCoordForMapPoint(mapPoint: AGSPoint) -> (Int, Int) {
+        return (Int(floor(mapPoint.x/Double(cellSize.width))), Int(floor(mapPoint.y/Double(cellSize.height))))
+    }
+    
+    func scaleInRange(scale: Double) -> Bool {
+        if scale >= self.scale {
+            if let prevLevelScale = gridForPrevZoomLevel?.scale, scale >= prevLevelScale {
+                // This scale falls into another LOD range, not this one
+                return false
+            }
+            // No previous LOD, or the range between this LOD scale and previous LOD scale covers it.
+            return true
+        }
+        // Outside of this LOD range.
+        return false
     }
     
     static func lodForLevel(_ level: Int) -> AGSLevelOfDetail {
