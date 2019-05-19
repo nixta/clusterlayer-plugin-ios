@@ -12,7 +12,31 @@
 		D94630582291918B00DC4FAD /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D94630562291918B00DC4FAD /* Main.storyboard */; };
 		D946305A2291918C00DC4FAD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D94630592291918C00DC4FAD /* Assets.xcassets */; };
 		D946305D2291918C00DC4FAD /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D946305B2291918C00DC4FAD /* LaunchScreen.storyboard */; };
+		D946306622919DAA00DC4FAD /* ClusterProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D946306522919DAA00DC4FAD /* ClusterProvider.swift */; };
+		D946306822919DBC00DC4FAD /* ArcGIS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D946306722919DBC00DC4FAD /* ArcGIS.framework */; };
+		D946306922919DBC00DC4FAD /* ArcGIS.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D946306722919DBC00DC4FAD /* ArcGIS.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		D946306C22919E6B00DC4FAD /* Cluster.swift in Sources */ = {isa = PBXBuildFile; fileRef = D946306B22919E6B00DC4FAD /* Cluster.swift */; };
+		D946306E2291C10700DC4FAD /* ZoomClusterGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = D946306D2291C10700DC4FAD /* ZoomClusterGrid.swift */; };
+		D94630712291C13300DC4FAD /* ClusterLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94630702291C13300DC4FAD /* ClusterLayer.swift */; };
+		D94630732291C19100DC4FAD /* ClusterCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94630722291C19100DC4FAD /* ClusterCell.swift */; };
+		D94630752291C1C800DC4FAD /* ZoomClusterGridCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94630742291C1C800DC4FAD /* ZoomClusterGridCell.swift */; };
+		D94630772291EE8700DC4FAD /* ZoomClusterGridManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94630762291EE8700DC4FAD /* ZoomClusterGridManager.swift */; };
+		D94630792291F1EA00DC4FAD /* ZoomClusterGridProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94630782291F1EA00DC4FAD /* ZoomClusterGridProvider.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		D946306A22919DBC00DC4FAD /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				D946306922919DBC00DC4FAD /* ArcGIS.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		D946304F2291918B00DC4FAD /* ClusterLayer100.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClusterLayer100.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -22,6 +46,15 @@
 		D94630592291918C00DC4FAD /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D946305C2291918C00DC4FAD /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D946305E2291918C00DC4FAD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D946306522919DAA00DC4FAD /* ClusterProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterProvider.swift; sourceTree = "<group>"; };
+		D946306722919DBC00DC4FAD /* ArcGIS.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ArcGIS.framework; path = $HOME/Library/SDKs/ArcGIS/iOS/Frameworks/Dynamic/ArcGIS.framework; sourceTree = "<absolute>"; };
+		D946306B22919E6B00DC4FAD /* Cluster.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cluster.swift; sourceTree = "<group>"; };
+		D946306D2291C10700DC4FAD /* ZoomClusterGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomClusterGrid.swift; sourceTree = "<group>"; };
+		D94630702291C13300DC4FAD /* ClusterLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterLayer.swift; sourceTree = "<group>"; };
+		D94630722291C19100DC4FAD /* ClusterCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterCell.swift; sourceTree = "<group>"; };
+		D94630742291C1C800DC4FAD /* ZoomClusterGridCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomClusterGridCell.swift; sourceTree = "<group>"; };
+		D94630762291EE8700DC4FAD /* ZoomClusterGridManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomClusterGridManager.swift; sourceTree = "<group>"; };
+		D94630782291F1EA00DC4FAD /* ZoomClusterGridProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomClusterGridProvider.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -29,6 +62,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D946306822919DBC00DC4FAD /* ArcGIS.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -38,6 +72,7 @@
 		D94630462291918B00DC4FAD = {
 			isa = PBXGroup;
 			children = (
+				D946306722919DBC00DC4FAD /* ArcGIS.framework */,
 				D94630512291918B00DC4FAD /* ClusterLayer100 */,
 				D94630502291918B00DC4FAD /* Products */,
 			);
@@ -54,6 +89,7 @@
 		D94630512291918B00DC4FAD /* ClusterLayer100 */ = {
 			isa = PBXGroup;
 			children = (
+				D946306422919D8500DC4FAD /* ClusterLibrary */,
 				D94630522291918B00DC4FAD /* AppDelegate.swift */,
 				D94630542291918B00DC4FAD /* ViewController.swift */,
 				D94630562291918B00DC4FAD /* Main.storyboard */,
@@ -62,6 +98,29 @@
 				D946305E2291918C00DC4FAD /* Info.plist */,
 			);
 			path = ClusterLayer100;
+			sourceTree = "<group>";
+		};
+		D946306422919D8500DC4FAD /* ClusterLibrary */ = {
+			isa = PBXGroup;
+			children = (
+				D946306F2291C10C00DC4FAD /* ZoomLevelClustering */,
+				D94630702291C13300DC4FAD /* ClusterLayer.swift */,
+				D946306522919DAA00DC4FAD /* ClusterProvider.swift */,
+				D94630722291C19100DC4FAD /* ClusterCell.swift */,
+				D946306B22919E6B00DC4FAD /* Cluster.swift */,
+			);
+			path = ClusterLibrary;
+			sourceTree = "<group>";
+		};
+		D946306F2291C10C00DC4FAD /* ZoomLevelClustering */ = {
+			isa = PBXGroup;
+			children = (
+				D94630782291F1EA00DC4FAD /* ZoomClusterGridProvider.swift */,
+				D94630762291EE8700DC4FAD /* ZoomClusterGridManager.swift */,
+				D946306D2291C10700DC4FAD /* ZoomClusterGrid.swift */,
+				D94630742291C1C800DC4FAD /* ZoomClusterGridCell.swift */,
+			);
+			path = ZoomLevelClustering;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -74,6 +133,7 @@
 				D946304B2291918B00DC4FAD /* Sources */,
 				D946304C2291918B00DC4FAD /* Frameworks */,
 				D946304D2291918B00DC4FAD /* Resources */,
+				D946306A22919DBC00DC4FAD /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -135,8 +195,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D94630732291C19100DC4FAD /* ClusterCell.swift in Sources */,
+				D94630712291C13300DC4FAD /* ClusterLayer.swift in Sources */,
+				D94630792291F1EA00DC4FAD /* ZoomClusterGridProvider.swift in Sources */,
+				D946306622919DAA00DC4FAD /* ClusterProvider.swift in Sources */,
+				D94630772291EE8700DC4FAD /* ZoomClusterGridManager.swift in Sources */,
 				D94630552291918B00DC4FAD /* ViewController.swift in Sources */,
+				D946306E2291C10700DC4FAD /* ZoomClusterGrid.swift in Sources */,
+				D946306C22919E6B00DC4FAD /* Cluster.swift in Sources */,
 				D94630532291918B00DC4FAD /* AppDelegate.swift in Sources */,
+				D94630752291C1C800DC4FAD /* ZoomClusterGridCell.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -283,6 +351,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = P8HGHS7JQ8;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(USER_LIBRARY_DIR)/SDKs/ArcGIS/iOS/Frameworks/Dynamic",
+				);
 				INFOPLIST_FILE = ClusterLayer100/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -300,6 +373,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = P8HGHS7JQ8;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(USER_LIBRARY_DIR)/SDKs/ArcGIS/iOS/Frameworks/Dynamic",
+				);
 				INFOPLIST_FILE = ClusterLayer100/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
