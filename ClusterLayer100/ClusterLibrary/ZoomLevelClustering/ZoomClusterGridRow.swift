@@ -14,20 +14,21 @@
 
 import Foundation
 
-typealias ZoomClusterGridRow = Dictionary<Int, ZoomClusterGridCellsForRow>
-typealias ZoomClusterGridCellsForRow = Dictionary<Int, ZoomClusterGridCell>
+class ZoomClusterGridRow {
+    var cellsForRow = Dictionary<Int, ZoomClusterGridCell>()
+}
 
-extension ZoomClusterGridRow {
-    mutating func getCell(grid: ZoomClusterGrid, row: Int, col: Int) -> ZoomClusterGridCell {
-        var gridRow = self[row]
-        if gridRow == nil {
-            gridRow = ZoomClusterGridCellsForRow()
-            self[row] = gridRow
+extension ZoomClusterGrid {
+    func getCell(grid: ZoomClusterGrid, rowId: Int, colId: Int) -> ZoomClusterGridCell {
+        var row = rows[rowId]
+        if row == nil {
+            row = ZoomClusterGridRow()
+            rows[rowId] = row
         }
-        var gridCell = gridRow![col]
+        var gridCell = row!.cellsForRow[colId]
         if gridCell == nil {
-            gridCell = ZoomClusterGridCell(grid: grid, row: row, col: col)
-            gridRow![col] = gridCell
+            gridCell = ZoomClusterGridCell(grid: grid, row: rowId, col: colId)
+            row!.cellsForRow[colId] = gridCell
         }
         return gridCell!
     }

@@ -16,16 +16,12 @@ import Foundation
 import ArcGIS
 
 class ZoomClusterGrid: ZoomLevelClusterGridProvider {
-    static func makeManager() -> ZoomClusterGridManager {
-        return ZoomClusterGridManager()
-    }
-    
     typealias GridManager = ZoomClusterGridManager
     
     // Minfill set of rows by Int ID from origin
     // Each row is a minfill set of columns by Int ID from origin
     // Origin is origin of the spatial reference of points added.
-    var rows = ZoomClusterGridRow()
+    public var rows = [Int: ZoomClusterGridRow]()
     
     var lod: AGSLevelOfDetail
     var cellSize: CGSize
@@ -46,7 +42,7 @@ class ZoomClusterGrid: ZoomLevelClusterGridProvider {
     var clusters: Set<Cluster> {
         var clusters = Set<Cluster>()
         for (_, row) in rows {
-            for (_, cell) in row {
+            for (_, cell) in row.cellsForRow {
                 clusters.formUnion(cell.clusters)
             }
         }
@@ -79,21 +75,21 @@ class ZoomClusterGrid: ZoomLevelClusterGridProvider {
             count += 1
             touchedClusters.insert(cluster)
         }
-        print("Touched \(touchedClusters.count) clusters while adding \(count) items and skipping \(skipped)")
+        print("Touched \(touchedClusters.count) clusters while adding \(count) items and skipping \(skipped) [Cluster Size: \(cellSize)")
     }
     
     func removeAllItems() {
-        for (_, var row) in rows {
-            for (_, clusterCell) in row {
+        for (_, row) in rows {
+            for (_, clusterCell) in row.cellsForRow {
                 clusterCell.clusters.removeAll()
             }
-            row.removeAll()
+            row.cellsForRow.removeAll()
         }
         rows.removeAll()
     }
     
     func cellFor(row: Int, col: Int) -> ZoomClusterGridCell {
-        return rows.getCell(grid: self, row: row, col: col)
+        return getCell(grid: self, rowId: row, colId: col)
     }
     
     func cellCentroid(for row: Int, col: Int) -> AGSPoint {
@@ -107,7 +103,9 @@ class ZoomClusterGrid: ZoomLevelClusterGridProvider {
     }
     
     func getGridCoordForMapPoint(mapPoint: AGSPoint) -> (Int, Int) {
-        return (Int(floor(mapPoint.x/Double(cellSize.width))), Int(floor(mapPoint.y/Double(cellSize.height))))
+        let row = Int(floor(mapPoint.y/Double(cellSize.width)))
+        let col = Int(floor(mapPoint.x/Double(cellSize.height)))
+        return (row, col)
     }
     
     func scaleInRange(scale: Double) -> Bool {

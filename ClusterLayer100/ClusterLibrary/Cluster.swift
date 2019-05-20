@@ -46,20 +46,52 @@ class Cluster {
     
     var showCoverage: Bool = false
 
-    private var isGeometryDirty = true
+    private var isCentroidDirty = true
     private var cachedCentroid: AGSPoint?
-    private var cachedCoverage: AGSGeometry?
+    private var isCoverageDirty = true
+    private var cachedCoverage: AGSPolygon?
+    private var isExtentDirty = true
     private var cachedExtent: AGSEnvelope?
     
     var centroid: AGSPoint? {
-        if isGeometryDirty {
+        if isCentroidDirty {
             cachedCentroid = calculateCentroid(features: features)
+            isCentroidDirty = false
         }
         
         return cachedCentroid
     }
-    var coverage: AGSPolygon? { fatalError("NOT IMPLEMENTED") }
-    var envelope: AGSEnvelope? { fatalError("NOT IMPLEMENTED") }
+    
+    var coverage: AGSPolygon? {
+        if isCoverageDirty {
+            let featureGeometries = features.compactMap({ $0.geometry as? AGSPoint })
+            if featureGeometries.count == 1, let geom = featureGeometries.first {
+                cachedCoverage = AGSGeometryEngine.bufferGeometry(geom, byDistance: 20)
+            } else if featureGeometries.count == 2 {
+                let line = AGSPolyline(points: featureGeometries)
+                cachedCoverage = AGSGeometryEngine.bufferGeometry(line, byDistance: 20)
+            } else {
+                cachedCoverage = AGSGeometryEngine.convexHull(forGeometries: featureGeometries, mergeInputs: true)?.first as? AGSPolygon
+            }
+            isCoverageDirty = false
+        }
+        return cachedCoverage
+    }
+    
+    var envelope: AGSEnvelope? {
+        if isCentroidDirty {
+            cachedExtent = AGSGeometryEngine.unionGeometries(features.compactMap({ $0.geometry }))?.extent
+            isExtentDirty = false
+        }
+        
+        return cachedExtent
+    }
+    
+    func dirtyAllGeometries() {
+        isCentroidDirty = true
+        isCoverageDirty = true
+        isExtentDirty = true
+    }
 
     
     var coverageGraphic: AGSGraphic { fatalError("NOT IMPLEMENTED") }
@@ -73,13 +105,13 @@ extension Cluster {
         childClusters.insert(childCluster)
         features.formUnion(childCluster.features)
         
-        isGeometryDirty = true
+        dirtyAllGeometries()
     }
     
     func add(feature: AGSFeature) {
         features.insert(feature)
         
-        isGeometryDirty = true
+        dirtyAllGeometries()
     }
     
     func remove(childCluster: Cluster) {
@@ -88,19 +120,19 @@ extension Cluster {
         childClusters.remove(childCluster)
         features.subtract(childCluster.features)
         
-        isGeometryDirty = true
+        dirtyAllGeometries()
     }
     
     func remove(feature: AGSFeature) {
         features.remove(feature)
         
-        isGeometryDirty = true
+        dirtyAllGeometries()
     }
     
     func add<T: Sequence>(features: T) where T.Element == AGSFeature {
         self.features.formUnion(features)
         
-        isGeometryDirty = true
+        dirtyAllGeometries()
     }
 
     func addPending(feature: AGSFeature) {
@@ -110,37 +142,19 @@ extension Cluster {
         pendingAdds?.insert(feature)
     }
     
-    func flushPending() {
-        guard let pending = pendingAdds else { return }
+    func flushPending() -> Int {
+        guard let pending = pendingAdds else { return 0 }
         
         self.add(features: pending)
         
+        let pendingCount = pending.count
+        
         pendingAdds?.removeAll()
         pendingAdds = nil
+        
+        return pendingCount
     }
-}
 
-extension AGSFeature {
-    private struct ClusterAssociatedKeys {
-        static var ClusterKey = "agscl_Cluster"
-    }
-    
-    var isCluster: Bool {
-        return self.cluster != nil
-    }
-    
-    var cluster: Cluster? {
-        get {
-            return objc_getAssociatedObject(self, &ClusterAssociatedKeys.ClusterKey) as? Cluster
-        }
-    }
-}
-
-extension Cluster {
-    static func clusterForPoint(mapPoint: AGSPoint) -> Cluster {
-        fatalError("NOT IMPLEMENTED")
-    }
-    
 }
 
 extension Cluster: Hashable {

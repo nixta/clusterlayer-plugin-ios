@@ -13,22 +13,26 @@
 // limitations under the License.
 
 import Foundation
+import ArcGIS
 
 protocol GridManager {
     associatedtype ManagerType
     associatedtype GridType
     
-    static func makeManager() -> ManagerType
+    static func makeManager(mapView: AGSMapView) -> ManagerType
     
     func gridForScale(mapScale: Double) -> GridType?
+    
+    func addFeatures(features: [AGSFeature])
 }
 
 class ZoomClusterGridManager: GridManager {
+
     typealias ManagerType = ZoomClusterGridManager
     typealias GridType = ZoomClusterGrid
 
-    static func makeManager() -> ZoomClusterGridManager {
-        return ZoomClusterGridManager()
+    static func makeManager(mapView: AGSMapView) -> ZoomClusterGridManager {
+        return ZoomClusterGridManager(mapView: mapView)
     }
     
     var grids: [Int : ZoomClusterGrid] = [:]
@@ -42,7 +46,29 @@ class ZoomClusterGridManager: GridManager {
         return nil
     }
     
-    init() {
+    init(mapView: AGSMapView) {
+        let cellSizeInFeet = 1/12.0
+        let mapUnits = AGSLinearUnit.meters()
+        let screenUnits = AGSLinearUnit.feet()
+        let cellSizeInMapUnits = screenUnits.convert(cellSizeInFeet, to: mapUnits)
         
+        var prevGrid: ZoomClusterGrid?
+        for lodLevel in 0...19 {
+            let lod = ZoomClusterGrid.lodForLevel(lodLevel)
+            let cellSize = floor(cellSizeInMapUnits * lod.scale)
+            let gridForLod = ZoomClusterGrid(cellSize: CGSize(width: cellSize, height: cellSize), zoomLevel: lodLevel)
+            
+            gridForLod.gridForPrevZoomLevel = prevGrid
+            prevGrid?.gridForNextZoomLevel = gridForLod
+            prevGrid = gridForLod
+            
+            grids[lodLevel] = gridForLod
+        }
+    }
+    
+    func addFeatures(features: [AGSFeature]) {
+        for (_, grid) in grids {
+            grid.add(items: features)
+        }
     }
 }
