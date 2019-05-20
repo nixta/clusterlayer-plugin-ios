@@ -15,15 +15,15 @@
 import Foundation
 import ArcGIS
 
-class ZoomClusterGridCell: ClusterCell, Hashable {
-    var grid: ZoomLevelClusterGridProvider
-    
+class ZoomClusterGridCell {
     var row: Int
     var col: Int
-    var clusters = Set<Cluster>()
-    var cluster: Cluster {
+    var size: CGSize
+    
+    var clusters = Set<GeoElementCluster>()
+    var cluster: GeoElementCluster {
         guard let clusterForCell = clusters.first else {
-            let newCluster = Cluster()
+            let newCluster = GeoElementCluster()
             newCluster.containingCell = self
             clusters.insert(newCluster)
             return newCluster
@@ -40,8 +40,8 @@ class ZoomClusterGridCell: ClusterCell, Hashable {
         return lhs.row == rhs.row && lhs.col == rhs.col
     }
     
-    init(grid: ZoomClusterGrid, row: Int, col: Int) {
-        self.grid = grid
+    init(size: CGSize, row: Int, col: Int) {
+        self.size = size
         self.row = row
         self.col = col
     }
@@ -51,7 +51,7 @@ class ZoomClusterGridCell: ClusterCell, Hashable {
     }
     
     lazy var extent: AGSEnvelope = {
-        let cellSize = grid.cellSize
+        let cellSize = size
         let bl = AGSPoint(x: Double(row) * Double(cellSize.width), y: Double(col) * Double(cellSize.height), spatialReference: AGSSpatialReference.webMercator())
         let tr = AGSPoint(x: Double(row+1) * Double(cellSize.width), y: Double(col+1) * Double(cellSize.height), spatialReference: AGSSpatialReference.webMercator())
         return AGSEnvelope(min: bl, max: tr)

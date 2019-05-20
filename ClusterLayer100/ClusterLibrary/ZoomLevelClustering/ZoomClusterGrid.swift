@@ -16,7 +16,6 @@ import Foundation
 import ArcGIS
 
 class ZoomClusterGrid: ZoomLevelClusterGridProvider {
-    typealias GridManager = ZoomClusterGridManager
     
     // Minfill set of rows by Int ID from origin
     // Each row is a minfill set of columns by Int ID from origin
@@ -34,13 +33,13 @@ class ZoomClusterGrid: ZoomLevelClusterGridProvider {
         return lod.scale
     }
     
-    var gridForPrevZoomLevel: ZoomLevelClusterGridProvider?
-    var gridForNextZoomLevel: ZoomLevelClusterGridProvider?
+    var gridForPrevZoomLevel: ZoomClusterGrid?
+    var gridForNextZoomLevel: ZoomClusterGrid?
     
     var items = Set<AGSFeature>()
     
-    var clusters: Set<Cluster> {
-        var clusters = Set<Cluster>()
+    var clusters: Set<GeoElementCluster> {
+        var clusters = Set<GeoElementCluster>()
         for (_, row) in rows {
             for (_, cell) in row.cellsForRow {
                 clusters.formUnion(cell.clusters)
@@ -61,7 +60,7 @@ class ZoomClusterGrid: ZoomLevelClusterGridProvider {
     func add<T: Sequence>(items: T) where T.Element == AGSFeature {
         self.items.formUnion(items)
         
-        var touchedClusters = Set<Cluster>()
+        var touchedClusters = Set<GeoElementCluster>()
         var count = 0
         var skipped = 0
         for item in items {
@@ -75,7 +74,7 @@ class ZoomClusterGrid: ZoomLevelClusterGridProvider {
             count += 1
             touchedClusters.insert(cluster)
         }
-        print("Touched \(touchedClusters.count) clusters while adding \(count) items and skipping \(skipped) [Cluster Size: \(cellSize)")
+        print("Touched \(touchedClusters.count) clusters while adding \(count) items and skipping \(skipped) [GeoElementCluster Size: \(cellSize)")
     }
     
     func removeAllItems() {
@@ -96,7 +95,7 @@ class ZoomClusterGrid: ZoomLevelClusterGridProvider {
         return cellFor(row: row, col: col).center
     }
     
-    func getClusterForMapPoint(mapPoint: AGSPoint) -> Cluster {
+    func getClusterForMapPoint(mapPoint: AGSPoint) -> GeoElementCluster {
         let (row, col) = getGridCoordForMapPoint(mapPoint: mapPoint)
         let cell = cellFor(row: row, col: col)
         return cell.cluster

@@ -15,7 +15,3 @@
 import Foundation
 import ArcGIS
 
-protocol ClusterCell: Hashable {
-    var clusters: Set<Cluster> { get }
-    var center: AGSPoint { get }
-}

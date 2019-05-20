@@ -7,9 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D91C926322920571002C8974 /* Cluster+Geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D91C926222920571002C8974 /* Cluster+Geometry.swift */; };
+		D91C926322920571002C8974 /* GeoElementCluster+Geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = D91C926222920571002C8974 /* GeoElementCluster+Geometry.swift */; };
 		D91C926522920D76002C8974 /* ZoomClusterGridRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D91C926422920D76002C8974 /* ZoomClusterGridRow.swift */; };
 		D91C926722921111002C8974 /* stops.geodatabase in Resources */ = {isa = PBXBuildFile; fileRef = D91C926622921111002C8974 /* stops.geodatabase */; };
+		D91C92692292ED4F002C8974 /* ClusterProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = D91C92682292ED4F002C8974 /* ClusterProtocols.swift */; };
 		D94630532291918B00DC4FAD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94630522291918B00DC4FAD /* AppDelegate.swift */; };
 		D94630552291918B00DC4FAD /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94630542291918B00DC4FAD /* ViewController.swift */; };
 		D94630582291918B00DC4FAD /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D94630562291918B00DC4FAD /* Main.storyboard */; };
@@ -18,7 +19,7 @@
 		D946306622919DAA00DC4FAD /* ClusterProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D946306522919DAA00DC4FAD /* ClusterProvider.swift */; };
 		D946306822919DBC00DC4FAD /* ArcGIS.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D946306722919DBC00DC4FAD /* ArcGIS.framework */; };
 		D946306922919DBC00DC4FAD /* ArcGIS.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D946306722919DBC00DC4FAD /* ArcGIS.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		D946306C22919E6B00DC4FAD /* Cluster.swift in Sources */ = {isa = PBXBuildFile; fileRef = D946306B22919E6B00DC4FAD /* Cluster.swift */; };
+		D946306C22919E6B00DC4FAD /* GeoElementCluster.swift in Sources */ = {isa = PBXBuildFile; fileRef = D946306B22919E6B00DC4FAD /* GeoElementCluster.swift */; };
 		D946306E2291C10700DC4FAD /* ZoomClusterGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = D946306D2291C10700DC4FAD /* ZoomClusterGrid.swift */; };
 		D94630712291C13300DC4FAD /* ClusterLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94630702291C13300DC4FAD /* ClusterLayer.swift */; };
 		D94630732291C19100DC4FAD /* ClusterCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94630722291C19100DC4FAD /* ClusterCell.swift */; };
@@ -42,9 +43,10 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		D91C926222920571002C8974 /* Cluster+Geometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Cluster+Geometry.swift"; sourceTree = "<group>"; };
+		D91C926222920571002C8974 /* GeoElementCluster+Geometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GeoElementCluster+Geometry.swift"; sourceTree = "<group>"; };
 		D91C926422920D76002C8974 /* ZoomClusterGridRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomClusterGridRow.swift; sourceTree = "<group>"; };
 		D91C926622921111002C8974 /* stops.geodatabase */ = {isa = PBXFileReference; lastKnownFileType = file; path = stops.geodatabase; sourceTree = "<group>"; };
+		D91C92682292ED4F002C8974 /* ClusterProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterProtocols.swift; sourceTree = "<group>"; };
 		D946304F2291918B00DC4FAD /* ClusterLayer100.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ClusterLayer100.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D94630522291918B00DC4FAD /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D94630542291918B00DC4FAD /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -54,7 +56,7 @@
 		D946305E2291918C00DC4FAD /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D946306522919DAA00DC4FAD /* ClusterProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterProvider.swift; sourceTree = "<group>"; };
 		D946306722919DBC00DC4FAD /* ArcGIS.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ArcGIS.framework; path = $HOME/Library/SDKs/ArcGIS/iOS/Frameworks/Dynamic/ArcGIS.framework; sourceTree = "<absolute>"; };
-		D946306B22919E6B00DC4FAD /* Cluster.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cluster.swift; sourceTree = "<group>"; };
+		D946306B22919E6B00DC4FAD /* GeoElementCluster.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeoElementCluster.swift; sourceTree = "<group>"; };
 		D946306D2291C10700DC4FAD /* ZoomClusterGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomClusterGrid.swift; sourceTree = "<group>"; };
 		D94630702291C13300DC4FAD /* ClusterLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterLayer.swift; sourceTree = "<group>"; };
 		D94630722291C19100DC4FAD /* ClusterCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterCell.swift; sourceTree = "<group>"; };
@@ -110,12 +112,13 @@
 		D946306422919D8500DC4FAD /* ClusterLibrary */ = {
 			isa = PBXGroup;
 			children = (
+				D91C92682292ED4F002C8974 /* ClusterProtocols.swift */,
 				D946306F2291C10C00DC4FAD /* ZoomLevelClustering */,
 				D94630702291C13300DC4FAD /* ClusterLayer.swift */,
 				D946306522919DAA00DC4FAD /* ClusterProvider.swift */,
 				D94630722291C19100DC4FAD /* ClusterCell.swift */,
-				D946306B22919E6B00DC4FAD /* Cluster.swift */,
-				D91C926222920571002C8974 /* Cluster+Geometry.swift */,
+				D946306B22919E6B00DC4FAD /* GeoElementCluster.swift */,
+				D91C926222920571002C8974 /* GeoElementCluster+Geometry.swift */,
 			);
 			path = ClusterLibrary;
 			sourceTree = "<group>";
@@ -211,12 +214,13 @@
 				D94630792291F1EA00DC4FAD /* ZoomClusterGridProvider.swift in Sources */,
 				D946306622919DAA00DC4FAD /* ClusterProvider.swift in Sources */,
 				D94630772291EE8700DC4FAD /* ZoomClusterGridManager.swift in Sources */,
-				D91C926322920571002C8974 /* Cluster+Geometry.swift in Sources */,
+				D91C926322920571002C8974 /* GeoElementCluster+Geometry.swift in Sources */,
 				D94630552291918B00DC4FAD /* ViewController.swift in Sources */,
 				D946306E2291C10700DC4FAD /* ZoomClusterGrid.swift in Sources */,
-				D946306C22919E6B00DC4FAD /* Cluster.swift in Sources */,
+				D946306C22919E6B00DC4FAD /* GeoElementCluster.swift in Sources */,
 				D94630532291918B00DC4FAD /* AppDelegate.swift in Sources */,
 				D94630752291C1C800DC4FAD /* ZoomClusterGridCell.swift in Sources */,
+				D91C92692292ED4F002C8974 /* ClusterProtocols.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

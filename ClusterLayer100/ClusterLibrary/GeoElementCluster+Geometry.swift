@@ -15,7 +15,7 @@
 import Foundation
 import ArcGIS
 
-extension Cluster {
+extension GeoElementCluster {
     
     func calculateCentroid<T: Sequence>(features: T) -> AGSPoint where T.Element == AGSFeature {
         let points = features.compactMap { (feature) -> AGSPoint? in

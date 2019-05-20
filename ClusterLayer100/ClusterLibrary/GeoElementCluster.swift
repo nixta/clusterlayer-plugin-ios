@@ -21,22 +21,17 @@ private func getNextClusterKey() -> Int {
     return nextClusterKey
 }
 
-class Cluster {
+class GeoElementCluster: Cluster, Hashable {
     let clusterKey: Int = getNextClusterKey()
+    var items = Set<AGSFeature>()
     
-    var features = Set<AGSFeature>()
-    
-    var childClusters = Set<Cluster>()
+    var childClusters = Set<GeoElementCluster>()
     
     internal unowned var containingCell: ZoomClusterGridCell!
-    private weak var parentCluster: Cluster?
-
-    private var grid: ClusterProvider {
-        return containingCell.grid
-    }
+    private weak var parentCluster: GeoElementCluster?
 
     var featureCount: Int {
-        return features.count
+        return items.count
     }
     
     private var pendingAdds: Set<AGSFeature>?
@@ -55,7 +50,7 @@ class Cluster {
     
     var centroid: AGSPoint? {
         if isCentroidDirty {
-            cachedCentroid = calculateCentroid(features: features)
+            cachedCentroid = calculateCentroid(features: items)
             isCentroidDirty = false
         }
         
@@ -64,7 +59,7 @@ class Cluster {
     
     var coverage: AGSPolygon? {
         if isCoverageDirty {
-            let featureGeometries = features.compactMap({ $0.geometry as? AGSPoint })
+            let featureGeometries = items.compactMap({ $0.geometry as? AGSPoint })
             if featureGeometries.count == 1, let geom = featureGeometries.first {
                 cachedCoverage = AGSGeometryEngine.bufferGeometry(geom, byDistance: 20)
             } else if featureGeometries.count == 2 {
@@ -78,9 +73,9 @@ class Cluster {
         return cachedCoverage
     }
     
-    var envelope: AGSEnvelope? {
+    var extent: AGSEnvelope? {
         if isCentroidDirty {
-            cachedExtent = AGSGeometryEngine.unionGeometries(features.compactMap({ $0.geometry }))?.extent
+            cachedExtent = AGSGeometryEngine.unionGeometries(items.compactMap({ $0.geometry }))?.extent
             isExtentDirty = false
         }
         
@@ -95,42 +90,40 @@ class Cluster {
 
     
     var coverageGraphic: AGSGraphic { fatalError("NOT IMPLEMENTED") }
-}
 
-extension Cluster {
     
-    func add(childCluster: Cluster) {
+    func add(childCluster: GeoElementCluster) {
         childCluster.parentCluster = self
         
         childClusters.insert(childCluster)
-        features.formUnion(childCluster.features)
+        items.formUnion(childCluster.items)
         
         dirtyAllGeometries()
     }
     
     func add(feature: AGSFeature) {
-        features.insert(feature)
+        items.insert(feature)
         
         dirtyAllGeometries()
     }
     
-    func remove(childCluster: Cluster) {
+    func remove(childCluster: GeoElementCluster) {
         childCluster.parentCluster = nil
         
         childClusters.remove(childCluster)
-        features.subtract(childCluster.features)
+        items.subtract(childCluster.items)
         
         dirtyAllGeometries()
     }
     
     func remove(feature: AGSFeature) {
-        features.remove(feature)
+        items.remove(feature)
         
         dirtyAllGeometries()
     }
     
     func add<T: Sequence>(features: T) where T.Element == AGSFeature {
-        self.features.formUnion(features)
+        self.items.formUnion(features)
         
         dirtyAllGeometries()
     }
@@ -155,14 +148,12 @@ extension Cluster {
         return pendingCount
     }
 
-}
-
-extension Cluster: Hashable {
-    static func == (lhs: Cluster, rhs: Cluster) -> Bool {
+    static func == (lhs: GeoElementCluster, rhs: GeoElementCluster) -> Bool {
         return lhs.clusterKey == rhs.clusterKey
     }
     
     func hash(into hasher: inout Hasher) {
         hasher.combine(clusterKey)
     }
+
 }

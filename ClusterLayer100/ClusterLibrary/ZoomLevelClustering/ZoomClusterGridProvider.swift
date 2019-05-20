@@ -15,11 +15,3 @@
 import Foundation
 import ArcGIS
 
-protocol ZoomLevelClusterGridProvider: ClusterProvider {
-    var zoomLevel: Int { get }
-    var scale: Double { get }
-    var cellSize: CGSize { get }
-    var gridForPrevZoomLevel: ZoomLevelClusterGridProvider? { get }
-    var gridForNextZoomLevel: ZoomLevelClusterGridProvider? { get }
-    func cellFor(row: Int, col: Int) -> ZoomClusterGridCell
-}

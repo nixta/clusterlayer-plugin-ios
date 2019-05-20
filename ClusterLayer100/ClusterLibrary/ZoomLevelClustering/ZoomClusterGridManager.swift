@@ -15,18 +15,7 @@
 import Foundation
 import ArcGIS
 
-protocol GridManager {
-    associatedtype ManagerType
-    associatedtype GridType
-    
-    static func makeManager(mapView: AGSMapView) -> ManagerType
-    
-    func gridForScale(mapScale: Double) -> GridType?
-    
-    func addFeatures(features: [AGSFeature])
-}
-
-class ZoomClusterGridManager: GridManager {
+class ZoomClusterGridManager: ClusterManager {
 
     typealias ManagerType = ZoomClusterGridManager
     typealias GridType = ZoomClusterGrid

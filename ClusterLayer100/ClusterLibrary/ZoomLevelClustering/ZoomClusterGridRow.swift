@@ -27,7 +27,7 @@ extension ZoomClusterGrid {
         }
         var gridCell = row!.cellsForRow[colId]
         if gridCell == nil {
-            gridCell = ZoomClusterGridCell(grid: grid, row: rowId, col: colId)
+            gridCell = ZoomClusterGridCell(size: grid.cellSize, row: rowId, col: colId)
             row!.cellsForRow[colId] = gridCell
         }
         return gridCell!

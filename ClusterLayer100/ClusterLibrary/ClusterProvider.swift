@@ -15,8 +15,3 @@
 import Foundation
 import ArcGIS
 
-protocol ClusterProvider {
-    var clusters: Set<Cluster> { get }
-    func add<T: Sequence>(items: T) where T.Element == AGSFeature
-    func removeAllItems()
-}
