@@ -17,7 +17,7 @@ import ArcGIS
 
 class ClusterLayer: AGSFeatureCollectionLayer {
     
-    let manager: ZoomClusterGridManager!
+    let manager: LODLevelGriddedClusterManager!
     
     let sourceLayer: AGSFeatureLayer!
     
@@ -50,7 +50,7 @@ class ClusterLayer: AGSFeatureCollectionLayer {
 
         let fc = AGSFeatureCollection(featureCollectionTables: [clustersTable, coveragesTable])
         
-        manager = ZoomClusterGridManager(mapView: mapView)
+        manager = LODLevelGriddedClusterManager(mapView: mapView)
         
         super.init(featureCollection: fc)
         
@@ -102,7 +102,7 @@ class ClusterLayer: AGSFeatureCollectionLayer {
         }
     }
     
-    func setToGrid(grid: ZoomClusterGrid) {
+    func setToGrid(grid: LODLevelGriddedClusterProvider) {
         print("newLOD = \(grid.lod.level), oldLOD = \(self.currentLOD)")
         
         self.currentLOD = grid.lod.level
@@ -122,7 +122,7 @@ class ClusterLayer: AGSFeatureCollectionLayer {
         print("Flushed \(pendingCount) pending items on \(grid.clusters.count) clusters")
     }
     
-    func updateTablesWithGrid(table: AGSFeatureTable, gridForScale: ZoomClusterGrid) {
+    func updateTablesWithGrid(table: AGSFeatureTable, gridForScale: LODLevelGriddedClusterProvider) {
         let params = AGSQueryParameters()
         params.whereClause = "1=1"
         table.queryFeatures(with: params, completion: { [table] (result, error) in

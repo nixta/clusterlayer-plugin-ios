@@ -21,14 +21,11 @@ private func getNextClusterKey() -> Int {
     return nextClusterKey
 }
 
-class GeoElementCluster: Cluster, Hashable {
+class GeoElementCluster: Cluster {
     let clusterKey: Int = getNextClusterKey()
     var items = Set<AGSFeature>()
     
-    var childClusters = Set<GeoElementCluster>()
-    
-    internal unowned var containingCell: ZoomClusterGridCell!
-    private weak var parentCluster: GeoElementCluster?
+    internal unowned var containingCell: LODLevelGriddedClusterGridCell!
 
     var featureCount: Int {
         return items.count
@@ -36,17 +33,16 @@ class GeoElementCluster: Cluster, Hashable {
     
     private var pendingAdds: Set<AGSFeature>?
     
-
-    
-    
-    var showCoverage: Bool = false
-
     private var isCentroidDirty = true
     private var cachedCentroid: AGSPoint?
     private var isCoverageDirty = true
     private var cachedCoverage: AGSPolygon?
     private var isExtentDirty = true
     private var cachedExtent: AGSEnvelope?
+    
+}
+
+extension GeoElementCluster {
     
     var centroid: AGSPoint? {
         if isCentroidDirty {
@@ -87,31 +83,12 @@ class GeoElementCluster: Cluster, Hashable {
         isCoverageDirty = true
         isExtentDirty = true
     }
+}
 
-    
-    var coverageGraphic: AGSGraphic { fatalError("NOT IMPLEMENTED") }
-
-    
-    func add(childCluster: GeoElementCluster) {
-        childCluster.parentCluster = self
-        
-        childClusters.insert(childCluster)
-        items.formUnion(childCluster.items)
-        
-        dirtyAllGeometries()
-    }
+extension GeoElementCluster {
     
     func add(feature: AGSFeature) {
         items.insert(feature)
-        
-        dirtyAllGeometries()
-    }
-    
-    func remove(childCluster: GeoElementCluster) {
-        childCluster.parentCluster = nil
-        
-        childClusters.remove(childCluster)
-        items.subtract(childCluster.items)
         
         dirtyAllGeometries()
     }
@@ -147,13 +124,39 @@ class GeoElementCluster: Cluster, Hashable {
         
         return pendingCount
     }
+}
 
-    static func == (lhs: GeoElementCluster, rhs: GeoElementCluster) -> Bool {
-        return lhs.clusterKey == rhs.clusterKey
-    }
+extension GeoElementCluster: Hashable {
     
     func hash(into hasher: inout Hasher) {
         hasher.combine(clusterKey)
     }
 
+    static func == (lhs: GeoElementCluster, rhs: GeoElementCluster) -> Bool {
+        return lhs.clusterKey == rhs.clusterKey
+    }
+
+}
+
+class GeoElementLODLevelCluster: GeoElementCluster, LODLevelCluster {
+    var childClusters = Set<GeoElementCluster>()
+    private weak var parentCluster: GeoElementCluster?
+    
+    func add(childCluster: GeoElementLODLevelCluster) {
+        childCluster.parentCluster = self
+        
+        childClusters.insert(childCluster)
+        items.formUnion(childCluster.items)
+        
+        dirtyAllGeometries()
+    }
+    
+    func remove(childCluster: GeoElementLODLevelCluster) {
+        childCluster.parentCluster = nil
+        
+        childClusters.remove(childCluster)
+        items.subtract(childCluster.items)
+        
+        dirtyAllGeometries()
+    }
 }

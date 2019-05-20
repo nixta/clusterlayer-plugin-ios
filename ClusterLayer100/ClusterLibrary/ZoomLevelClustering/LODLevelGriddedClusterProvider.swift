@@ -15,17 +15,21 @@
 import Foundation
 import ArcGIS
 
-class ZoomClusterGrid: ZoomLevelClusterGridProvider {
+class LODLevelGriddedClusterProvider: LODLevelClusterProvider {
+    
+    private class ZoomClusterGridRow {
+        var cellsForRow = Dictionary<Int, LODLevelGriddedClusterGridCell>()
+    }
     
     // Minfill set of rows by Int ID from origin
     // Each row is a minfill set of columns by Int ID from origin
     // Origin is origin of the spatial reference of points added.
-    public var rows = [Int: ZoomClusterGridRow]()
+    private var rows = [Int: ZoomClusterGridRow]()
     
     var lod: AGSLevelOfDetail
     var cellSize: CGSize
 
-    var zoomLevel: Int {
+    var lodLevel: Int {
         return lod.level
     }
     
@@ -33,8 +37,8 @@ class ZoomClusterGrid: ZoomLevelClusterGridProvider {
         return lod.scale
     }
     
-    var gridForPrevZoomLevel: ZoomClusterGrid?
-    var gridForNextZoomLevel: ZoomClusterGrid?
+    var providerForPreviousLODLevel: LODLevelGriddedClusterProvider?
+    var providerForNextLODLevel: LODLevelGriddedClusterProvider?
     
     var items = Set<AGSFeature>()
     
@@ -87,7 +91,7 @@ class ZoomClusterGrid: ZoomLevelClusterGridProvider {
         rows.removeAll()
     }
     
-    func cellFor(row: Int, col: Int) -> ZoomClusterGridCell {
+    func cellFor(row: Int, col: Int) -> LODLevelGriddedClusterGridCell {
         return getCell(grid: self, rowId: row, colId: col)
     }
     
@@ -109,7 +113,7 @@ class ZoomClusterGrid: ZoomLevelClusterGridProvider {
     
     func scaleInRange(scale: Double) -> Bool {
         if scale >= self.scale {
-            if let prevLevelScale = gridForPrevZoomLevel?.scale, scale >= prevLevelScale {
+            if let prevLevelScale = providerForPreviousLODLevel?.scale, scale >= prevLevelScale {
                 // This scale falls into another LOD range, not this one
                 return false
             }
@@ -123,6 +127,21 @@ class ZoomClusterGrid: ZoomLevelClusterGridProvider {
     static func lodForLevel(_ level: Int) -> AGSLevelOfDetail {
         return makeWebMercatorLod(level: level)
     }
+    
+    func getCell(grid: LODLevelGriddedClusterProvider, rowId: Int, colId: Int) -> LODLevelGriddedClusterGridCell {
+        var row = rows[rowId]
+        if row == nil {
+            row = ZoomClusterGridRow()
+            rows[rowId] = row
+        }
+        var gridCell = row!.cellsForRow[colId]
+        if gridCell == nil {
+            gridCell = LODLevelGriddedClusterGridCell(size: grid.cellSize, row: rowId, col: colId)
+            row!.cellsForRow[colId] = gridCell
+        }
+        return gridCell!
+    }
+
 }
 
 

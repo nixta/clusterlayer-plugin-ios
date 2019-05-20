@@ -15,22 +15,9 @@
 import Foundation
 import ArcGIS
 
-class ZoomClusterGridManager: ClusterManager {
-
-//    static func makeManager(mapView: AGSMapView) -> ZoomClusterGridManager {
-//        return ZoomClusterGridManager(mapView: mapView)
-//    }
+class LODLevelGriddedClusterManager: ClusterManager {
     
-    var grids: [Int : ZoomClusterGrid] = [:]
-    
-    func clusterProvider(for mapScale: Double) -> ZoomClusterGrid? {
-        for grid in grids.values {
-            if grid.scaleInRange(scale: mapScale) {
-                return grid
-            }
-        }
-        return nil
-    }
+    var grids: [Int : LODLevelGriddedClusterProvider] = [:]
     
     required init(mapView: AGSMapView) {
         let cellSizeInFeet = 1/12.0
@@ -38,18 +25,27 @@ class ZoomClusterGridManager: ClusterManager {
         let screenUnits = AGSLinearUnit.feet()
         let cellSizeInMapUnits = screenUnits.convert(cellSizeInFeet, to: mapUnits)
         
-        var prevGrid: ZoomClusterGrid?
+        var prevGrid: LODLevelGriddedClusterProvider?
         for lodLevel in 0...19 {
-            let lod = ZoomClusterGrid.lodForLevel(lodLevel)
+            let lod = LODLevelGriddedClusterProvider.lodForLevel(lodLevel)
             let cellSize = floor(cellSizeInMapUnits * lod.scale)
-            let gridForLod = ZoomClusterGrid(cellSize: CGSize(width: cellSize, height: cellSize), zoomLevel: lodLevel)
+            let gridForLod = LODLevelGriddedClusterProvider(cellSize: CGSize(width: cellSize, height: cellSize), zoomLevel: lodLevel)
             
-            gridForLod.gridForPrevZoomLevel = prevGrid
-            prevGrid?.gridForNextZoomLevel = gridForLod
+            gridForLod.providerForPreviousLODLevel = prevGrid
+            prevGrid?.providerForNextLODLevel = gridForLod
             prevGrid = gridForLod
             
             grids[lodLevel] = gridForLod
         }
+    }
+    
+    func clusterProvider(for mapScale: Double) -> LODLevelGriddedClusterProvider? {
+        for grid in grids.values {
+            if grid.scaleInRange(scale: mapScale) {
+                return grid
+            }
+        }
+        return nil
     }
     
     func add(items: [AGSFeature]) {

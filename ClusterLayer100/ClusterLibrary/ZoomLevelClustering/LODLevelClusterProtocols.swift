@@ -13,5 +13,22 @@
 // limitations under the License.
 
 import Foundation
-import ArcGIS
+import UIKit
 
+protocol LODLevelCluster: Cluster {
+    associatedtype ChildClusters : Hashable = Self
+    
+    var childClusters: Set<ChildClusters> { get }
+}
+
+protocol LODLevelClusterProvider: ClusterProvider {
+    associatedtype SiblingGrids = Self
+    
+    var lodLevel: Int { get }
+    var scale: Double { get }
+
+    var providerForPreviousLODLevel: SiblingGrids? { get }
+    var providerForNextLODLevel: SiblingGrids? { get }
+
+    func cellFor(row: Int, col: Int) -> LODLevelGriddedClusterGridCell
+}

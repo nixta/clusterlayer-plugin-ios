@@ -21,7 +21,7 @@ class ViewController: UIViewController {
     
     let geodatabase = AGSGeodatabase(name: "stops")
     
-    var manager: ZoomClusterGridManager?
+    var manager: LODLevelGriddedClusterManager?
     
     let map = AGSMap(basemapType: .streetsVector, latitude: 40.7128, longitude: -74.0060, levelOfDetail: 15)
     
@@ -30,7 +30,7 @@ class ViewController: UIViewController {
         // Do any additional setup after loading the view.
         
         
-        manager = ZoomClusterGridManager(mapView: mapView)
+        manager = LODLevelGriddedClusterManager(mapView: mapView)
         
         mapView.map = map
         

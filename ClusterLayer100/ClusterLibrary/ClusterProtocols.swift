@@ -15,14 +15,13 @@
 import Foundation
 import ArcGIS
 
-
 protocol Cluster {
-    associatedtype ClusteredItem : Hashable
+    associatedtype ItemType : Hashable
     associatedtype Key: Hashable
     
     var clusterKey: Key { get }
     
-    var items: Set<ClusteredItem> { get }
+    var items: Set<ItemType> { get }
     
     var centroid: AGSPoint? { get }
     var coverage: AGSPolygon? { get }
@@ -46,26 +45,5 @@ protocol ClusterManager {
     
     func clusterProvider(for mapScale: Double) -> ClusterProviderType?
     
-    func add(items: [ClusterProviderType.ClusterType.ClusteredItem])
-}
-
-
-
-
-
-protocol ZoomLevelCluster: Cluster {
-    associatedtype ChildClusters : Hashable = Self
-    
-    var childClusters: Set<ChildClusters> { get }
-}
-
-protocol ZoomLevelClusterGridProvider: ClusterProvider {
-    associatedtype SiblingGrids = Self
-    
-    var zoomLevel: Int { get }
-    var scale: Double { get }
-    var cellSize: CGSize { get }
-    var gridForPrevZoomLevel: SiblingGrids? { get }
-    var gridForNextZoomLevel: SiblingGrids? { get }
-    func cellFor(row: Int, col: Int) -> ZoomClusterGridCell
+    func add(items: [ClusterProviderType.ClusterType.ItemType])
 }

@@ -15,29 +15,20 @@
 import Foundation
 import ArcGIS
 
-class ZoomClusterGridCell {
+class LODLevelGriddedClusterGridCell {
     var row: Int
     var col: Int
     var size: CGSize
     
-    var clusters = Set<GeoElementCluster>()
-    var cluster: GeoElementCluster {
+    var clusters = Set<GeoElementLODLevelCluster>()
+    var cluster: GeoElementLODLevelCluster {
         guard let clusterForCell = clusters.first else {
-            let newCluster = GeoElementCluster()
+            let newCluster = GeoElementLODLevelCluster()
             newCluster.containingCell = self
             clusters.insert(newCluster)
             return newCluster
         }
         return clusterForCell
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(row)
-        hasher.combine(col)
-    }
-    
-    static func == (lhs: ZoomClusterGridCell, rhs: ZoomClusterGridCell) -> Bool {
-        return lhs.row == rhs.row && lhs.col == rhs.col
     }
     
     init(size: CGSize, row: Int, col: Int) {
