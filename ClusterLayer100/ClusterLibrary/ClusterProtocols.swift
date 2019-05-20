@@ -33,19 +33,20 @@ protocol ClusterProvider {
     associatedtype ClusterType: Cluster, Hashable
     
     var clusters: Set<ClusterType> { get }
+    func getCluster(for mapPoint: AGSPoint) -> ClusterType
+
     func add<T: Sequence>(items: T) where T.Element == AGSFeature
     func removeAllItems()
 }
 
 protocol ClusterManager {
-    associatedtype ManagerType = Self
-    associatedtype GridType
+    associatedtype ClusterProviderType : ClusterProvider
     
-    static func makeManager(mapView: AGSMapView) -> ManagerType
+    init(mapView: AGSMapView)
     
-    func gridForScale(mapScale: Double) -> GridType?
+    func clusterProvider(for mapScale: Double) -> ClusterProviderType?
     
-    func addFeatures(features: [AGSFeature])
+    func add(items: [ClusterProviderType.ClusterType.ClusteredItem])
 }
 
 

@@ -17,16 +17,13 @@ import ArcGIS
 
 class ZoomClusterGridManager: ClusterManager {
 
-    typealias ManagerType = ZoomClusterGridManager
-    typealias GridType = ZoomClusterGrid
-
-    static func makeManager(mapView: AGSMapView) -> ZoomClusterGridManager {
-        return ZoomClusterGridManager(mapView: mapView)
-    }
+//    static func makeManager(mapView: AGSMapView) -> ZoomClusterGridManager {
+//        return ZoomClusterGridManager(mapView: mapView)
+//    }
     
     var grids: [Int : ZoomClusterGrid] = [:]
     
-    func gridForScale(mapScale: Double) -> ZoomClusterGrid? {
+    func clusterProvider(for mapScale: Double) -> ZoomClusterGrid? {
         for grid in grids.values {
             if grid.scaleInRange(scale: mapScale) {
                 return grid
@@ -35,7 +32,7 @@ class ZoomClusterGridManager: ClusterManager {
         return nil
     }
     
-    init(mapView: AGSMapView) {
+    required init(mapView: AGSMapView) {
         let cellSizeInFeet = 1/12.0
         let mapUnits = AGSLinearUnit.meters()
         let screenUnits = AGSLinearUnit.feet()
@@ -55,9 +52,9 @@ class ZoomClusterGridManager: ClusterManager {
         }
     }
     
-    func addFeatures(features: [AGSFeature]) {
+    func add(items: [AGSFeature]) {
         for (_, grid) in grids {
-            grid.add(items: features)
+            grid.add(items: items)
         }
     }
 }

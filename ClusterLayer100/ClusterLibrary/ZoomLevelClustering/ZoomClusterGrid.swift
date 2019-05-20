@@ -69,7 +69,7 @@ class ZoomClusterGrid: ZoomLevelClusterGridProvider {
                 skipped += 1
                 continue
             }
-            let cluster = getClusterForMapPoint(mapPoint: itemLocation)
+            let cluster = getCluster(for: itemLocation)
             cluster.addPending(feature: item)
             count += 1
             touchedClusters.insert(cluster)
@@ -95,7 +95,7 @@ class ZoomClusterGrid: ZoomLevelClusterGridProvider {
         return cellFor(row: row, col: col).center
     }
     
-    func getClusterForMapPoint(mapPoint: AGSPoint) -> GeoElementCluster {
+    func getCluster(for mapPoint: AGSPoint) -> GeoElementCluster {
         let (row, col) = getGridCoordForMapPoint(mapPoint: mapPoint)
         let cell = cellFor(row: row, col: col)
         return cell.cluster

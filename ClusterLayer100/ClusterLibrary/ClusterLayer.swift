@@ -72,7 +72,7 @@ class ClusterLayer: AGSFeatureCollectionLayer {
             
             guard let self = self, let sourceFeatures = sourceFeatureResults?.featureEnumerator().allObjects else { return }
             
-            self.manager.addFeatures(features: sourceFeatures)
+            self.manager.add(items: sourceFeatures)
         })
         
         initializationGroup.enter()
@@ -82,7 +82,7 @@ class ClusterLayer: AGSFeatureCollectionLayer {
         
         initializationGroup.notify(queue: .main) { [weak self] in
             guard let self = self else { return }
-            guard let gridForScale = self.manager.gridForScale(mapScale: mapView.mapScale) else {
+            guard let gridForScale = self.manager.clusterProvider(for: mapView.mapScale) else {
                 print("Unable to set initial cluster LOD")
                 return
             }
@@ -95,7 +95,7 @@ class ClusterLayer: AGSFeatureCollectionLayer {
             
             guard let self = self else { return }
             
-            guard let gridForScale = self.manager.gridForScale(mapScale: changedMapView.mapScale),
+            guard let gridForScale = self.manager.clusterProvider(for: changedMapView.mapScale),
                 gridForScale.lod.level != self.currentLOD else { return }
             
             self.setToGrid(grid: gridForScale)
@@ -207,6 +207,8 @@ extension AGSGeometryType: CustomStringConvertible {
             return "Polygon"
         case .envelope:
             return "Envelope"
+        @unknown default:
+            fatalError("Unexpected Geometry Type!")
         }
     }
 }
