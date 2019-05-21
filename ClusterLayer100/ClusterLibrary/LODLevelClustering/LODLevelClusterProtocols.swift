@@ -23,6 +23,7 @@ protocol LODLevelCluster: Cluster {
 
 protocol LODLevelClusterProvider: ClusterProvider {
     associatedtype SiblingGrids = Self
+    associatedtype CellType
     
     var lodLevel: Int { get }
     var scale: Double { get }
@@ -30,5 +31,5 @@ protocol LODLevelClusterProvider: ClusterProvider {
     var providerForPreviousLODLevel: SiblingGrids? { get }
     var providerForNextLODLevel: SiblingGrids? { get }
 
-    func cellFor(row: Int, col: Int) -> LODLevelGriddedClusterGridCell
+    func cellFor(row: Int, col: Int) -> CellType
 }

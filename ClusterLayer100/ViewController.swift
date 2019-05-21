@@ -15,22 +15,19 @@
 import UIKit
 import ArcGIS
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, AGSGeoViewTouchDelegate {
     
     @IBOutlet weak var mapView: AGSMapView!
     
     let geodatabase = AGSGeodatabase(name: "stops")
     
-    var manager: LODLevelGriddedClusterManager?
-    
     let map = AGSMap(basemapType: .streetsVector, latitude: 40.7128, longitude: -74.0060, levelOfDetail: 15)
+    
+    var clusterLayer: ClusterLayer<AGSFeature>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-        
-        
-        manager = LODLevelGriddedClusterManager(mapView: mapView)
         
         mapView.map = map
         
@@ -51,59 +48,34 @@ class ViewController: UIViewController {
             let sourceLayer = AGSFeatureLayer(featureTable: table)
             self.map.operationalLayers.add(sourceLayer)
             
-            let clusterLayer = ClusterLayer(mapView: self.mapView, featureLayer: sourceLayer)
+            let clusterLayer = ClusterLayer<AGSFeature>(mapView: self.mapView, featureLayer: sourceLayer)
             
             self.map.operationalLayers.add(clusterLayer)
+            
+            self.clusterLayer = clusterLayer
         }
         
-//        initGrid()
+        mapView.touchDelegate = self
     }
-
-    func initGrid() {
-        AGSLoadObjects([map, geodatabase]) { [weak self, map, geodatabase] (allLoaded) in
-            guard allLoaded else {
-                [map, geodatabase].filter({$0.loadError != nil}).forEach({ print("error loading \($0): \($0.loadError!)")})
+    
+    func geoView(_ geoView: AGSGeoView, didTapAtScreenPoint screenPoint: CGPoint, mapPoint: AGSPoint) {
+        mapView.identifyLayers(atScreenPoint: screenPoint, tolerance: 20, returnPopupsOnly: false) { (results, error) in
+            if let error = error {
+                print("Error identifying! \(error.localizedDescription)")
                 return
             }
             
-            guard let self = self, let table = self.geodatabase.geodatabaseFeatureTables.first else {
-                return
+            guard let results = results else { return }
+            
+            for result in results {
+                print(result.layerContent.name)
+                print(result.geoElements)
+                for subLayerResult in result.sublayerResults {
+                    print(subLayerResult.layerContent.name)
+                    print(subLayerResult.geoElements)
+                }
             }
-            
-            let layer = AGSFeatureLayer(featureTable: table)
-            map.operationalLayers.add(layer)
-            
-            layer.load(completion: { [layer] (error) in
-                guard error == nil else { return }
-                
-                guard let extent = layer.fullExtent else { return }
-                self.mapView.setViewpointGeometry(extent, completion: nil)
-            })
-            
-            let params = AGSQueryParameters()
-            params.whereClause = "1=1"
-            table.queryFeatures(with: params, completion: { [weak self] (result, error) in
-                if let error = error {
-                    print("Error querying table: \(error.localizedDescription)")
-                    return
-                }
-                
-                guard let self = self, let result = result, let manager = self.manager else { return }
-                
-                let features = result.featureEnumerator().allObjects
-                
-                print("Found \(features.count) features")
-
-                for (_, grid) in manager.grids.sorted(by: { (item1, item2) -> Bool in
-                    return item1.key < item2.key
-                }) {
-                    grid.add(items: features)
-                }
-                
-                print("Added features to grids")
-
-            })
         }
     }
-}
 
+}

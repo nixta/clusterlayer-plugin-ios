@@ -34,7 +34,7 @@ protocol ClusterProvider {
     var clusters: Set<ClusterType> { get }
     func getCluster(for mapPoint: AGSPoint) -> ClusterType
 
-    func add<T: Sequence>(items: T) where T.Element == AGSFeature
+    func add<S>(items: S) where S: Sequence, S.Element == ClusterType.ItemType
     func removeAllItems()
 }
 
@@ -45,5 +45,5 @@ protocol ClusterManager {
     
     func clusterProvider(for mapScale: Double) -> ClusterProviderType?
     
-    func add(items: [ClusterProviderType.ClusterType.ItemType])
+    func add<S: Sequence>(items: S) where S.Element == ClusterProviderType.ClusterType.ItemType
 }

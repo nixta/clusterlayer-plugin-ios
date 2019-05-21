@@ -15,10 +15,10 @@
 import Foundation
 import ArcGIS
 
-class LODLevelGriddedClusterProvider: LODLevelClusterProvider {
+class LODLevelGriddedClusterProvider<T>: LODLevelClusterProvider where T: AGSGeoElement, T: Hashable {
     
     private class ZoomClusterGridRow {
-        var cellsForRow = Dictionary<Int, LODLevelGriddedClusterGridCell>()
+        var cellsForRow = Dictionary<Int, LODLevelGriddedClusterGridCell<T>>()
     }
     
     // Minfill set of rows by Int ID from origin
@@ -40,10 +40,10 @@ class LODLevelGriddedClusterProvider: LODLevelClusterProvider {
     var providerForPreviousLODLevel: LODLevelGriddedClusterProvider?
     var providerForNextLODLevel: LODLevelGriddedClusterProvider?
     
-    var items = Set<AGSFeature>()
+    var items = Set<T>()
     
-    var clusters: Set<GeoElementCluster> {
-        var clusters = Set<GeoElementCluster>()
+    var clusters: Set<GeoElementCluster<T>> {
+        var clusters = Set<GeoElementCluster<T>>()
         for (_, row) in rows {
             for (_, cell) in row.cellsForRow {
                 clusters.formUnion(cell.clusters)
@@ -58,13 +58,12 @@ class LODLevelGriddedClusterProvider: LODLevelClusterProvider {
         self.cellSize = cellSize
         lod = makeWebMercatorLod(level: zoomLevel)
     }
-    
 
     
-    func add<T: Sequence>(items: T) where T.Element == AGSFeature {
+    func add<S: Sequence>(items: S) where S.Element == T {
         self.items.formUnion(items)
         
-        var touchedClusters = Set<GeoElementCluster>()
+        var touchedClusters = Set<GeoElementCluster<T>>()
         var count = 0
         var skipped = 0
         for item in items {
@@ -91,7 +90,7 @@ class LODLevelGriddedClusterProvider: LODLevelClusterProvider {
         rows.removeAll()
     }
     
-    func cellFor(row: Int, col: Int) -> LODLevelGriddedClusterGridCell {
+    func cellFor(row: Int, col: Int) -> LODLevelGriddedClusterGridCell<T> {
         return getCell(grid: self, rowId: row, colId: col)
     }
     
@@ -99,7 +98,7 @@ class LODLevelGriddedClusterProvider: LODLevelClusterProvider {
         return cellFor(row: row, col: col).center
     }
     
-    func getCluster(for mapPoint: AGSPoint) -> GeoElementCluster {
+    func getCluster(for mapPoint: AGSPoint) -> GeoElementCluster<T> {
         let (row, col) = getGridCoordForMapPoint(mapPoint: mapPoint)
         let cell = cellFor(row: row, col: col)
         return cell.cluster
@@ -128,7 +127,7 @@ class LODLevelGriddedClusterProvider: LODLevelClusterProvider {
         return makeWebMercatorLod(level: level)
     }
     
-    func getCell(grid: LODLevelGriddedClusterProvider, rowId: Int, colId: Int) -> LODLevelGriddedClusterGridCell {
+    func getCell(grid: LODLevelGriddedClusterProvider, rowId: Int, colId: Int) -> LODLevelGriddedClusterGridCell<T> {
         var row = rows[rowId]
         if row == nil {
             row = ZoomClusterGridRow()

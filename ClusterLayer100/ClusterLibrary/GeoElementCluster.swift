@@ -21,17 +21,17 @@ private func getNextClusterKey() -> Int {
     return nextClusterKey
 }
 
-class GeoElementCluster: Cluster {
+class GeoElementCluster<T>: Cluster where T: AGSGeoElement, T: Hashable {
     let clusterKey: Int = getNextClusterKey()
-    var items = Set<AGSFeature>()
+    var items = Set<T>()
     
-    internal unowned var containingCell: LODLevelGriddedClusterGridCell!
+    internal unowned var containingCell: LODLevelGriddedClusterGridCell<T>!
 
     var featureCount: Int {
         return items.count
     }
     
-    private var pendingAdds: Set<AGSFeature>?
+    private var pendingAdds: Set<T>?
     
     private var isCentroidDirty = true
     private var cachedCentroid: AGSPoint?
@@ -87,27 +87,27 @@ extension GeoElementCluster {
 
 extension GeoElementCluster {
     
-    func add(feature: AGSFeature) {
+    func add(feature: T) {
         items.insert(feature)
         
         dirtyAllGeometries()
     }
     
-    func remove(feature: AGSFeature) {
+    func remove(feature: T) {
         items.remove(feature)
         
         dirtyAllGeometries()
     }
     
-    func add<T: Sequence>(features: T) where T.Element == AGSFeature {
+    func add<S: Sequence>(features: S) where S.Element == T {
         self.items.formUnion(features)
         
         dirtyAllGeometries()
     }
 
-    func addPending(feature: AGSFeature) {
+    func addPending(feature: T) {
         if pendingAdds == nil {
-            pendingAdds = Set<AGSFeature>()
+            pendingAdds = Set<T>()
         }
         pendingAdds?.insert(feature)
     }
@@ -138,11 +138,11 @@ extension GeoElementCluster: Hashable {
 
 }
 
-class GeoElementLODLevelCluster: GeoElementCluster, LODLevelCluster {
-    var childClusters = Set<GeoElementCluster>()
-    private weak var parentCluster: GeoElementCluster?
+class LODLevelGeoElementCluster<T>: GeoElementCluster<T>, LODLevelCluster where T: AGSGeoElement, T: Hashable {
+    var childClusters = Set<LODLevelGeoElementCluster<T>>()
+    private weak var parentCluster: LODLevelGeoElementCluster<T>?
     
-    func add(childCluster: GeoElementLODLevelCluster) {
+    func add(childCluster: LODLevelGeoElementCluster<T>) {
         childCluster.parentCluster = self
         
         childClusters.insert(childCluster)
@@ -151,7 +151,7 @@ class GeoElementLODLevelCluster: GeoElementCluster, LODLevelCluster {
         dirtyAllGeometries()
     }
     
-    func remove(childCluster: GeoElementLODLevelCluster) {
+    func remove(childCluster: LODLevelGeoElementCluster<T>) {
         childCluster.parentCluster = nil
         
         childClusters.remove(childCluster)

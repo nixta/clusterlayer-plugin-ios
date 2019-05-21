@@ -15,9 +15,33 @@
 import Foundation
 import ArcGIS
 
-class ClusterLayer: AGSFeatureCollectionLayer {
+fileprivate let clusterTableFields: [AGSField] = [
+    AGSField(fieldType: .int32, name: "Key", alias: "Key", length: 0, domain: nil, editable: true, allowNull: false),
+    AGSField(fieldType: .int16, name: "FeatureCount", alias: "Feature Count", length: 0, domain: nil, editable: true, allowNull: false)
+]
+
+fileprivate let defaultCoverageSymbol = AGSSimpleFillSymbol(style: .solid,
+                                                            color: UIColor.red.withAlphaComponent(0.3),
+                                                            outline: AGSSimpleLineSymbol(style: .solid, color: .brown, width: 2))
+
+fileprivate let smallClusterColor = UIColor(red: 0, green: 0.491, blue: 0, alpha: 1)
+fileprivate let mediumClusterColor = UIColor(red: 0.838, green: 0.5, blue: 0, alpha: 1)
+fileprivate let largeClusterColor = UIColor(red: 0.615, green: 0.178, blue: 0.550, alpha: 1)
+
+fileprivate let innerSize: CGFloat = 24
+fileprivate let borderSize: CGFloat = 6
+fileprivate let fontSize: CGFloat = 14
+
+fileprivate func getCompositeSymbol(sizeFactor: CGFloat = 1, color: UIColor = smallClusterColor) -> AGSCompositeSymbol {
+    let bgSymbol = AGSSimpleMarkerSymbol(style: .circle, color: color, size: (innerSize + borderSize) * sizeFactor)
+    let bgSymbol2 = AGSSimpleMarkerSymbol(style: .circle, color: UIColor.white.withAlphaComponent(0.7), size: (innerSize + (borderSize/2)) * sizeFactor)
+    let bgSymbol3 = AGSSimpleMarkerSymbol(style: .circle, color: color.withAlphaComponent(0.7), size: innerSize * sizeFactor)
+    return AGSCompositeSymbol(symbols: [bgSymbol, bgSymbol2, bgSymbol3])
+}
+
+class ClusterLayer<T>: AGSFeatureCollectionLayer where T: AGSGeoElement, T: Hashable {
     
-    let manager: LODLevelGriddedClusterManager!
+    let manager: LODLevelGriddedClusterManager<T>!
     
     let sourceLayer: AGSFeatureLayer!
     
@@ -25,43 +49,76 @@ class ClusterLayer: AGSFeatureCollectionLayer {
     
     var currentLOD: Int = 0
     
-    private var clusterPointLayer: AGSFeatureLayer?
-    private var clusterCoverageLayer: AGSFeatureLayer?
+    var clusterSymbol: AGSSymbol = getCompositeSymbol() {
+        didSet {
+            clusterPointsTable.renderer = AGSSimpleRenderer(symbol: clusterSymbol)
+        }
+    }
+    var coverageSymbol: AGSSymbol = defaultCoverageSymbol {
+        didSet {
+            clusterCoveragesTable.renderer = AGSSimpleRenderer(symbol: coverageSymbol)
+        }
+    }
+    
+    private var clusterPointsTable: AGSFeatureCollectionTable = {
+        let table = AGSFeatureCollectionTable(fields: clusterTableFields,
+                                                      geometryType: .point,
+                                                      spatialReference: AGSSpatialReference.webMercator())
+        let classBreakSmall = AGSClassBreak(description: "Small", label: "Small Cluster",
+                                       minValue: 5, maxValue: 50,
+                                       symbol: getCompositeSymbol())
+        let classBreakMedium = AGSClassBreak(description: "Medium", label: "MEdium Cluster",
+                                       minValue: 99, maxValue: 999,
+                                       symbol: getCompositeSymbol(sizeFactor: 1.2, color: mediumClusterColor))
+        let classBreakLarge = AGSClassBreak(description: "Large", label: "Large Cluster",
+                                       minValue: 1000, maxValue: 1E6,
+                                       symbol: getCompositeSymbol(sizeFactor: 1.3, color: largeClusterColor))
+        table.renderer = AGSClassBreaksRenderer(fieldName: "FeatureCount", classBreaks: [classBreakSmall, classBreakMedium, classBreakLarge])
+        return table
+    }()
+    
+    private var clusterCoveragesTable: AGSFeatureCollectionTable = {
+        let table = AGSFeatureCollectionTable(fields: clusterTableFields, geometryType: .polygon, spatialReference: AGSSpatialReference.webMercator())
+        let classBreak = AGSClassBreak(description: "Clustered", label: "Clustered",
+                                       minValue: 5, maxValue: 1E6,
+                                       symbol: defaultCoverageSymbol)
+        table.renderer = AGSClassBreaksRenderer(fieldName: "FeatureCount", classBreaks: [classBreak])
+        return table
+    }()
+    
+    private(set) var clusterPointLayer: AGSFeatureLayer?
+    
+    private(set) var clusterCoverageLayer: AGSFeatureLayer?
     
     init(mapView: AGSMapView, featureLayer: AGSFeatureLayer) {
         
+        manager = LODLevelGriddedClusterManager<T>(mapView: mapView)
+        
         sourceLayer = featureLayer
 
-        let fields: [AGSField] = [
-            AGSField(fieldType: .int32, name: "Key", alias: "Key", length: 0, domain: nil, editable: true, allowNull: false),
-            AGSField(fieldType: .int16, name: "FeatureCount", alias: "Feature Count", length: 0, domain: nil, editable: true, allowNull: false)
-        ]
+        let tables = [clusterPointsTable, clusterCoveragesTable]
         
-        let clustersTable = AGSFeatureCollectionTable(fields: fields, geometryType: .point, spatialReference: AGSSpatialReference.webMercator())
-        let clusteredClass = AGSClassBreak(description: "Clustered", label: "Clustered", minValue: 0, maxValue: 1E6, symbol: AGSSimpleMarkerSymbol(style: .circle, color: .red, size: 25))
-        let renderer = AGSClassBreaksRenderer(fieldName: "FeatureCount", classBreaks: [clusteredClass])
-        clustersTable.renderer = renderer
+        super.init(featureCollection: AGSFeatureCollection(featureCollectionTables: tables))
         
-        let coveragesTable = AGSFeatureCollectionTable(fields: fields, geometryType: .polygon, spatialReference: AGSSpatialReference.webMercator())
-        let clusteredClass2 = AGSClassBreak(description: "Clustered", label: "Clustered", minValue: 0, maxValue: 1E6,
-                                            symbol: AGSSimpleFillSymbol(style: .solid, color: UIColor.red.withAlphaComponent(0.3),
-                                                                        outline: AGSSimpleLineSymbol(style: .solid, color: .brown, width: 2)))
-        coveragesTable.renderer = AGSClassBreaksRenderer(fieldName: "FeatureCount", classBreaks: [clusteredClass2])
-
-        let fc = AGSFeatureCollection(featureCollectionTables: [clustersTable, coveragesTable])
+        // We shouldn't have to retrieve these, but there may be a bug in 100.5 Runtime
+        clusterPointsTable = featureCollection.tables[0] as! AGSFeatureCollectionTable
+        clusterCoveragesTable = featureCollection.tables[1] as! AGSFeatureCollectionTable
         
-        manager = LODLevelGriddedClusterManager(mapView: mapView)
+        clusterPointLayer = layers[0]
+        clusterCoverageLayer = layers[1]
         
-        super.init(featureCollection: fc)
-        
-        clusterPointLayer = layers.first
-        clusterCoverageLayer = layers.last
+        let textSymbol = AGSTextSymbol(text: "", color: .white, size: fontSize, horizontalAlignment: .center, verticalAlignment: .middle)
+        if let ld = try? AGSLabelDefinition.with(fieldName: "FeatureCount", textSymbol: textSymbol) {
+            clusterPointLayer?.labelDefinitions.add(ld)
+            clusterPointLayer?.labelsEnabled = true
+        }
         
         let initializationGroup = DispatchGroup()
         initializationGroup.enter()
         
         let sourceParams = AGSQueryParameters()
         sourceParams.whereClause = "1=1"
+        
         sourceLayer.featureTable?.queryFeatures(with: sourceParams, completion: { [weak self] (sourceFeatureResults, error) in
             defer { initializationGroup.leave() }
             
@@ -70,62 +127,83 @@ class ClusterLayer: AGSFeatureCollectionLayer {
                 return
             }
             
-            guard let self = self, let sourceFeatures = sourceFeatureResults?.featureEnumerator().allObjects else { return }
-            
+            guard let self = self, let sourceFeatures = sourceFeatureResults?.featureEnumerator().allObjects as? [T] else { return }
+
             self.manager.add(items: sourceFeatures)
         })
         
         initializationGroup.enter()
-        AGSLoadObjects(fc.tables as! [AGSFeatureTable]) { (_) in
+        AGSLoadObjects(tables) { (_) in
+            for errorTable in tables.filter({ $0.loadError != nil }) {
+                print("Error loading table '\(errorTable.tableName)': \(errorTable.loadError!)")
+            }
             initializationGroup.leave()
         }
         
         initializationGroup.notify(queue: .main) { [weak self] in
+            
             guard let self = self else { return }
-            guard let gridForScale = self.manager.clusterProvider(for: mapView.mapScale) else {
+            
+            guard let clusterProviderForScale = self.manager.clusterProvider(for: mapView.mapScale) else {
                 print("Unable to set initial cluster LOD")
                 return
             }
             
-            self.setToGrid(grid: gridForScale)
+            self.updateDisplayForProvider(provider: clusterProviderForScale)
+            
+            self.zoomObserver = mapView.observe(\.isNavigating, options: [.initial, .new]) { [weak self] (changedMapView, change) in
+                guard change.newValue == false else { return }
+                
+                guard let self = self else { return }
+                
+                guard let clusterProviderForScale = self.manager.clusterProvider(for: changedMapView.mapScale),
+                    clusterProviderForScale.lod.level != self.currentLOD else { return }
+                
+                self.updateDisplayForProvider(provider: clusterProviderForScale)
+            }
+
         }
         
-        zoomObserver = mapView.observe(\.isNavigating) { [weak self] (changedMapView, _) in
-            guard changedMapView.isNavigating == false else { return }
-            
-            guard let self = self else { return }
-            
-            guard let gridForScale = self.manager.clusterProvider(for: changedMapView.mapScale),
-                gridForScale.lod.level != self.currentLOD else { return }
-            
-            self.setToGrid(grid: gridForScale)
-        }
     }
     
-    func setToGrid(grid: LODLevelGriddedClusterProvider) {
-        print("newLOD = \(grid.lod.level), oldLOD = \(self.currentLOD)")
-        
-        self.currentLOD = grid.lod.level
+    func updateDisplayForProvider(provider: LODLevelGriddedClusterProvider<T>) {
+
+        self.currentLOD = provider.lod.level
         
         var pendingCount = 0
-        for cluster in grid.clusters {
+        for cluster in provider.clusters {
             pendingCount += cluster.flushPending()
         }
         
-        if let layer = clusterPointLayer, let table = layer.featureTable {
-            self.updateTablesWithGrid(table: table, gridForScale: grid)
-        }
+        updateClusterDisplayWithProvider(display: .clusterPoints, provider: provider)
+
 //        if let layer = clusterCoverageLayer, let table = layer.featureTable {
 //            self.updateTablesWithGrid(table: table, gridForScale: gridForScale)
 //        }
         
-        print("Flushed \(pendingCount) pending items on \(grid.clusters.count) clusters")
+//        print("Flushed \(pendingCount) pending items on \(provider.clusters.count) clusters")
     }
     
-    func updateTablesWithGrid(table: AGSFeatureTable, gridForScale: LODLevelGriddedClusterProvider) {
+    private enum ClusterDisplay {
+        case clusterPoints
+        case clusterCoverages
+    }
+    
+    private func updateClusterDisplayWithProvider(display: ClusterDisplay, provider: LODLevelGriddedClusterProvider<T>) {
+        
+        let table: AGSFeatureCollectionTable = {
+            switch display {
+            case .clusterPoints:
+                return clusterPointsTable
+            case .clusterCoverages:
+                return clusterCoveragesTable
+            }
+        }()
+        
         let params = AGSQueryParameters()
         params.whereClause = "1=1"
-        table.queryFeatures(with: params, completion: { [table] (result, error) in
+        
+        table.queryFeatures(with: params, completion: { (result, error) in
             if let error = error {
                 print("Error querying features to delete \(error.localizedDescription)")
                 return
@@ -147,7 +225,7 @@ class ClusterLayer: AGSFeatureCollectionLayer {
             })
             
             // Add new LOD's clusters to display.
-            let featuresToAdd = gridForScale.clusters.compactMap({ (cluster) -> AGSFeature? in
+            let featuresToAdd = provider.clusters.compactMap({ (cluster) -> AGSFeature? in
                 guard let geometry: AGSGeometry? = {
                     switch table.geometryType {
                     case .point:
@@ -156,10 +234,9 @@ class ClusterLayer: AGSFeatureCollectionLayer {
                         return cluster.coverage
                     default:
                         return nil
-                    }
-                    }() else {
-                    print("Skipping feature - could not get suitable geometry for type!")
-                    return nil
+                    } }() else {
+                        print("Skipping feature - could not get suitable geometry for type!")
+                        return nil
                 }
 
                 let attributes = [
@@ -167,9 +244,7 @@ class ClusterLayer: AGSFeatureCollectionLayer {
                     "FeatureCount": cluster.featureCount
                 ]
 
-                let featureForCluster = table.createFeature(attributes: attributes, geometry: geometry)
-
-                return featureForCluster
+                return table.createFeature(attributes: attributes, geometry: geometry)
             })
             
             table.add(featuresToAdd, completion: { error in
@@ -184,6 +259,7 @@ class ClusterLayer: AGSFeatureCollectionLayer {
                 print("Just removed \(featuresToDelete.count) and added \(featuresToAdd.count) features as \(table.geometryType)")
             }
         })
+        
     }
     
     deinit {

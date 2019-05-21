@@ -15,15 +15,17 @@
 import Foundation
 import ArcGIS
 
-class LODLevelGriddedClusterGridCell {
+class LODLevelGriddedClusterGridCell<T> where T: AGSGeoElement, T: Hashable {
     var row: Int
     var col: Int
     var size: CGSize
     
-    var clusters = Set<GeoElementLODLevelCluster>()
-    var cluster: GeoElementLODLevelCluster {
+    // We understand the concept of multiple clusters per cell, but in this implementation there
+    // is only every 1 cluster per call.
+    var clusters = Set<LODLevelGeoElementCluster<T>>()
+    var cluster: LODLevelGeoElementCluster<T> {
         guard let clusterForCell = clusters.first else {
-            let newCluster = GeoElementLODLevelCluster()
+            let newCluster = LODLevelGeoElementCluster<T>()
             newCluster.containingCell = self
             clusters.insert(newCluster)
             return newCluster
