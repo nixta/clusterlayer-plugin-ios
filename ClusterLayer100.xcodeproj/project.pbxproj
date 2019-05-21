@@ -24,6 +24,7 @@
 		D94630752291C1C800DC4FAD /* LODLevelGriddedClusterGridCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94630742291C1C800DC4FAD /* LODLevelGriddedClusterGridCell.swift */; };
 		D94630772291EE8700DC4FAD /* LODLevelGriddedClusterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94630762291EE8700DC4FAD /* LODLevelGriddedClusterManager.swift */; };
 		D96A8EAA229352930025013D /* AGSLabelDefinition+TextSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D96A8EA9229352930025013D /* AGSLabelDefinition+TextSymbol.swift */; };
+		D96A8ED2229425DD0025013D /* AGSQueryParameters+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = D96A8ED1229425DD0025013D /* AGSQueryParameters+Convenience.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -59,6 +60,7 @@
 		D94630742291C1C800DC4FAD /* LODLevelGriddedClusterGridCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LODLevelGriddedClusterGridCell.swift; sourceTree = "<group>"; };
 		D94630762291EE8700DC4FAD /* LODLevelGriddedClusterManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LODLevelGriddedClusterManager.swift; sourceTree = "<group>"; };
 		D96A8EA9229352930025013D /* AGSLabelDefinition+TextSymbol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AGSLabelDefinition+TextSymbol.swift"; sourceTree = "<group>"; };
+		D96A8ED1229425DD0025013D /* AGSQueryParameters+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AGSQueryParameters+Convenience.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -114,6 +116,7 @@
 				D946306B22919E6B00DC4FAD /* GeoElementCluster.swift */,
 				D91C926222920571002C8974 /* GeoElementCluster+Geometry.swift */,
 				D96A8EA9229352930025013D /* AGSLabelDefinition+TextSymbol.swift */,
+				D96A8ED1229425DD0025013D /* AGSQueryParameters+Convenience.swift */,
 			);
 			path = ClusterLibrary;
 			sourceTree = "<group>";
@@ -210,6 +213,7 @@
 				D946306E2291C10700DC4FAD /* LODLevelGriddedClusterProvider.swift in Sources */,
 				D96A8EAA229352930025013D /* AGSLabelDefinition+TextSymbol.swift in Sources */,
 				D946306C22919E6B00DC4FAD /* GeoElementCluster.swift in Sources */,
+				D96A8ED2229425DD0025013D /* AGSQueryParameters+Convenience.swift in Sources */,
 				D94630532291918B00DC4FAD /* AppDelegate.swift in Sources */,
 				D94630752291C1C800DC4FAD /* LODLevelGriddedClusterGridCell.swift in Sources */,
 				D91C92692292ED4F002C8974 /* ClusterProtocols.swift in Sources */,

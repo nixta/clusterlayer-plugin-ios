@@ -200,22 +200,22 @@ class ClusterLayer<T>: AGSFeatureCollectionLayer where T: AGSGeoElement, T: Hash
             }
         }()
         
-        let params = AGSQueryParameters()
-        params.whereClause = "1=1"
-        
+        // Get currently displayed clusters
+        let params = AGSQueryParameters.queryForAll()
         table.queryFeatures(with: params, completion: { (result, error) in
             if let error = error {
                 print("Error querying features to delete \(error.localizedDescription)")
                 return
             }
             
+            // Get all the clusters to remove from display.
             guard let featuresToDelete = result?.featureEnumerator().allObjects else { return }
             
             let addRemoveGroup = DispatchGroup()
             addRemoveGroup.enter()
             addRemoveGroup.enter()
             
-            // Remove previous LOD's clusters from display
+            // Remove previous LOD's clusters from display.
             table.delete(featuresToDelete, completion: { (error) in
                 addRemoveGroup.leave()
                 if let error = error {
@@ -225,28 +225,7 @@ class ClusterLayer<T>: AGSFeatureCollectionLayer where T: AGSGeoElement, T: Hash
             })
             
             // Add new LOD's clusters to display.
-            let featuresToAdd = provider.clusters.compactMap({ (cluster) -> AGSFeature? in
-                guard let geometry: AGSGeometry? = {
-                    switch table.geometryType {
-                    case .point:
-                        return cluster.centroid
-                    case .polygon:
-                        return cluster.coverage
-                    default:
-                        return nil
-                    } }() else {
-                        print("Skipping feature - could not get suitable geometry for type!")
-                        return nil
-                }
-
-                let attributes = [
-                    "Key": cluster.clusterKey,
-                    "FeatureCount": cluster.featureCount
-                ]
-
-                return table.createFeature(attributes: attributes, geometry: geometry)
-            })
-            
+            let featuresToAdd = provider.clusters.asFeatures(in: table)
             table.add(featuresToAdd, completion: { error in
                 addRemoveGroup.leave()
                 if let error = error {
@@ -256,7 +235,7 @@ class ClusterLayer<T>: AGSFeatureCollectionLayer where T: AGSGeoElement, T: Hash
             })
             
             addRemoveGroup.notify(queue: .main) {
-                print("Just removed \(featuresToDelete.count) and added \(featuresToAdd.count) features as \(table.geometryType)")
+                print("Just removed \(featuresToDelete.count) and added \(featuresToAdd.count) features as \(table.geometryType)s")
             }
         })
         
@@ -265,6 +244,32 @@ class ClusterLayer<T>: AGSFeatureCollectionLayer where T: AGSGeoElement, T: Hash
     deinit {
         zoomObserver.invalidate()
         zoomObserver = nil
+    }
+}
+
+extension Set where Element: Cluster {
+    func asFeatures(in table: AGSFeatureTable) -> [AGSFeature] {
+        return self.compactMap({ (cluster) -> AGSFeature? in
+            guard let geometry: AGSGeometry? = {
+                switch table.geometryType {
+                case .point:
+                    return cluster.centroid
+                case .polygon:
+                    return cluster.coverage
+                default:
+                    return nil
+                } }() else {
+                    print("Skipping feature - could not get suitable geometry for type!")
+                    return nil
+            }
+            
+            let attributes: [String : Any] = [
+                "Key": cluster.clusterKey,
+                "FeatureCount": cluster.itemCount
+            ]
+            
+            return table.createFeature(attributes: attributes, geometry: geometry)
+        })
     }
 }
 

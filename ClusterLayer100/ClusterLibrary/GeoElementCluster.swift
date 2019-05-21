@@ -22,14 +22,13 @@ private func getNextClusterKey() -> Int {
 }
 
 class GeoElementCluster<T>: Cluster where T: AGSGeoElement, T: Hashable {
+
     let clusterKey: Int = getNextClusterKey()
     var items = Set<T>()
-    
+    var itemCount: Int { return items.count }
+
     internal unowned var containingCell: LODLevelGriddedClusterGridCell<T>!
 
-    var featureCount: Int {
-        return items.count
-    }
     
     private var pendingAdds: Set<T>?
     

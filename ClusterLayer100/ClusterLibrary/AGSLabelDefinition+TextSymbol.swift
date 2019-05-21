@@ -61,4 +61,5 @@ extension AGSLabelDefinition{
         let labelDefinition = try AGSLabelDefinition.fromJSON(JSON)
         return labelDefinition as! AGSLabelDefinition
     }
+    
 }

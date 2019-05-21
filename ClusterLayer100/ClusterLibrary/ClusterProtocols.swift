@@ -22,6 +22,7 @@ protocol Cluster {
     var clusterKey: Key { get }
     
     var items: Set<ItemType> { get }
+    var itemCount: Int { get }
     
     var centroid: AGSPoint? { get }
     var coverage: AGSPolygon? { get }
