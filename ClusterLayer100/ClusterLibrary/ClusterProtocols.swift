@@ -15,7 +15,33 @@
 import Foundation
 import ArcGIS
 
-protocol Cluster {
+protocol ClusterManager {
+    associatedtype ClusterProviderType : ClusterProvider
+    typealias ClusterType = ClusterProviderType.ClusterType
+    typealias ItemType = ClusterType.ItemType
+    
+    init(mapView: AGSMapView)
+    
+    func clusterProvider(for mapScale: Double) -> ClusterProviderType?
+    
+    func add<S: Sequence>(items: S) where S.Element == ClusterType.ItemType
+    func removeAllItems()
+}
+
+protocol ClusterProvider: Equatable {
+    associatedtype ClusterType: Cluster
+    associatedtype ItemType = ClusterType.ItemType
+    
+    var clusters: Set<ClusterType> { get }
+    func getCluster(for mapPoint: AGSPoint) -> ClusterType
+    
+    func add<S: Sequence>(items: S) where S.Element == ItemType
+    func removeAllItems()
+    
+    func ensureClustersReadyForDisplay()
+}
+
+protocol Cluster: Hashable {
     associatedtype ItemType : Hashable
     associatedtype Key: Hashable
     
@@ -27,24 +53,7 @@ protocol Cluster {
     var centroid: AGSPoint? { get }
     var coverage: AGSPolygon? { get }
     var extent: AGSEnvelope? { get }
-}
 
-protocol ClusterProvider {
-    associatedtype ClusterType: Cluster, Hashable
-    
-    var clusters: Set<ClusterType> { get }
-    func getCluster(for mapPoint: AGSPoint) -> ClusterType
-
-    func add<S>(items: S) where S: Sequence, S.Element == ClusterType.ItemType
+    func add<S: Sequence>(items: S) where S.Element == ItemType
     func removeAllItems()
-}
-
-protocol ClusterManager {
-    associatedtype ClusterProviderType : ClusterProvider
-    
-    init(mapView: AGSMapView)
-    
-    func clusterProvider(for mapScale: Double) -> ClusterProviderType?
-    
-    func add<S: Sequence>(items: S) where S.Element == ClusterProviderType.ClusterType.ItemType
 }

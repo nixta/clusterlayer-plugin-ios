@@ -23,7 +23,7 @@ class ViewController: UIViewController, AGSGeoViewTouchDelegate {
     
     let map = AGSMap(basemapType: .streetsVector, latitude: 40.7128, longitude: -74.0060, levelOfDetail: 15)
     
-    var clusterLayer: ClusterLayer<AGSFeature>!
+    var clusterLayer: ClusterLayer<LODLevelGriddedClusterManager<AGSFeature>>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -48,7 +48,7 @@ class ViewController: UIViewController, AGSGeoViewTouchDelegate {
             let sourceLayer = AGSFeatureLayer(featureTable: table)
             self.map.operationalLayers.add(sourceLayer)
             
-            let clusterLayer = ClusterLayer<AGSFeature>(mapView: self.mapView, featureLayer: sourceLayer)
+            let clusterLayer = ClusterLayer<LODLevelGriddedClusterManager<AGSFeature>>(mapView: self.mapView, featureLayer: sourceLayer)
             
             self.map.operationalLayers.add(clusterLayer)
             

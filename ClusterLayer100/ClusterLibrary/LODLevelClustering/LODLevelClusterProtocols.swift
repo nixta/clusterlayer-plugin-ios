@@ -16,20 +16,18 @@ import Foundation
 import UIKit
 
 protocol LODLevelCluster: Cluster {
-    associatedtype ChildClusters : Hashable = Self
+    associatedtype ClusterType: Hashable = Self
     
-    var childClusters: Set<ChildClusters> { get }
+    var parentCluster: ClusterType? { get }
+    var childClusters: Set<ClusterType> { get }
 }
 
 protocol LODLevelClusterProvider: ClusterProvider {
-    associatedtype SiblingGrids = Self
-    associatedtype CellType
+    associatedtype SiblingProvider = Self
     
     var lodLevel: Int { get }
     var scale: Double { get }
 
-    var providerForPreviousLODLevel: SiblingGrids? { get }
-    var providerForNextLODLevel: SiblingGrids? { get }
-
-    func cellFor(row: Int, col: Int) -> CellType
+    var providerForPreviousLODLevel: SiblingProvider? { get }
+    var providerForNextLODLevel: SiblingProvider? { get }
 }

@@ -15,8 +15,9 @@
 import Foundation
 import ArcGIS
 
-class LODLevelGriddedClusterManager<T>: ClusterManager where T: AGSGeoElement, T: Hashable {
-    
+class LODLevelGriddedClusterManager<T: ClusterableGeoElement>: ClusterManager {
+
+    /// A dictionary of grid cluster providers, keyed by LOD level.
     var clusterProviders: [Int : LODLevelGriddedClusterProvider<T>] = [:]
     
     required init(mapView: AGSMapView) {
@@ -28,17 +29,17 @@ class LODLevelGriddedClusterManager<T>: ClusterManager where T: AGSGeoElement, T
         let cellSizeInMapUnits = screenUnits.convert(cellSizeInFeet, to: mapUnits)
         
         // Prepare a cluster provider for each LOD level
-        var prevGrid: LODLevelGriddedClusterProvider<T>?
+        var providerForPreviousLod: LODLevelGriddedClusterProvider<T>?
         for lodLevel in 0...19 {
             let lod = LODLevelGriddedClusterProvider<T>.lodForLevel(lodLevel)
             let cellSize = floor(cellSizeInMapUnits * lod.scale)
-            let gridForLod = LODLevelGriddedClusterProvider<T>(cellSize: CGSize(width: cellSize, height: cellSize), zoomLevel: lodLevel)
+            let providerForLod = LODLevelGriddedClusterProvider<T>(cellSize: CGSize(width: cellSize, height: cellSize), zoomLevel: lodLevel)
             
-            gridForLod.providerForPreviousLODLevel = prevGrid
-            prevGrid?.providerForNextLODLevel = gridForLod
-            prevGrid = gridForLod
+            providerForLod.providerForPreviousLODLevel = providerForPreviousLod
+            providerForPreviousLod?.providerForNextLODLevel = providerForLod
+            providerForPreviousLod = providerForLod
             
-            clusterProviders[lodLevel] = gridForLod
+            clusterProviders[lodLevel] = providerForLod
         }
     }
     
@@ -65,4 +66,13 @@ class LODLevelGriddedClusterManager<T>: ClusterManager where T: AGSGeoElement, T
             clusterProvider.add(items: items)
         }
     }
+    
+    
+    /// Remove all items from all providers being managed by this provider manager.
+    func removeAllItems() {
+        for (_, clusterProvider) in clusterProviders {
+            clusterProvider.removeAllItems()
+        }
+    }
+
 }

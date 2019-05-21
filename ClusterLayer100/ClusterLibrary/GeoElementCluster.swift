@@ -21,16 +21,15 @@ private func getNextClusterKey() -> Int {
     return nextClusterKey
 }
 
-class GeoElementCluster<T>: Cluster where T: AGSGeoElement, T: Hashable {
+typealias ClusterableGeoElement = AGSGeoElement & Hashable
+
+class GeoElementCluster<T: ClusterableGeoElement>: Cluster {
 
     let clusterKey: Int = getNextClusterKey()
     var items = Set<T>()
     var itemCount: Int { return items.count }
 
-    internal unowned var containingCell: LODLevelGriddedClusterGridCell<T>!
-
-    
-    private var pendingAdds: Set<T>?
+    private var pendingAdds = Set<T>()
     
     private var isCentroidDirty = true
     private var cachedCentroid: AGSPoint?
@@ -39,10 +38,8 @@ class GeoElementCluster<T>: Cluster where T: AGSGeoElement, T: Hashable {
     private var isExtentDirty = true
     private var cachedExtent: AGSEnvelope?
     
-}
 
-extension GeoElementCluster {
-    
+    // MARK: Cluster Geometries
     var centroid: AGSPoint? {
         if isCentroidDirty {
             cachedCentroid = calculateCentroid(features: items)
@@ -54,15 +51,7 @@ extension GeoElementCluster {
     
     var coverage: AGSPolygon? {
         if isCoverageDirty {
-            let featureGeometries = items.compactMap({ $0.geometry as? AGSPoint })
-            if featureGeometries.count == 1, let geom = featureGeometries.first {
-                cachedCoverage = AGSGeometryEngine.bufferGeometry(geom, byDistance: 20)
-            } else if featureGeometries.count == 2 {
-                let line = AGSPolyline(points: featureGeometries)
-                cachedCoverage = AGSGeometryEngine.bufferGeometry(line, byDistance: 20)
-            } else {
-                cachedCoverage = AGSGeometryEngine.convexHull(forGeometries: featureGeometries, mergeInputs: true)?.first as? AGSPolygon
-            }
+            cachedCoverage = calculateCoverage(features: items)
             isCoverageDirty = false
         }
         return cachedCoverage
@@ -70,59 +59,129 @@ extension GeoElementCluster {
     
     var extent: AGSEnvelope? {
         if isCentroidDirty {
-            cachedExtent = AGSGeometryEngine.unionGeometries(items.compactMap({ $0.geometry }))?.extent
+            cachedExtent = calculateExtent(features: items)
             isExtentDirty = false
         }
         
         return cachedExtent
     }
     
-    func dirtyAllGeometries() {
+    internal func invalidateAllGeometries() {
         isCentroidDirty = true
         isCoverageDirty = true
         isExtentDirty = true
     }
+
+    
+    // MARK: Cluster Content
+    func add(item: T) {
+        items.insert(item)
+        
+        invalidateAllGeometries()
+    }
+    
+    func remove(item: T) {
+        items.remove(item)
+        
+        invalidateAllGeometries()
+    }
+    
+    func add<S: Sequence>(items: S) where S.Element == T {
+        self.items.formUnion(items)
+        
+        invalidateAllGeometries()
+    }
+    
+    func removeAllItems() {
+        self.items.removeAll()
+        
+        invalidateAllGeometries()
+    }
+    
 }
 
 extension GeoElementCluster {
     
-    func add(feature: T) {
-        items.insert(feature)
+    func addPending(item: T) {
+        pendingAdds.insert(item)
         
-        dirtyAllGeometries()
+        invalidateAllGeometries()
     }
     
-    func remove(feature: T) {
-        items.remove(feature)
+    @discardableResult func flushPendingItemsIntoCluster() -> Int {
+        guard pendingAdds.count > 0 else { return 0 }
         
-        dirtyAllGeometries()
-    }
-    
-    func add<S: Sequence>(features: S) where S.Element == T {
-        self.items.formUnion(features)
+        self.add(items: pendingAdds)
         
-        dirtyAllGeometries()
-    }
-
-    func addPending(feature: T) {
-        if pendingAdds == nil {
-            pendingAdds = Set<T>()
-        }
-        pendingAdds?.insert(feature)
-    }
-    
-    func flushPending() -> Int {
-        guard let pending = pendingAdds else { return 0 }
+        let pendingCount = pendingAdds.count
         
-        self.add(features: pending)
-        
-        let pendingCount = pending.count
-        
-        pendingAdds?.removeAll()
-        pendingAdds = nil
+        pendingAdds.removeAll()
         
         return pendingCount
     }
+
+}
+
+extension GeoElementCluster {
+    
+    func calculateCentroid<S: Sequence>(features: S) -> AGSPoint? where S.Element == T {
+        flushPendingItemsIntoCluster()
+        
+        let points = features.compactMap { (feature) -> AGSPoint? in
+            if let pt = feature.geometry as? AGSPoint {
+                return pt
+            } else {
+                return feature.geometry?.extent.center
+            }
+        }
+        
+        guard points.count > 0 else {
+            assertionFailure("Attempting to get centroid for empty cluster!")
+            return nil
+        }
+        
+        if points.count == 1 {
+            return points.first!
+        }
+        
+        var totalX: Double = 0
+        var totalY: Double = 0
+        var count = 0
+        
+        var sr: AGSSpatialReference?
+        for feature in features {
+            guard let featurePoint = feature.geometry as? AGSPoint else { continue }
+            
+            if sr == nil { sr = featurePoint.spatialReference }
+            
+            totalX += featurePoint.x
+            totalY += featurePoint.y
+            count += 1
+        }
+        
+        return AGSPoint(x: totalX/Double(count), y: totalY/Double(count), spatialReference: sr)
+    }
+    
+    func calculateCoverage<S: Sequence>(features: S) -> AGSPolygon? where S.Element == T {
+        flushPendingItemsIntoCluster()
+
+        let featureGeometries = items.compactMap({ $0.geometry as? AGSPoint })
+        if featureGeometries.count == 1, let geom = featureGeometries.first {
+            return AGSGeometryEngine.bufferGeometry(geom, byDistance: 20)
+        } else if featureGeometries.count == 2 {
+            let line = AGSPolyline(points: featureGeometries)
+            return AGSGeometryEngine.bufferGeometry(line, byDistance: 20)
+        } else {
+            return AGSGeometryEngine.convexHull(forGeometries: featureGeometries, mergeInputs: true)?.first as? AGSPolygon
+        }
+    }
+    
+    func calculateExtent<S: Sequence>(features: S) -> AGSEnvelope? where S.Element == T {
+        flushPendingItemsIntoCluster()
+
+        return AGSGeometryEngine.unionGeometries(features.compactMap({ $0.geometry }))?.extent
+    }
+    
 }
 
 extension GeoElementCluster: Hashable {
@@ -135,27 +194,4 @@ extension GeoElementCluster: Hashable {
         return lhs.clusterKey == rhs.clusterKey
     }
 
-}
-
-class LODLevelGeoElementCluster<T>: GeoElementCluster<T>, LODLevelCluster where T: AGSGeoElement, T: Hashable {
-    var childClusters = Set<LODLevelGeoElementCluster<T>>()
-    private weak var parentCluster: LODLevelGeoElementCluster<T>?
-    
-    func add(childCluster: LODLevelGeoElementCluster<T>) {
-        childCluster.parentCluster = self
-        
-        childClusters.insert(childCluster)
-        items.formUnion(childCluster.items)
-        
-        dirtyAllGeometries()
-    }
-    
-    func remove(childCluster: LODLevelGeoElementCluster<T>) {
-        childCluster.parentCluster = nil
-        
-        childClusters.remove(childCluster)
-        items.subtract(childCluster.items)
-        
-        dirtyAllGeometries()
-    }
 }
