@@ -15,6 +15,14 @@
 import Foundation
 import ArcGIS
 
+let agsBuild: Int = {
+    let bundleBuildStr = AGSBundle()?.object(forInfoDictionaryKey: "CFBundleVersion") as? String
+    if let bundleBuildStr = bundleBuildStr, let bundleBuild = Int(bundleBuildStr) {
+        return bundleBuild
+    }
+    return 0
+}()
+
 fileprivate let clusterTableFields: [AGSField] = [
     AGSField(fieldType: .int32, name: "Key", alias: "Key", length: 0, domain: nil, editable: true, allowNull: false),
     AGSField(fieldType: .int16, name: "FeatureCount", alias: "Feature Count", length: 0, domain: nil, editable: true, allowNull: false)
@@ -82,9 +90,12 @@ class ClusterLayer<M: ClusterManager>: AGSFeatureCollectionLayer {
         
         super.init(featureCollection: AGSFeatureCollection(featureCollectionTables: tables))
         
-        // We shouldn't have to retrieve these, but there may be a bug in 100.5 Runtime
-        centroidsTable = featureCollection.tables[0] as! AGSFeatureCollectionTable
-        coveragesTable = featureCollection.tables[1] as! AGSFeatureCollectionTable
+        if agsBuild < 2432 {
+            print("Fixing table references")
+            // We shouldn't have to retrieve these, but there is a bug in 100.5 Runtime
+            centroidsTable = featureCollection.tables[0] as! AGSFeatureCollectionTable
+            coveragesTable = featureCollection.tables[1] as! AGSFeatureCollectionTable
+        }
         
         clusterPointLayer = layers[0]
         clusterCoverageLayer = layers[1]
