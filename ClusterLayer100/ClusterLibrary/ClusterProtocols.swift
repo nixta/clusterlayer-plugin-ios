@@ -15,6 +15,8 @@
 import Foundation
 import ArcGIS
 
+/// A `ClusterManager` controls the relationship between items and clusters. Add and remove items on the cluster manager,
+/// and it will work with its `ClusterProvider` to create/update/remove clusters as appropriate.
 protocol ClusterManager {
     associatedtype ClusterProviderType : ClusterProvider
     typealias ClusterType = ClusterProviderType.ClusterType
@@ -28,6 +30,9 @@ protocol ClusterManager {
     func removeAllItems()
 }
 
+/// A `ClusterProvider` will own and provide a set of clusters for a given map view condition (most likely, scale).
+/// A `ClusterManager` will work with `ClusterProvider`s and the `AGSMapView` to coordinate cluster display
+/// for a set of items (almost certainly `Features` or `Graphics`, but the implementation is more generic).
 protocol ClusterProvider: Equatable {
     associatedtype ClusterType: Cluster
     associatedtype ItemType = ClusterType.ItemType
@@ -41,10 +46,12 @@ protocol ClusterProvider: Equatable {
     func ensureClustersReadyForDisplay()
 }
 
+/// A `Cluster` groups a set of items. A `ClusterProvider` will determine which clusters to create and which existing clusters
+/// to add new items to.
 protocol Cluster: Hashable {
     associatedtype ItemType : Hashable
     associatedtype Key: Hashable
-    
+        
     var clusterKey: Key { get }
     
     var items: Set<ItemType> { get }

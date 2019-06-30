@@ -46,19 +46,26 @@ class ViewController: UIViewController, AGSGeoViewTouchDelegate {
             }
 
             let sourceLayer = AGSFeatureLayer(featureTable: table)
-            self.map.operationalLayers.add(sourceLayer)
             
-            let clusterLayer = ClusterLayer<LODLevelGriddedClusterManager<AGSFeature>>(mapView: self.mapView, featureLayer: sourceLayer)
-            
-            self.map.operationalLayers.add(clusterLayer)
-            
-            self.clusterLayer = clusterLayer
+            table.load(completion: { (error) in
+                if let error = error {
+                    print("Error loading table: \(error.localizedDescription)")
+                    return
+                }
+                
+                let clusterLayer = ClusterLayer<LODLevelGriddedClusterManager<AGSFeature>>(mapView: self.mapView, featureLayer: sourceLayer)
+                
+                self.map.operationalLayers.add(clusterLayer)
+                
+                self.clusterLayer = clusterLayer
+            })
         }
         
         mapView.touchDelegate = self
     }
     
     func geoView(_ geoView: AGSGeoView, didTapAtScreenPoint screenPoint: CGPoint, mapPoint: AGSPoint) {
+        print("Map Scale: \(mapView.mapScale)")
         mapView.identifyLayers(atScreenPoint: screenPoint, tolerance: 20, returnPopupsOnly: false) { (results, error) in
             if let error = error {
                 print("Error identifying! \(error.localizedDescription)")
@@ -69,10 +76,14 @@ class ViewController: UIViewController, AGSGeoViewTouchDelegate {
             
             for result in results {
                 print(result.layerContent.name)
-                print(result.geoElements)
+                print(result.geoElements.map({ (element) -> NSMutableDictionary in
+                    return element.attributes
+                }))
                 for subLayerResult in result.sublayerResults {
                     print(subLayerResult.layerContent.name)
-                    print(subLayerResult.geoElements)
+                    print(subLayerResult.geoElements.map({ (element) -> NSMutableDictionary in
+                        return element.attributes
+                    }))
                 }
             }
         }

@@ -22,6 +22,7 @@
 		D94630712291C13300DC4FAD /* ClusterLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94630702291C13300DC4FAD /* ClusterLayer.swift */; };
 		D94630752291C1C800DC4FAD /* LODLevelGriddedClusterGridCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94630742291C1C800DC4FAD /* LODLevelGriddedClusterGridCell.swift */; };
 		D94630772291EE8700DC4FAD /* LODLevelGriddedClusterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94630762291EE8700DC4FAD /* LODLevelGriddedClusterManager.swift */; };
+		D94FAB1922C91411007AC374 /* DispatchQueue+Debounce.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94FAB1822C91411007AC374 /* DispatchQueue+Debounce.swift */; };
 		D96A8EAA229352930025013D /* AGSLabelDefinition+TextSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D96A8EA9229352930025013D /* AGSLabelDefinition+TextSymbol.swift */; };
 		D96A8ED2229425DD0025013D /* AGSQueryParameters+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = D96A8ED1229425DD0025013D /* AGSQueryParameters+Convenience.swift */; };
 		D96A8ED42294468D0025013D /* LODLevelGeoElementCluster.swift in Sources */ = {isa = PBXBuildFile; fileRef = D96A8ED32294468D0025013D /* LODLevelGeoElementCluster.swift */; };
@@ -58,6 +59,7 @@
 		D94630702291C13300DC4FAD /* ClusterLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusterLayer.swift; sourceTree = "<group>"; };
 		D94630742291C1C800DC4FAD /* LODLevelGriddedClusterGridCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LODLevelGriddedClusterGridCell.swift; sourceTree = "<group>"; };
 		D94630762291EE8700DC4FAD /* LODLevelGriddedClusterManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LODLevelGriddedClusterManager.swift; sourceTree = "<group>"; };
+		D94FAB1822C91411007AC374 /* DispatchQueue+Debounce.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchQueue+Debounce.swift"; sourceTree = "<group>"; };
 		D96A8EA9229352930025013D /* AGSLabelDefinition+TextSymbol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AGSLabelDefinition+TextSymbol.swift"; sourceTree = "<group>"; };
 		D96A8ED1229425DD0025013D /* AGSQueryParameters+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AGSQueryParameters+Convenience.swift"; sourceTree = "<group>"; };
 		D96A8ED32294468D0025013D /* LODLevelGeoElementCluster.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LODLevelGeoElementCluster.swift; sourceTree = "<group>"; };
@@ -116,6 +118,7 @@
 				D946306F2291C10C00DC4FAD /* LODLevelClustering */,
 				D96A8EA9229352930025013D /* AGSLabelDefinition+TextSymbol.swift */,
 				D96A8ED1229425DD0025013D /* AGSQueryParameters+Convenience.swift */,
+				D94FAB1822C91411007AC374 /* DispatchQueue+Debounce.swift */,
 			);
 			path = ClusterLibrary;
 			sourceTree = "<group>";
@@ -216,6 +219,7 @@
 				D96A8ED2229425DD0025013D /* AGSQueryParameters+Convenience.swift in Sources */,
 				D94630532291918B00DC4FAD /* AppDelegate.swift in Sources */,
 				D94630752291C1C800DC4FAD /* LODLevelGriddedClusterGridCell.swift in Sources */,
+				D94FAB1922C91411007AC374 /* DispatchQueue+Debounce.swift in Sources */,
 				D91C92692292ED4F002C8974 /* ClusterProtocols.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -363,7 +367,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = P8HGHS7JQ8;
+				DEVELOPMENT_TEAM = J8UEUYLV27;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(USER_LIBRARY_DIR)/SDKs/ArcGIS/iOS/Frameworks/Dynamic",
@@ -385,7 +389,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
-				DEVELOPMENT_TEAM = P8HGHS7JQ8;
+				DEVELOPMENT_TEAM = J8UEUYLV27;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(USER_LIBRARY_DIR)/SDKs/ArcGIS/iOS/Frameworks/Dynamic",

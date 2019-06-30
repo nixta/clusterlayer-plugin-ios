@@ -25,8 +25,32 @@ let agsBuild: Int = {
 
 fileprivate let clusterTableFields: [AGSField] = [
     AGSField(fieldType: .int32, name: "Key", alias: "Key", length: 0, domain: nil, editable: true, allowNull: false),
-    AGSField(fieldType: .int16, name: "FeatureCount", alias: "Feature Count", length: 0, domain: nil, editable: true, allowNull: false)
+    AGSField(fieldType: .int16, name: "FeatureCount", alias: "Feature Count", length: 0, domain: nil, editable: true, allowNull: false),
+    AGSField(fieldType: .int16, name: "ShouldDisplayItems", alias: "Display Exploded", length: 0, domain: nil, editable: true, allowNull: false)
 ]
+
+fileprivate enum ClusterDisplay: CustomStringConvertible {
+    case clusters
+    case coverages
+    case items
+    
+    var description: String {
+        switch self {
+        case .clusters:
+            return "Clusters"
+        case .coverages:
+            return "Coverages"
+        case .items:
+            return "Items"
+        }
+    }
+}
+
+extension ClusterLayer {
+    class func clusterLayer(for featureLayer: AGSFeatureLayer, completion: (ClusterLayer?)->Void) {
+        
+    }
+}
 
 class ClusterLayer<M: ClusterManager>: AGSFeatureCollectionLayer {
     typealias T = M.ItemType
@@ -35,9 +59,9 @@ class ClusterLayer<M: ClusterManager>: AGSFeatureCollectionLayer {
     
     let sourceLayer: AGSFeatureLayer!
     
-    var zoomObserver: NSKeyValueObservation!
-    
-    var currentProvider: M.ClusterProviderType?
+    var mapScaleObserver: NSKeyValueObservation!
+
+    var currentClusterProvider: M.ClusterProviderType?
     
     var centroidSymbol: AGSSymbol = getCentroidSymbol() {
         didSet {
@@ -50,12 +74,15 @@ class ClusterLayer<M: ClusterManager>: AGSFeatureCollectionLayer {
         }
     }
     
-    private var centroidsTable: AGSFeatureCollectionTable = {
+    let minClusterCount: Int = 3
+    
+    private let centroidsTable: AGSFeatureCollectionTable = {
         let table = AGSFeatureCollectionTable(fields: clusterTableFields,
                                                       geometryType: .point,
                                                       spatialReference: AGSSpatialReference.webMercator())
+        table.displayName = "Clusters Table"
         let classBreakSmall = AGSClassBreak(description: "Small", label: "Small Cluster",
-                                       minValue: 5, maxValue: 50,
+                                       minValue: 0, maxValue: 50,
                                        symbol: getCentroidSymbol())
         let classBreakMedium = AGSClassBreak(description: "Medium", label: "MEdium Cluster",
                                        minValue: 99, maxValue: 999,
@@ -67,8 +94,9 @@ class ClusterLayer<M: ClusterManager>: AGSFeatureCollectionLayer {
         return table
     }()
     
-    private var coveragesTable: AGSFeatureCollectionTable = {
+    private let coveragesTable: AGSFeatureCollectionTable = {
         let table = AGSFeatureCollectionTable(fields: clusterTableFields, geometryType: .polygon, spatialReference: AGSSpatialReference.webMercator())
+        table.displayName = "Coverages Table"
         let classBreak = AGSClassBreak(description: "Clustered", label: "Clustered",
                                        minValue: 5, maxValue: 1E6,
                                        symbol: defaultCoverageSymbol)
@@ -76,29 +104,45 @@ class ClusterLayer<M: ClusterManager>: AGSFeatureCollectionLayer {
         return table
     }()
     
-    private(set) var clusterPointLayer: AGSFeatureLayer?
+    private let unclusteredItemsTable: AGSFeatureCollectionTable
     
+    private(set) var clusterPointLayer: AGSFeatureLayer?
     private(set) var clusterCoverageLayer: AGSFeatureLayer?
+    private(set) var unclusteredItemsLayer: AGSFeatureLayer?
     
     init(mapView: AGSMapView, featureLayer: AGSFeatureLayer) {
+        guard let sourceTable = featureLayer.featureTable else {
+            preconditionFailure("Feature Layer has no source table: \(featureLayer.name)")
+        }
         
+        guard sourceTable.loadStatus == .loaded else {
+            preconditionFailure("Feature Layer's source Feature Table must be loaded: \(featureLayer.name)")
+        }
+        
+        guard sourceTable.geometryType != .unknown else {
+            preconditionFailure("Feature Layer GeometryType is unknown: \(sourceTable.tableName)")
+        }
+
         manager = M(mapView: mapView)
         
         sourceLayer = featureLayer
-
-        let tables = [centroidsTable, coveragesTable]
+        
+        unclusteredItemsTable = AGSFeatureCollectionTable(featureTable: sourceTable)
+        unclusteredItemsTable.renderer = featureLayer.renderer?.copy() as? AGSRenderer
+        
+        let tables = [unclusteredItemsTable, coveragesTable, centroidsTable]
         
         super.init(featureCollection: AGSFeatureCollection(featureCollectionTables: tables))
         
-        if agsBuild < 2432 {
-            print("Fixing table references")
-            // We shouldn't have to retrieve these, but there is a bug in 100.5 Runtime
-            centroidsTable = featureCollection.tables[0] as! AGSFeatureCollectionTable
-            coveragesTable = featureCollection.tables[1] as! AGSFeatureCollectionTable
-        }
-        
-        clusterPointLayer = layers[0]
+        unclusteredItemsLayer = layers[0]
         clusterCoverageLayer = layers[1]
+        clusterPointLayer = layers[2]
+
+        featureLayer.load { [weak self] (error) in
+            guard error == nil else { return }
+            self?.minScale = featureLayer.minScale
+            self?.maxScale = featureLayer.maxScale
+        }
         
         let textSymbol = AGSTextSymbol(text: "", color: .white, size: fontSize, horizontalAlignment: .center, verticalAlignment: .middle)
         if let ld = try? AGSLabelDefinition.with(fieldName: "FeatureCount", textSymbol: textSymbol) {
@@ -108,11 +152,13 @@ class ClusterLayer<M: ClusterManager>: AGSFeatureCollectionLayer {
         
         let initializationGroup = DispatchGroup()
         initializationGroup.enter()
-        
+        initializationGroup.enter()
+        initializationGroup.enter()
+
         let sourceParams = AGSQueryParameters()
         sourceParams.whereClause = "1=1"
         
-        sourceLayer.featureTable?.queryFeatures(with: sourceParams, completion: { [weak self] (sourceFeatureResults, error) in
+        sourceLayer.featureTable?.queryFeatures(with: sourceParams, completion: { [weak self, initializationGroup] (sourceFeatureResults, error) in
             defer { initializationGroup.leave() }
             
             if let error = error {
@@ -125,11 +171,23 @@ class ClusterLayer<M: ClusterManager>: AGSFeatureCollectionLayer {
             self.manager.add(items: sourceFeatures)
         })
         
-        initializationGroup.enter()
-        AGSLoadObjects(tables) { (_) in
+        AGSLoadObjects(tables) { [initializationGroup] (_) in
             for errorTable in tables.filter({ $0.loadError != nil }) {
                 print("Error loading table '\(errorTable.tableName)': \(errorTable.loadError!)")
             }
+            initializationGroup.leave()
+        }
+
+        if mapView.mapScale.isNaN {
+            print("mapScale is NaN!!!!")
+            mapScaleObserver = mapView.observe(\.mapScale, options: [.initial, .new], changeHandler: { [weak self, initializationGroup] (changedMapView, change) in
+                guard !changedMapView.mapScale.isNaN else { return }
+                print("mapScale WAS NaN - is now \(changedMapView.mapScale)...")
+                self?.mapScaleObserver?.invalidate()
+                self?.mapScaleObserver = nil
+                initializationGroup.leave()
+            })
+        } else {
             initializationGroup.leave()
         }
         
@@ -138,57 +196,64 @@ class ClusterLayer<M: ClusterManager>: AGSFeatureCollectionLayer {
             guard let self = self else { return }
             
             guard let clusterProviderForScale = self.manager.clusterProvider(for: mapView.mapScale) else {
-                print("Unable to set initial cluster LOD")
+                print("Unable to set initial cluster LOD (mapScape = \(mapView.mapScale))")
                 return
             }
             
-            self.currentProvider = clusterProviderForScale
+            self.currentClusterProvider = clusterProviderForScale
             
-            self.updateDisplay()
+            self.updateDisplay(for: mapView)
             
-            self.zoomObserver = mapView.observe(\.isNavigating, options: [.initial, .new]) { [weak self] (changedMapView, change) in
-                guard change.newValue == false else { return }
-                
-                guard let self = self else { return }
-                
-                guard let clusterProviderForScale = self.manager.clusterProvider(for: changedMapView.mapScale),
-                    clusterProviderForScale != self.currentProvider else { return }
-                
-                self.currentProvider = clusterProviderForScale
-                
-                self.updateDisplay()
-            }
-
+            self.mapScaleObserver = mapView.observe(\.mapScale, options: [.new], changeHandler: { [weak self] (changedMapView, change) in
+                // AGSMapView emits many mapScale changes. We want to wait until the map isn't changing any more…
+                DispatchQueue.main.debounce(interval: 0.2, context: changedMapView, action: {
+                    guard let self = self else { return }
+                    
+                    guard (self.minScale == 0 && self.maxScale == 0) || (self.minScale < changedMapView.mapScale && self.maxScale > changedMapView.mapScale) else {
+                        print("Map Scale out of visible range: \(self.minScale) < \(changedMapView.mapScale) < \(self.maxScale)")
+                        return
+                    }
+                    
+                    guard let clusterProviderForScale = self.manager.clusterProvider(for: changedMapView.mapScale),
+                        clusterProviderForScale != self.currentClusterProvider else {
+                            print("Cluster Provider is unchanged after map navigation (Map Scale \(changedMapView.mapScale))")
+                            return
+                    }
+                    
+                    self.currentClusterProvider = clusterProviderForScale
+                    
+                    self.updateDisplay(for: changedMapView)
+                })
+            })
+            
         }
         
     }
     
-    func updateDisplay() {
+    func updateDisplay(for mapView: AGSMapView) {
 
-        currentProvider?.ensureClustersReadyForDisplay()
-        
-        updateClusterDisplay(display: .clusterPoints)
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+            
+            self.currentClusterProvider?.ensureClustersReadyForDisplay()
+            
+            self.updateClusterDisplay(component: .clusters, mapView: mapView)
+            self.updateClusterDisplay(component: .items, mapView: mapView)
+//            self.updateClusterDisplay(component: .coverages, mapView: mapView)
+        }
 
-//        if let layer = clusterCoverageLayer, let table = layer.featureTable {
-//            self.updateTablesWithGrid(table: table, gridForScale: gridForScale)
-//        }
-        
-//        print("Flushed \(pendingCount) pending items on \(provider.clusters.count) clusters")
     }
     
-    private enum ClusterDisplay {
-        case clusterPoints
-        case clusterCoverages
-    }
-    
-    private func updateClusterDisplay(display: ClusterDisplay) {
+    private func updateClusterDisplay(component: ClusterDisplay, mapView: AGSMapView) {
         
         let table: AGSFeatureCollectionTable = {
-            switch display {
-            case .clusterPoints:
+            switch component {
+            case .clusters:
                 return centroidsTable
-            case .clusterCoverages:
+            case .coverages:
                 return coveragesTable
+            case .items:
+                return unclusteredItemsTable
             }
         }()
         
@@ -200,15 +265,18 @@ class ClusterLayer<M: ClusterManager>: AGSFeatureCollectionLayer {
                 return
             }
             
-            // Get all the clusters to remove from display.
-            guard let featuresToDelete = result?.featureEnumerator().allObjects else { return }
+            guard let self = self else { return }
             
+            // Get all the clusters to remove from display.
+            guard let featuresToRemove = result?.featureEnumerator().allObjects else { return }
+            let featuresToAdd = self.currentClusterProvider?.clusters.asFeatures(in: table, for: component, minClusterCount: self.minClusterCount)
+
             let addRemoveGroup = DispatchGroup()
             addRemoveGroup.enter()
             addRemoveGroup.enter()
             
             // Remove previous LOD's clusters from display.
-            table.delete(featuresToDelete, completion: { (error) in
+            table.delete(featuresToRemove, completion: { (error) in
                 addRemoveGroup.leave()
                 if let error = error {
                     print("Error deleting features: \(error.localizedDescription)")
@@ -217,7 +285,6 @@ class ClusterLayer<M: ClusterManager>: AGSFeatureCollectionLayer {
             })
             
             // Add new LOD's clusters to display.
-            let featuresToAdd = self?.currentProvider?.clusters.asFeatures(in: table)
             if let featuresToAdd = featuresToAdd {
                 table.add(featuresToAdd, completion: { error in
                     addRemoveGroup.leave()
@@ -231,41 +298,74 @@ class ClusterLayer<M: ClusterManager>: AGSFeatureCollectionLayer {
             }
             
             addRemoveGroup.notify(queue: .main) {
-                print("Just removed \(featuresToDelete.count) and added \(featuresToAdd?.count ?? 0) features as \(table.geometryType)s")
+                print("Just removed \(featuresToRemove.count) and added \(featuresToAdd?.count ?? 0) \(component)")
             }
         })
-        
+
     }
     
     deinit {
-        zoomObserver.invalidate()
-        zoomObserver = nil
+        mapScaleObserver.invalidate()
+        mapScaleObserver = nil
     }
 }
 
+extension AGSFeatureCollectionTable {
+    convenience init(featureTable: AGSFeatureTable) {
+        self.init(fields: featureTable.fields,
+        geometryType: featureTable.geometryType,
+        spatialReference: featureTable.spatialReference,
+        hasZ: featureTable.hasZ, hasM: featureTable.hasM)
+    }
+}
+
+
 extension Set where Element: Cluster {
-    func asFeatures(in table: AGSFeatureTable) -> [AGSFeature] {
-        return self.compactMap({ (cluster) -> AGSFeature? in
-            guard let geometry: AGSGeometry? = {
-                switch table.geometryType {
-                case .point:
-                    return cluster.centroid
-                case .polygon:
-                    return cluster.coverage
-                default:
-                    return nil
-                } }() else {
-                    print("Skipping feature - could not get suitable geometry for type!")
-                    return nil
-            }
-            
-            let attributes: [String : Any] = [
-                "Key": cluster.clusterKey,
-                "FeatureCount": cluster.itemCount
-            ]
-            
-            return table.createFeature(attributes: attributes, geometry: geometry)
-        })
+    fileprivate func asFeatures(in table: AGSFeatureTable, for displayType: ClusterDisplay, minClusterCount: Int = 2) -> [AGSFeature] {
+        switch displayType {
+        case .items:
+            return self.flatMap({ (cluster) -> [AGSFeature] in
+                if cluster.itemCount < minClusterCount {
+                    // If we should be displaying the features, return them
+                    return cluster.items.compactMap({ (item) -> AGSFeature? in
+                        return item as? AGSFeature
+                    })
+                } else {
+                    // We should be displaying as a cluster, so don't return any items.
+                    return []
+                }
+            })
+        case .clusters, .coverages:
+            return self.compactMap({ (cluster) -> AGSFeature? in
+                guard let geometry: AGSGeometry? = {
+                    switch displayType {
+                    case .clusters:
+                        // If we should explode the cluster, return nil for the cluster geometry.
+                        // A separate call to this function with displayType == .items will then
+                        // make sure the features are displayed.
+                        if cluster.itemCount >= minClusterCount {
+                            return cluster.centroid
+                        } else {
+                            return nil
+                        }
+                    case .coverages:
+                        return cluster.coverage
+                    default:
+                        return nil
+                    } }() else {
+//                        print("Skipping feature - could not get suitable geometry for type!")
+                        return nil
+                }
+                
+                let attributes: [String : Any] = [
+                    "Key": cluster.clusterKey,
+                    "FeatureCount": cluster.itemCount,
+                    "ShouldDisplayItems": cluster.itemCount >= minClusterCount ? 0 : -1
+                ]
+                
+                return table.createFeature(attributes: attributes, geometry: geometry)
+            })
+        }
     }
 }
 
