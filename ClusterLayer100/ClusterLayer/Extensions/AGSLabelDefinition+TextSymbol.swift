@@ -44,7 +44,6 @@ extension AGSLabelDefinition{
         "symbol": {"type": "esriTS", "color": [255,0,0,255], "backgroundColor": null, "borderLineColor": null, "verticalAlignment": "middle", "horizontalAlignment": "center", "rightToLeft": false, "angle": 0, "xoffset": 0, "yoffset": 0, "font": {"family": "Arial", "size": 10, "style": "normal", "weight": "bold", "decoration": "none"}},
         }
         """
-        //let labelDefinitionString = "{\r\n\"labelExpressionInfo\": {\r\n\"expression\": \"return $feature.都市名;\"},\r\n\"symbol\": {\r\n\"color\": [255,0,0,255],\r\n\"font\": {\"size\": 8, \"weight\": \"bold\"},\r\n\"type\": \"esriTS\"}\r\n}\r\n"
         
         guard let jsonData = labelDefinitionString.data(using: .utf8) else {
             throw NSError(domain: "cocoa-tests", code: 1, userInfo: [NSLocalizedDescriptionKey: "Could not create json data from label definition json string"])

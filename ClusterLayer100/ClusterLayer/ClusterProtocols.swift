@@ -37,6 +37,8 @@ protocol ClusterProvider: Equatable {
     associatedtype ClusterType: Cluster
     associatedtype ItemType = ClusterType.ItemType
     
+    var name: String { get }
+    
     var clusters: Set<ClusterType> { get }
     func getCluster(for mapPoint: AGSPoint) -> ClusterType
     

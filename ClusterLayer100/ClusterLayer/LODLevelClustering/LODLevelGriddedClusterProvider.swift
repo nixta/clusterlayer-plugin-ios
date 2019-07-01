@@ -16,7 +16,10 @@ import Foundation
 import ArcGIS
 
 class LODLevelGriddedClusterProvider<T: ClusterableGeoElement>: LODLevelClusterProvider {
-    
+    var name: String {
+        return "LOD Level \(lodLevel)"
+    }
+
     typealias ClusterType = LODLevelGeoElementCluster<T>
     
     private class LODLevelGriddedClusterGridRow {

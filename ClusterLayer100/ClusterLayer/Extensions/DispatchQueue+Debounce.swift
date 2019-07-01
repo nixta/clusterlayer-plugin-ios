@@ -67,16 +67,12 @@ public extension DispatchQueue {
             // waiting with the same ultimate deadline.
             last.workItem.cancel()
             lastDebounces[context ?? nilContext] = debounceItem
-//            print("Updated existing debounce to \(last.deadline) (now = \(DispatchTime.now())")
-        } else {
-//            print("Added debounce for \(debounceItem.deadline) (now = \(DispatchTime.now())")
         }
         
         lastDebounces[context ?? nilContext] = debounceItem
         
         // Cleanup & release context
         throttle(deadline: debounceItem.deadline + 2) {
-//            print("Removing debounce")
             lastDebounces.removeValue(forKey: context ?? nilContext)
         }
     }

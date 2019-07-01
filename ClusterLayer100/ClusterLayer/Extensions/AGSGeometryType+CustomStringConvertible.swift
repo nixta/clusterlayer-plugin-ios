@@ -12,16 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import Foundation
 import ArcGIS
 
-extension AGSQueryParameters {
-    static func queryForAll() -> AGSQueryParameters {
-        return AGSQueryParameters(whereClause: "1=1")
-    }
-    
-    convenience init(whereClause: String) {
-        self.init()
-        self.whereClause = whereClause
+extension AGSGeometryType: CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .unknown:
+            return "Unknown"
+        case .point:
+            return "Point"
+        case .multipoint:
+            return "Multipoint"
+        case .polyline:
+            return "Polyline"
+        case .polygon:
+            return "Polygon"
+        case .envelope:
+            return "Envelope"
+        @unknown default:
+            fatalError("Unexpected Geometry Type!")
+        }
     }
 }

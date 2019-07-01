@@ -23,6 +23,10 @@
 		D94630752291C1C800DC4FAD /* LODLevelGriddedClusterGridCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94630742291C1C800DC4FAD /* LODLevelGriddedClusterGridCell.swift */; };
 		D94630772291EE8700DC4FAD /* LODLevelGriddedClusterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94630762291EE8700DC4FAD /* LODLevelGriddedClusterManager.swift */; };
 		D94FAB1922C91411007AC374 /* DispatchQueue+Debounce.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94FAB1822C91411007AC374 /* DispatchQueue+Debounce.swift */; };
+		D94FAB1B22C9BB7F007AC374 /* AGSGeometryType+CustomStringConvertible.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94FAB1A22C9BB7F007AC374 /* AGSGeometryType+CustomStringConvertible.swift */; };
+		D94FAB1D22C9BBB3007AC374 /* DispatchGroup+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94FAB1C22C9BBB3007AC374 /* DispatchGroup+Convenience.swift */; };
+		D94FAB1F22C9BDC5007AC374 /* Set+Cluster.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94FAB1E22C9BDC5007AC374 /* Set+Cluster.swift */; };
+		D94FAB2122C9BEF4007AC374 /* AGSFeatureCollectionTable+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = D94FAB2022C9BEF4007AC374 /* AGSFeatureCollectionTable+Convenience.swift */; };
 		D96A8EAA229352930025013D /* AGSLabelDefinition+TextSymbol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D96A8EA9229352930025013D /* AGSLabelDefinition+TextSymbol.swift */; };
 		D96A8ED2229425DD0025013D /* AGSQueryParameters+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = D96A8ED1229425DD0025013D /* AGSQueryParameters+Convenience.swift */; };
 		D96A8ED42294468D0025013D /* LODLevelGeoElementCluster.swift in Sources */ = {isa = PBXBuildFile; fileRef = D96A8ED32294468D0025013D /* LODLevelGeoElementCluster.swift */; };
@@ -60,6 +64,10 @@
 		D94630742291C1C800DC4FAD /* LODLevelGriddedClusterGridCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LODLevelGriddedClusterGridCell.swift; sourceTree = "<group>"; };
 		D94630762291EE8700DC4FAD /* LODLevelGriddedClusterManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LODLevelGriddedClusterManager.swift; sourceTree = "<group>"; };
 		D94FAB1822C91411007AC374 /* DispatchQueue+Debounce.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchQueue+Debounce.swift"; sourceTree = "<group>"; };
+		D94FAB1A22C9BB7F007AC374 /* AGSGeometryType+CustomStringConvertible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AGSGeometryType+CustomStringConvertible.swift"; sourceTree = "<group>"; };
+		D94FAB1C22C9BBB3007AC374 /* DispatchGroup+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchGroup+Convenience.swift"; sourceTree = "<group>"; };
+		D94FAB1E22C9BDC5007AC374 /* Set+Cluster.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Set+Cluster.swift"; sourceTree = "<group>"; };
+		D94FAB2022C9BEF4007AC374 /* AGSFeatureCollectionTable+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AGSFeatureCollectionTable+Convenience.swift"; sourceTree = "<group>"; };
 		D96A8EA9229352930025013D /* AGSLabelDefinition+TextSymbol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AGSLabelDefinition+TextSymbol.swift"; sourceTree = "<group>"; };
 		D96A8ED1229425DD0025013D /* AGSQueryParameters+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AGSQueryParameters+Convenience.swift"; sourceTree = "<group>"; };
 		D96A8ED32294468D0025013D /* LODLevelGeoElementCluster.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LODLevelGeoElementCluster.swift; sourceTree = "<group>"; };
@@ -97,7 +105,7 @@
 		D94630512291918B00DC4FAD /* ClusterLayer100 */ = {
 			isa = PBXGroup;
 			children = (
-				D946306422919D8500DC4FAD /* ClusterLibrary */,
+				D946306422919D8500DC4FAD /* ClusterLayer */,
 				D94630522291918B00DC4FAD /* AppDelegate.swift */,
 				D94630542291918B00DC4FAD /* ViewController.swift */,
 				D94630562291918B00DC4FAD /* Main.storyboard */,
@@ -109,18 +117,16 @@
 			path = ClusterLayer100;
 			sourceTree = "<group>";
 		};
-		D946306422919D8500DC4FAD /* ClusterLibrary */ = {
+		D946306422919D8500DC4FAD /* ClusterLayer */ = {
 			isa = PBXGroup;
 			children = (
-				D91C92682292ED4F002C8974 /* ClusterProtocols.swift */,
 				D94630702291C13300DC4FAD /* ClusterLayer.swift */,
+				D91C92682292ED4F002C8974 /* ClusterProtocols.swift */,
 				D946306B22919E6B00DC4FAD /* GeoElementCluster.swift */,
 				D946306F2291C10C00DC4FAD /* LODLevelClustering */,
-				D96A8EA9229352930025013D /* AGSLabelDefinition+TextSymbol.swift */,
-				D96A8ED1229425DD0025013D /* AGSQueryParameters+Convenience.swift */,
-				D94FAB1822C91411007AC374 /* DispatchQueue+Debounce.swift */,
+				D94FAB2222C9BF31007AC374 /* Extensions */,
 			);
-			path = ClusterLibrary;
+			path = ClusterLayer;
 			sourceTree = "<group>";
 		};
 		D946306F2291C10C00DC4FAD /* LODLevelClustering */ = {
@@ -133,6 +139,20 @@
 				D96A8ED32294468D0025013D /* LODLevelGeoElementCluster.swift */,
 			);
 			path = LODLevelClustering;
+			sourceTree = "<group>";
+		};
+		D94FAB2222C9BF31007AC374 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				D96A8EA9229352930025013D /* AGSLabelDefinition+TextSymbol.swift */,
+				D96A8ED1229425DD0025013D /* AGSQueryParameters+Convenience.swift */,
+				D94FAB1A22C9BB7F007AC374 /* AGSGeometryType+CustomStringConvertible.swift */,
+				D94FAB2022C9BEF4007AC374 /* AGSFeatureCollectionTable+Convenience.swift */,
+				D94FAB1822C91411007AC374 /* DispatchQueue+Debounce.swift */,
+				D94FAB1C22C9BBB3007AC374 /* DispatchGroup+Convenience.swift */,
+				D94FAB1E22C9BDC5007AC374 /* Set+Cluster.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -213,6 +233,9 @@
 				D94630772291EE8700DC4FAD /* LODLevelGriddedClusterManager.swift in Sources */,
 				D96A8ED42294468D0025013D /* LODLevelGeoElementCluster.swift in Sources */,
 				D94630552291918B00DC4FAD /* ViewController.swift in Sources */,
+				D94FAB1F22C9BDC5007AC374 /* Set+Cluster.swift in Sources */,
+				D94FAB2122C9BEF4007AC374 /* AGSFeatureCollectionTable+Convenience.swift in Sources */,
+				D94FAB1B22C9BB7F007AC374 /* AGSGeometryType+CustomStringConvertible.swift in Sources */,
 				D946306E2291C10700DC4FAD /* LODLevelGriddedClusterProvider.swift in Sources */,
 				D96A8EAA229352930025013D /* AGSLabelDefinition+TextSymbol.swift in Sources */,
 				D946306C22919E6B00DC4FAD /* GeoElementCluster.swift in Sources */,
@@ -220,6 +243,7 @@
 				D94630532291918B00DC4FAD /* AppDelegate.swift in Sources */,
 				D94630752291C1C800DC4FAD /* LODLevelGriddedClusterGridCell.swift in Sources */,
 				D94FAB1922C91411007AC374 /* DispatchQueue+Debounce.swift in Sources */,
+				D94FAB1D22C9BBB3007AC374 /* DispatchGroup+Convenience.swift in Sources */,
 				D91C92692292ED4F002C8974 /* ClusterProtocols.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -377,6 +401,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				OTHER_SWIFT_FLAGS = "-D DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.esri.runtime.productmanagement..ClusterLayer100;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -399,6 +424,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				OTHER_SWIFT_FLAGS = "-D DEBUG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.esri.runtime.productmanagement..ClusterLayer100;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
