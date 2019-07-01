@@ -88,5 +88,8 @@ class ViewController: UIViewController, AGSGeoViewTouchDelegate {
             }
         }
     }
-
+    
+    @IBAction func showCoverages(_ sender: UISwitch) {
+        clusterLayer.showCoverages = sender.isOn
+    }
 }

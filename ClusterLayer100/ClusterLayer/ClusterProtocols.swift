@@ -22,6 +22,8 @@ protocol ClusterManager {
     typealias ClusterType = ClusterProviderType.ClusterType
     typealias ItemType = ClusterType.ItemType
     
+    var mapView: AGSMapView? { get }
+    
     init(mapView: AGSMapView)
     
     func clusterProvider(for mapScale: Double) -> ClusterProviderType?

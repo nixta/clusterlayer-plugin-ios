@@ -20,6 +20,8 @@ class LODLevelGriddedClusterManager<T: ClusterableGeoElement>: ClusterManager {
     /// A dictionary of grid cluster providers, keyed by LOD level.
     var clusterProviders: [Int : LODLevelGriddedClusterProvider<T>] = [:]
     
+    weak var mapView: AGSMapView?
+    
     required init(mapView: AGSMapView) {
         // TODO: Use a better method for figuring out cell sizes. This is copied from the original
         // implementation and is pretty much gibberish.
@@ -41,6 +43,8 @@ class LODLevelGriddedClusterManager<T: ClusterableGeoElement>: ClusterManager {
             
             clusterProviders[lodLevel] = providerForLod
         }
+        
+        self.mapView = mapView
     }
     
     

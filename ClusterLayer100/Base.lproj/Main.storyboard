@@ -18,17 +18,50 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="f0e-CI-AWo" customClass="AGSMapView">
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="MhR-Xw-WaF">
                                 <rect key="frame" x="0.0" y="44" width="414" height="818"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                            </view>
+                                <subviews>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="f0e-CI-AWo" customClass="AGSMapView">
+                                        <rect key="frame" x="0.0" y="0.0" width="414" height="760"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    </view>
+                                    <stackView opaque="NO" contentMode="scaleToFill" alignment="center" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="8Vs-re-RqR">
+                                        <rect key="frame" x="0.0" y="768" width="414" height="50"/>
+                                        <subviews>
+                                            <view contentMode="scaleToFill" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="3L0-N5-lJF">
+                                                <rect key="frame" x="0.0" y="0.0" width="86.5" height="50"/>
+                                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            </view>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" horizontalCompressionResistancePriority="1000" text="Show Coverage Areas" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="y3E-2N-uVB">
+                                                <rect key="frame" x="94.5" y="15" width="168.5" height="20.5"/>
+                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                <nil key="textColor"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" horizontalCompressionResistancePriority="1000" contentHorizontalAlignment="center" contentVerticalAlignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="dXI-eP-04S">
+                                                <rect key="frame" x="271" y="9.5" width="51" height="31"/>
+                                                <connections>
+                                                    <action selector="showCoverages:" destination="BYZ-38-t0r" eventType="valueChanged" id="Nas-Fc-Pqi"/>
+                                                </connections>
+                                            </switch>
+                                            <view contentMode="scaleToFill" horizontalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="Q3j-sy-xS5">
+                                                <rect key="frame" x="328" y="0.0" width="86" height="50"/>
+                                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                            </view>
+                                        </subviews>
+                                        <constraints>
+                                            <constraint firstItem="Q3j-sy-xS5" firstAttribute="width" secondItem="3L0-N5-lJF" secondAttribute="width" id="x2r-cG-ZWy"/>
+                                        </constraints>
+                                    </stackView>
+                                </subviews>
+                            </stackView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="f0e-CI-AWo" secondAttribute="bottom" id="7Jp-9P-0ti"/>
-                            <constraint firstItem="f0e-CI-AWo" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="iHe-Gn-Hh9"/>
-                            <constraint firstItem="f0e-CI-AWo" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="ubc-47-Igh"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="f0e-CI-AWo" secondAttribute="trailing" id="xtY-t5-7Nm"/>
+                            <constraint firstItem="MhR-Xw-WaF" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="NTp-IV-VgY"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="MhR-Xw-WaF" secondAttribute="trailing" id="drv-as-VPu"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="MhR-Xw-WaF" secondAttribute="bottom" id="f0p-ZO-glp"/>
+                            <constraint firstItem="MhR-Xw-WaF" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="pBh-Yg-htc"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
