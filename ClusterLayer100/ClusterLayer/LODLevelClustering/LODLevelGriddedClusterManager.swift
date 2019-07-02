@@ -63,7 +63,7 @@ class LODLevelGriddedClusterManager<T: ClusterableGeoElement>: ClusterManager {
     }
     
     
-    func clusterForKey(key: GridClusterKey) -> LODLevelGeoElementCluster<T>? {
+    func cluster(for key: GridClusterKey) -> LODLevelGeoElementCluster<T>? {
         let lodLevel = key.lod
         guard let providerForLOD = clusterProviders[lodLevel] else { return nil }
         return providerForLOD.cell(for: key).cluster
@@ -71,7 +71,7 @@ class LODLevelGriddedClusterManager<T: ClusterableGeoElement>: ClusterManager {
     
     func cluster(for feature: AGSFeature) -> LODLevelGeoElementCluster<T>? {
         if let key = GridClusterKey(from: feature.attributes["Key"] as? String) {
-            return clusterForKey(key: key)
+            return cluster(for: key)
         }
         return nil
     }

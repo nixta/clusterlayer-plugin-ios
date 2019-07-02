@@ -71,7 +71,7 @@ class LODLevelGriddedClusterProvider<T: ClusterableGeoElement>: LODLevelClusterP
                 skipped += 1
                 continue
             }
-            let cluster = getCluster(for: itemLocation)
+            let cluster = self.cluster(for: itemLocation)
             cluster.addPending(item: item)
             count += 1
             touchedClusters.insert(cluster)
@@ -113,10 +113,13 @@ class LODLevelGriddedClusterProvider<T: ClusterableGeoElement>: LODLevelClusterP
         return cell(for: cellIndex).center
     }
     
-    func getCluster(for mapPoint: AGSPoint) -> ClusterType {
+    func cluster(for key: GridCellIndex) -> LODLevelGeoElementCluster<T>? {
+        return cell(for: key).cluster
+    }
+
+    func cluster(for mapPoint: AGSPoint) -> ClusterType {
         let cellIndex = getGridCoordForMapPoint(mapPoint: mapPoint)
-        let cluster = cell(for: cellIndex).cluster
-        return cluster
+        return cluster(for: cellIndex)!
     }
     
     func getGridCoordForMapPoint(mapPoint: AGSPoint) -> GridCellIndex {
