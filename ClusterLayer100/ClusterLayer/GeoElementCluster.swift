@@ -23,9 +23,9 @@ private func getNextClusterKey() -> Int {
 
 typealias ClusterableGeoElement = AGSGeoElement & Hashable
 
-class GeoElementCluster<T: ClusterableGeoElement>: Cluster {
+class GeoElementCluster<T: ClusterableGeoElement, K: Hashable>: Cluster {
 
-    let clusterKey: Int = getNextClusterKey()
+    let clusterKey: K
     var items = Set<T>()
     var itemCount: Int { return items.count }
 
@@ -38,6 +38,9 @@ class GeoElementCluster<T: ClusterableGeoElement>: Cluster {
     private var isExtentDirty = true
     private var cachedExtent: AGSEnvelope?
     
+    init(key: K) {
+        clusterKey = key
+    }
 
     // MARK: Cluster Geometries
     var centroid: AGSPoint? {
@@ -182,6 +185,14 @@ extension GeoElementCluster {
         return AGSGeometryEngine.unionGeometries(features.compactMap({ $0.geometry }))?.extent
     }
     
+}
+
+extension GeoElementCluster {
+    func getPopups(popupDefinition: AGSPopupDefinition? = nil) -> [AGSPopup] {
+        return items.map({ (item) -> AGSPopup in
+            return AGSPopup(geoElement: item, popupDefinition: popupDefinition)
+        })
+    }
 }
 
 extension GeoElementCluster: Hashable {

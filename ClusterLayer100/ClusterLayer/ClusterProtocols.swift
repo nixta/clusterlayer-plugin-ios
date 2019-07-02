@@ -28,6 +28,8 @@ protocol ClusterManager {
     
     func clusterProvider(for mapScale: Double) -> ClusterProviderType?
     
+    func clusterForKey(key: ClusterType.Key) -> ClusterType?
+    
     func add<S: Sequence>(items: S) where S.Element == ClusterType.ItemType
     func removeAllItems()
 }

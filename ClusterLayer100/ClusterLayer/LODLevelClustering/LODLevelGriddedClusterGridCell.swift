@@ -15,9 +15,30 @@
 import Foundation
 import ArcGIS
 
-internal struct GridCellIndex {
+internal struct GridCellIndex: Hashable, CustomStringConvertible {
+    let lod: Int
     let row: Int
     let col: Int
+
+    var description: String {
+        return "\(lod).\(row).\(col)"
+    }
+    
+    init?(from keyString: String?) {
+        guard let str = keyString, let parts = str.split(separator: ".").map({ Int($0) }) as? [Int], parts.count == 3 else {
+            return nil
+        }
+        
+        lod = parts[0]
+        row = parts[1]
+        col = parts[2]
+    }
+    
+    init(lod: Int, row: Int, col: Int) {
+        self.lod = lod
+        self.row = row
+        self.col = col
+    }
 }
 
 internal class LODLevelGriddedClusterGridCell<T: ClusterableGeoElement> {
@@ -31,7 +52,7 @@ internal class LODLevelGriddedClusterGridCell<T: ClusterableGeoElement> {
     // is only every 1 cluster per call.
     var cluster: LODLevelGeoElementCluster<T> {
         guard let clusterForCell = clusters.first else {
-            let newCluster = LODLevelGeoElementCluster<T>()
+            let newCluster = LODLevelGeoElementCluster<T>(key: index)
             clusters.insert(newCluster)
             return newCluster
         }

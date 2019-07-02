@@ -75,15 +75,24 @@ class ViewController: UIViewController, AGSGeoViewTouchDelegate {
             guard let results = results else { return }
             
             for result in results {
-                print(result.layerContent.name)
-                print(result.geoElements.map({ (element) -> NSMutableDictionary in
-                    return element.attributes
-                }))
                 for subLayerResult in result.sublayerResults {
                     print(subLayerResult.layerContent.name)
                     print(subLayerResult.geoElements.map({ (element) -> NSMutableDictionary in
                         return element.attributes
                     }))
+
+                    let clusterResults = subLayerResult.geoElements.compactMap({ (element) -> AGSFeature? in
+                        if let feature = element as? AGSFeature, feature.attributes["Key"] != nil {
+                            return feature
+                        }
+                        return nil
+                    })
+
+                    let popups = clusterResults.compactMap({ (feature) -> [AGSPopup]? in
+                        return self.clusterLayer.manager.cluster(for: feature)?.getPopups(popupDefinition: self.clusterLayer.sourceLayer.popupDefinition)
+                    }).joined()
+                    
+                    print("Found \(popups.count) popups")
                 }
             }
         }

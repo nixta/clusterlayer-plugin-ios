@@ -14,7 +14,9 @@
 
 import Foundation
 
-class LODLevelGeoElementCluster<T: ClusterableGeoElement>: GeoElementCluster<T>, LODLevelCluster {
+typealias GridClusterKey = GridCellIndex
+
+class LODLevelGeoElementCluster<T: ClusterableGeoElement>: GeoElementCluster<T,GridClusterKey>, LODLevelCluster {
     
     weak var parentCluster: LODLevelGeoElementCluster<T>?
 

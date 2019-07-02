@@ -15,34 +15,17 @@
 import Foundation
 import ArcGIS
 
-internal enum ClusterLayerComponent: CustomStringConvertible {
-    case clusters
-    case coverages
-    case items
+class ClusterLayer<ManagerType: ClusterManager>: AGSFeatureCollectionLayer {
     
-    var description: String {
-        switch self {
-        case .clusters:
-            return "Clusters"
-        case .coverages:
-            return "Coverages"
-        case .items:
-            return "Items"
-        }
-    }
-}
-
-class ClusterLayer<M: ClusterManager>: AGSFeatureCollectionLayer {
+    typealias T = ManagerType.ItemType
     
-    typealias T = M.ItemType
-    
-    let manager: M!
+    let manager: ManagerType!
     
     let sourceLayer: AGSFeatureLayer!
     
     let minClusterCount: Int = 3
     
-    private var currentClusterProvider: M.ClusterProviderType?
+    private var currentClusterProvider: ManagerType.ClusterProviderType?
 
     var showCoverages: Bool = false {
         didSet {
@@ -56,7 +39,7 @@ class ClusterLayer<M: ClusterManager>: AGSFeatureCollectionLayer {
     }
     
     // MARK: Symbols
-    var clusterSymbol: AGSSymbol = getClusterSymbol() {
+    var clusterSymbol: AGSSymbol = defaultClusterSymbol {
         didSet {
             clustersTable.renderer = AGSSimpleRenderer(symbol: clusterSymbol)
         }
@@ -128,7 +111,7 @@ class ClusterLayer<M: ClusterManager>: AGSFeatureCollectionLayer {
         }
         
         // Create a manager
-        manager = M(mapView: mapView)
+        manager = ManagerType(mapView: mapView)
         
         // Store the source layer (we will get data from here)
         sourceLayer = featureLayer
@@ -360,12 +343,30 @@ class ClusterLayer<M: ClusterManager>: AGSFeatureCollectionLayer {
     }
 }
 
+internal enum ClusterLayerComponent: CustomStringConvertible {
+    case clusters
+    case coverages
+    case items
+    
+    var description: String {
+        switch self {
+        case .clusters:
+            return "Clusters"
+        case .coverages:
+            return "Coverages"
+        case .items:
+            return "Items"
+        }
+    }
+}
+
 fileprivate let clusterTableFields: [AGSField] = [
-    AGSField(fieldType: .int32, name: "Key", alias: "Key", length: 0, domain: nil, editable: true, allowNull: false),
+    AGSField(fieldType: .text, name: "Key", alias: "Key", length: 30, domain: nil, editable: true, allowNull: false),
     AGSField(fieldType: .int16, name: "FeatureCount", alias: "Feature Count", length: 0, domain: nil, editable: true, allowNull: false),
     AGSField(fieldType: .int16, name: "ShouldDisplayItems", alias: "Display Exploded", length: 0, domain: nil, editable: true, allowNull: false)
 ]
 
+fileprivate let defaultClusterSymbol = getClusterSymbol()
 fileprivate let defaultCoverageSymbol = AGSSimpleFillSymbol(style: .solid,
                                                             color: UIColor.red.withAlphaComponent(0.3),
                                                             outline: AGSSimpleLineSymbol(style: .solid, color: .brown, width: 2))

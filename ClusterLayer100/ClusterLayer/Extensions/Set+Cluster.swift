@@ -54,7 +54,7 @@ extension Set where Element: Cluster {
                 }
                 
                 let attributes: [String : Any] = [
-                    "Key": cluster.clusterKey,
+                    "Key": "\(cluster.clusterKey)",
                     "FeatureCount": cluster.itemCount,
                     "ShouldDisplayItems": cluster.itemCount >= minClusterCount ? 0 : -1
                 ]

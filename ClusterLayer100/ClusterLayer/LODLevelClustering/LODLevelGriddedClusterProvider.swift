@@ -95,7 +95,7 @@ class LODLevelGriddedClusterProvider<T: ClusterableGeoElement>: LODLevelClusterP
         }
     }
     
-    private func cell(for cellIndex: GridCellIndex) -> LODLevelGriddedClusterGridCell<T> {
+    internal func cell(for cellIndex: GridCellIndex) -> LODLevelGriddedClusterGridCell<T> {
         var gridRowForCell = rows[cellIndex.row]
         if gridRowForCell == nil {
             gridRowForCell = LODLevelGriddedClusterGridRow()
@@ -115,13 +115,14 @@ class LODLevelGriddedClusterProvider<T: ClusterableGeoElement>: LODLevelClusterP
     
     func getCluster(for mapPoint: AGSPoint) -> ClusterType {
         let cellIndex = getGridCoordForMapPoint(mapPoint: mapPoint)
-        return cell(for: cellIndex).cluster
+        let cluster = cell(for: cellIndex).cluster
+        return cluster
     }
     
     func getGridCoordForMapPoint(mapPoint: AGSPoint) -> GridCellIndex {
         let row = Int(floor(mapPoint.y/Double(cellSize.width)))
         let col = Int(floor(mapPoint.x/Double(cellSize.height)))
-        return GridCellIndex(row: row, col: col)
+        return GridCellIndex(lod: lodLevel, row: row, col: col)
     }
     
     func scaleInRange(scale: Double) -> Bool {

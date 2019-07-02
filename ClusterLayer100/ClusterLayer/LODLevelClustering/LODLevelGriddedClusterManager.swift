@@ -16,6 +16,7 @@ import Foundation
 import ArcGIS
 
 class LODLevelGriddedClusterManager<T: ClusterableGeoElement>: ClusterManager {
+    
 
     /// A dictionary of grid cluster providers, keyed by LOD level.
     var clusterProviders: [Int : LODLevelGriddedClusterProvider<T>] = [:]
@@ -60,6 +61,35 @@ class LODLevelGriddedClusterManager<T: ClusterableGeoElement>: ClusterManager {
         }
         return nil
     }
+    
+    
+    func clusterForKey(key: GridClusterKey) -> LODLevelGeoElementCluster<T>? {
+        let lodLevel = key.lod
+        guard let providerForLOD = clusterProviders[lodLevel] else { return nil }
+        return providerForLOD.cell(for: key).cluster
+    }
+    
+    func cluster(for feature: AGSFeature) -> LODLevelGeoElementCluster<T>? {
+        if let key = GridClusterKey(from: feature.attributes["Key"] as? String) {
+            return clusterForKey(key: key)
+        }
+        return nil
+    }
+
+//    Version if Key is an Int and globally unique across all LODs. Performance is O(n) to find a particular key,
+//       but storage is smaller. Performance with complex key is O(1) but string parsing and memory footprint bigger.
+//    func clusterForKey(key: GridClusterIndex) -> LODLevelGeoElementCluster<T>? {
+//        for (lod, provider) in clusterProviders {
+//            for cluster in provider.clusters {
+//                if cluster.clusterKey == key {
+//                    print("Found cluster \(key) in LOD \(lod)")
+//                    return cluster
+//                }
+//            }
+//        }
+//        return nil
+//    }
+
     
     
     /// Add items to be clustered.
