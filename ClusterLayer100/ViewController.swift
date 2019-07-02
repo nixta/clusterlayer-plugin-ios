@@ -15,6 +15,8 @@
 import UIKit
 import ArcGIS
 
+typealias FeatureClusterLayer = ClusterLayer<LODBasedFeatureClusteringManager>
+
 class ViewController: UIViewController, AGSGeoViewTouchDelegate {
     
     @IBOutlet weak var mapView: AGSMapView!
@@ -47,13 +49,13 @@ class ViewController: UIViewController, AGSGeoViewTouchDelegate {
 
             let sourceLayer = AGSFeatureLayer(featureTable: table)
             
-            table.load(completion: { (error) in
+            sourceLayer.load(completion: { (error) in
                 if let error = error {
-                    print("Error loading table: \(error.localizedDescription)")
+                    print("Error loading source layer: \(error.localizedDescription)")
                     return
                 }
                 
-                let clusterLayer = ClusterLayer<LODLevelGriddedClusterManager<AGSFeature>>(mapView: self.mapView, featureLayer: sourceLayer)
+                let clusterLayer = FeatureClusterLayer(mapView: self.mapView, featureLayer: sourceLayer)
                 
                 self.map.operationalLayers.add(clusterLayer)
                 

@@ -15,6 +15,8 @@
 import Foundation
 import ArcGIS
 
+typealias LODBasedFeatureClusteringManager = LODLevelGriddedClusterManager<AGSFeature>
+
 class LODLevelGriddedClusterManager<T: ClusterableGeoElement>: ClusterManager {
     
 
