@@ -7,7 +7,7 @@ The gridding code is based heavily on [Leaflet.markercluster](https://github.com
 
 ![App](clusterlayer-plugin-ios.png)
 
-##Usage
+## Usage
 1. Import `AGSClusterLayer.h`
 2. Add an `AGSFeatureLayer` to the `AGSMapView`
 3. Create an `AGSClusterLayer` with the `AGSFeatureLayer` and add it to the `AGSMapView`
